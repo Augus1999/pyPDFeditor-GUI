@@ -4,8 +4,6 @@ import os
 import sys
 import fitz
 import json
-import pickle
-import subprocess as sp
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
@@ -17,11 +15,9 @@ def restart_program():
     os.execl(python, python, * sys.argv)
 
 
-def render_pdf_page(page_data, for_cover=False):
+def render_pdf_page(page_data):
     # 图像缩放比例
-    zoom_matrix = fitz.Matrix(4, 4)
-    if for_cover:
-        zoom_matrix = fitz.Matrix(1, 1)
+    zoom_matrix = fitz.Matrix(1, 1)
 
     # 获取封面对应的 Pixmap 对象
     # alpha 设置背景为白色
@@ -81,22 +77,6 @@ def create_watermark(input_pdf, output_pdf, text, rotate,
     doc.save(output_pdf)
 
 
-def setting(set_file_name, cache_file_name, list_name, open_program, cache=False):
-    sp.call(open_program+' '+set_file_name, shell=True)
-    n = QMessageBox.information(None, 'Attention',
-                                'You need to restart the program \n'
-                                'to activate new settings.\n'
-                                '\nDo you want to restart now?',
-                                QMessageBox.Yes | QMessageBox.No)
-    if n == 16384:
-        if cache:
-            with open(cache_file_name, 'wb') as e:
-                pickle.dump(list_name, e)
-        else:
-            pass
-        restart_program()
-
-
 def setting_warning(set_file_name):
     try:
         with open(set_file_name, 'r', encoding='utf-8') as f:
@@ -108,11 +88,11 @@ def setting_warning(set_file_name):
         exit()
 
 
-def set_icon(f_name, widget: QWidget):
+def set_icon(f_name, widget):
     # 填充文件首页图像入对应单元格
     doc = fitz.open(f_name)  # 打开文件
     page = doc.loadPage(0)  # 加载封面
-    _cover = render_pdf_page(page, True)  # 生成首页图像
+    _cover = render_pdf_page(page)  # 生成首页图像
     label = QtWidgets.QLabel(None)
     label.setScaledContents(True)  # 设置图像自动填充
     label.setPixmap(QtGui.QPixmap(_cover))  # 设置首页图像
@@ -130,28 +110,19 @@ def set_icon(f_name, widget: QWidget):
         pass
 
 
-def recover(cache_file_name, widget: QWidget):
-    # 恢复退出前状态
-    with open(cache_file_name, 'rb') as h:
-        widget.book_list = pickle.load(h)
-    for item in widget.book_list:
-        set_icon(item, widget)
-    os.remove(cache_file_name)
-
-
-def cover(widget: QWidget):
+def cover(words: str, widget: QWidget):
     # 填充单元格图像
     for i in range(widget.w_row):
         for j in range(widget.w_col):
-            icon = QtWidgets.QTableWidgetItem(QtGui.QIcon(".\\ico\\pdf.png"), "\nPDF file")
+            icon = QtWidgets.QTableWidgetItem(QtGui.QIcon('.\\ico\\pdf.png'), "\n"+words)
             widget.table.setItem(i, j, icon)
             del icon  # 删除icon（重要）
 
 
-def add(widget: QWidget):
+def add(main: QWidget, widget: QWidget):
     # 添加文件
     f_name, _ = QFileDialog.getOpenFileName(None, 'Open files',
-                                            widget.s_dir, '(*.pdf)')
+                                            main.s_dir, '(*.pdf)')
     if _:
         if f_name not in widget.book_list:
             widget.book_list.append(f_name)
@@ -185,7 +156,7 @@ def delete(row, col, widget: QWidget):
         widget.col = -1
     for f_name in widget.book_list[index:]:
         # 删除文件后，重新按顺序显示首页图像
-        cover(widget)
+        cover(words='', widget=widget)
         set_icon(f_name, widget)
 
 
@@ -214,4 +185,4 @@ def reset_table(book_len, widget: QWidget):
         widget.table.setColumnWidth(i, (875 - 16) // widget.w_col)
     for i in range(widget.w_row):
         widget.table.setRowHeight(i, ((875 - 16) // widget.w_col) * 4 // 3)
-    cover(widget)
+    cover(words='page', widget=widget)
