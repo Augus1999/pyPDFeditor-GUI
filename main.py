@@ -3,9 +3,9 @@
 import os
 import sys
 import json
+import fitz
 import subprocess as sp
 from PyQt5.QtGui import QIcon
-from PyPDF2 import PdfFileMerger
 from PyQt5 import QtGui, QtCore, QtWidgets
 from scripts import *
 from PyQt5.QtWidgets import (QApplication, QWidget, QTabWidget, QLabel, QTextEdit,
@@ -13,6 +13,9 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QTabWidget, QLabel, QTextEdi
 
 
 class Main(QTabWidget):
+    """
+    main widow
+    """
     def __init__(self):
         super(Main, self).__init__()
         content = setting_warning('settings\\main_settings.json')
@@ -224,37 +227,40 @@ class Main(QTabWidget):
         button2.clicked.connect(self.save3)
 
     def save1(self):
-        # 点击保存按钮事件
-        merger = PdfFileMerger()
         if len(self.tab1.book_list) != 0:
-            for item in self.tab1.book_list:
-                _input = open(item, 'rb')
-                merger.append(_input)
+            doc0 = fitz.open(self.tab1.book_list[0])
+            for item in self.tab1.book_list[1:]:
+                doc = fitz.open(item)
+                doc0.insertPDF(doc)
+                doc.close()
             file_name, ok = QFileDialog.getSaveFileName(None, "save",
                                                         self.o_dir + "new.pdf",
                                                         ".pdf")
             if ok:
-                with open(file_name.replace('/', '\\'), 'wb') as g:
-                    merger.write(g)
+                doc0.save(file_name.replace('/', '\\'))
+                doc0.close()
                 sp.Popen('explorer ' + file_name.replace('/', '\\'), shell=True)
 
     def save2(self):
-        # 点击保存按钮事件
-        merger = PdfFileMerger()
         if len(self.tab2.book_list) != 0:
-            for item in self.tab2.book_list:
-                _input = open(item, 'rb')
-                merger.append(_input)
+            doc0 = fitz.open(self.tab2.book_list[0])
+            for item in self.tab2.book_list[1:]:
+                doc = fitz.open(item)
+                doc0.insertPDF(doc)
+                doc.close()
             file_name, ok = QFileDialog.getSaveFileName(None, "save",
                                                         self.o_dir + "new.pdf",
                                                         ".pdf")
             if ok:
-                with open(file_name.replace('/', '\\'), 'wb') as g:
-                    merger.write(g)
+                doc0.save(file_name.replace('/', '\\'))
+                doc0.close()
+                for root, _, files in os.walk('cache'):
+                    for name in files:
+                        if name.endswith('.pdf'):
+                            os.remove(os.path.join(root, name))
                 sp.Popen('explorer ' + file_name.replace('/', '\\'), shell=True)
 
     def save3(self):
-        # 点击保存按钮事件
         u_password = self.tab3.line1.text()
         o_password = self.tab3.line2.text()
         font_size = int(self.tab3.line3.text())
@@ -265,17 +271,13 @@ class Main(QTabWidget):
                                                         self.o_dir + "new.pdf",
                                                         ".pdf")
             if ok:
-                cache_file_name = 'cache\\'+file_name.split('/')[-1].replace('.pdf', '_cache.pdf')
-                create_watermark(self.tab3.book_list[0], cache_file_name, watermark, 0,
-                                 (float(self.colour_r), float(self.colour_g), float(self.colour_b),),
-                                 font_size=font_size, opacity=opacity)
-                add_encryption(cache_file_name, file_name.replace('/', '\\'), u_password, o_password)
-                os.remove(cache_file_name)
+                security(self.tab3.book_list[0], file_name.replace('/', '\\'), watermark, 0,
+                         (float(self.colour_r), float(self.colour_g), float(self.colour_b),),
+                         font_size=font_size, opacity=opacity, owner_pass=o_password, user_pass=u_password)
                 if self.tab3.check.isChecked():
                     sp.Popen('explorer '+file_name.replace('/', '\\'), shell=True)
 
     def _set(self):
-        # 点击设置按钮事件
         self.ChildDialog.show()
         self.ChildDialog.signal.connect(self.get_data)
 
@@ -329,6 +331,9 @@ class Main(QTabWidget):
 
 
 class Setting(QWidget):
+    """
+    setting window
+    """
     signal = QtCore.pyqtSignal(str, str, list)
 
     def __init__(self):
@@ -340,7 +345,7 @@ class Setting(QWidget):
         self.colour_b = content["colour"]["B"]
         self.setFixedSize(600, 400)
         self.setWindowTitle('Setting')
-        self.setWindowIcon(QtGui.QIcon(':\\ico\\settings.png'))
+        self.setWindowIcon(QtGui.QIcon('.\\ico\\settings.png'))
         self.setStyleSheet('background-color: #ffffff')
         self.label1 = QLabel(self)
         self.label2 = QLabel(self)
@@ -376,16 +381,22 @@ class Setting(QWidget):
         self.label4.setStyleSheet('font-size:9pt')
         self.label5.setStyleSheet('font-size:9pt')
         self.label6.setStyleSheet('font-size:9pt')
+        self.button1.setStyleSheet('font-size:9t;background-color:rgba(255,255,255,0);'
+                                   'color:#a77e5e; font-weight:bold')
+        self.button2.setStyleSheet('font-size:9t;background-color:rgba(255,255,255,0);'
+                                   'color:#a77e5e; font-weight:bold')
+        self.button3.setStyleSheet('font-size:9t;background-color:rgba(255,255,255,80);'
+                                   'color:#a77e5e; font-weight:bold')
         self.line1.setStyleSheet('font-size:12pt;border-radius:15px;'
-                                 'background-color:#f1f2ff')
+                                 'background-color:#f5dce3')
         self.line2.setStyleSheet('font-size:12pt;border-radius:15px;'
                                  'background-color:#f1f2ff')
         self.line3.setStyleSheet('font-size:12pt;border-radius:15px;'
-                                 'background-color:#f1f2ff')
+                                 'background-color:rgba(236,190,139,70)')
         self.line4.setStyleSheet('font-size:12pt;border-radius:15px;'
-                                 'background-color:#f1f2ff')
+                                 'background-color:rgba(236,190,139,70)')
         self.line5.setStyleSheet('font-size:12pt;border-radius:15px;'
-                                 'background-color:#f1f2ff')
+                                 'background-color:rgba(236,190,139,70)')
         self.label1.setAlignment(QtCore.Qt.AlignCenter)
         self.label2.setAlignment(QtCore.Qt.AlignCenter)
         self.label3.setAlignment(QtCore.Qt.AlignCenter)
@@ -424,11 +435,13 @@ class Setting(QWidget):
 
     def select1(self):
         root = QtWidgets.QFileDialog.getExistingDirectory(None, "choose", self.s_dir)
-        self.line1.setText(root.replace('/', '\\'))
+        if len(root) != 0:
+            self.line1.setText(root.replace('/', '\\'))
 
     def select2(self):
-        root = QtWidgets.QFileDialog.getExistingDirectory(None, "choose", self.s_dir)
-        self.line2.setText(root.replace('/', '\\'))
+        root = QtWidgets.QFileDialog.getExistingDirectory(None, "choose", self.o_dir)
+        if len(root) != 0:
+            self.line2.setText(root.replace('/', '\\'))
 
 
 if __name__ == '__main__':
