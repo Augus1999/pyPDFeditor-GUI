@@ -1,3 +1,4 @@
 PyMuPDF==1.18.8
 PyQt5-sip==12.8.1
 PyQt5==5.15.2
+pywin32==300
