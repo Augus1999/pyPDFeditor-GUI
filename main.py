@@ -6,7 +6,7 @@ import fitz
 import subprocess as sp
 from scripts import *
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QApplication, QFileDialog
+from PyQt5.QtWidgets import QApplication, QFileDialog, QColorDialog
 
 
 class Main(MainR):
@@ -120,7 +120,7 @@ class Main(MainR):
         generate_menu(pos, self.tab1)
 
     def gen2(self, pos):
-        generate_menu(pos, self.tab2)
+        generate_menu(pos, self.tab2, select=1, main=self)
 
     def gen3(self, pos):
         generate_menu(pos, self.tab3)
@@ -137,7 +137,8 @@ class Main(MainR):
                 self.tab1.x, self.tab1.y = 0, 0
                 cover('', self.tab1)
                 for item in self.tab1.book_list:
-                    set_icon(item, self.tab1)
+                    if not set_icon(item, self.tab1):
+                        self.tab1.book_list.remove(item)
             else:
                 pass
         else:
@@ -148,11 +149,15 @@ class Main(MainR):
             f_name, _ = QFileDialog.getOpenFileName(None, 'Open files',
                                                     self.s_dir, '(*.pdf)')
             if _:
-                self.tab2.book_list = pdf_split(f_name.replace('/', '\\'))
-                book_len = len(self.tab2.book_list)
-                reset_table(book_len, self.tab2)
-                for item in self.tab2.book_list:
-                    set_icon(item, self.tab2)
+                b_l = pdf_split(f_name.replace('/', '\\'))
+                if len(b_l) != 0:
+                    self.tab2.book_list = b_l
+                    book_len = len(self.tab2.book_list)
+                    reset_table(book_len, self.tab2)
+                    for item in self.tab2.book_list:
+                        set_icon(item, self.tab2)
+                else:
+                    pass
             else:
                 pass
 
@@ -195,6 +200,7 @@ class Setting(SettingR):
         self.button1.clicked.connect(self.select1)
         self.button2.clicked.connect(self.select2)
         self.button3.clicked.connect(self.out)
+        self.button4.clicked.connect(self.colour)
 
     def out(self):
         self.signal.emit(self.line1.text(), self.line2.text(),
@@ -217,6 +223,13 @@ class Setting(SettingR):
         root = QtWidgets.QFileDialog.getExistingDirectory(None, "choose", self.o_dir)
         if len(root) != 0:
             self.line2.setText(root.replace('/', '\\'))
+
+    def colour(self):
+        _colour = QColorDialog.getColor()
+        if _colour.isValid():
+            self.line3.setText('%2.1f' % _colour.getRgbF()[0])
+            self.line4.setText('%2.1f' % _colour.getRgbF()[1])
+            self.line5.setText('%2.1f' % _colour.getRgbF()[2])
 
 
 if __name__ == '__main__':
