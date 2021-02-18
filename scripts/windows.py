@@ -223,6 +223,7 @@ class SettingR(QWidget):
         self.button1 = QPushButton(self)
         self.button2 = QPushButton(self)
         self.button3 = QPushButton(self)
+        self.button4 = QPushButton(self)
         self.button1.setText('view')
         self.button2.setText('view')
         self.button3.setText('confirm')
@@ -232,6 +233,7 @@ class SettingR(QWidget):
         self.label4.setText('G')
         self.label5.setText('B')
         self.label6.setText('.'*10+'watermark colour'+'.'*10)
+        self.button4.setIcon(QIcon('ico\\palette.png'))
         self.label1.setStyleSheet('font-size:9pt;font-family:calibri')
         self.label2.setStyleSheet('font-size:9pt;font-family:calibri')
         self.label3.setStyleSheet('font-size:9pt;font-family:calibri')
@@ -244,6 +246,8 @@ class SettingR(QWidget):
                                    'color:#a77e5e;font-weight:bold;font-family:calibri')
         self.button3.setStyleSheet('font-size:9t;background-color:rgba(255,255,255,80);'
                                    'color:#a77e5e;font-weight:bold;font-family:calibri')
+        self.button4.setStyleSheet('QPushButton{border-radius:15px}'
+                                   'QPushButton:hover{background-color:#f1f1ff}')
         self.line1.setStyleSheet('font-size:12pt;border-radius:15px;;color:#363942;'
                                  'background-color:#f5dce3;font-family:calibri')
         self.line2.setStyleSheet('font-size:12pt;border-radius:15px;color:#363942;'
@@ -277,3 +281,4 @@ class SettingR(QWidget):
         self.button1.setGeometry(QtCore.QRect(510, 20, 50, 40))
         self.button2.setGeometry(QtCore.QRect(510, 80, 50, 40))
         self.button3.setGeometry(QtCore.QRect(510, 350, 80, 40))
+        self.button4.setGeometry(QtCore.QRect(400, 200, 40, 40))

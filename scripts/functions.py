@@ -41,15 +41,18 @@ def pdf_split(input_pdf: str):
     book_list = list()
     f_name = os.path.splitext(os.path.basename(input_pdf))[0]
     doc0 = fitz.open(input_pdf)
-    for page in range(doc0.pageCount):
-        out_file_name = 'cache\\{}-{}.pdf'.format(f_name, page)
-        book_list.append(out_file_name)
-        doc = fitz.open(input_pdf)
-        doc.select([page])
-        doc.save(out_file_name)
-        doc.close()
-    doc0.close()
-    return book_list
+    if doc0.needsPass:
+        return book_list
+    else:
+        for page in range(doc0.pageCount):
+            out_file_name = 'cache\\{}-{}.pdf'.format(f_name, page+1)
+            book_list.append(out_file_name)
+            doc = fitz.open(input_pdf)
+            doc.select([page])
+            doc.save(out_file_name)
+            doc.close()
+        doc0.close()
+        return book_list
 
 
 def security(input_pdf: str,
@@ -84,10 +87,10 @@ def security(input_pdf: str,
     encrypt_meth = fitz.PDF_ENCRYPT_AES_256  # strongest algorithm
     doc = fitz.open(input_pdf)
     for page in doc:
-        p1 = fitz.Point(page.rect.width//2-150, page.rect.height//2-150)
+        r1 = fitz.Rect(10, 10, page.rect.width-10, page.rect.height-10)
         shape = page.newShape()
-        shape.insert_text(p1, text, rotate=rotate, color=colour, fontsize=font_size,
-                          stroke_opacity=0.5, fill_opacity=opacity)
+        shape.insertTextbox(r1, text, rotate=rotate, color=colour, fontsize=font_size,
+                            stroke_opacity=0.5, fill_opacity=opacity, align=1)
         shape.commit()
     doc.save(output_pdf,
              encryption=encrypt_meth,  # set the encryption method
@@ -121,26 +124,30 @@ def set_icon(f_name, widget):
 
     :param f_name: import file name
     :param widget: widget
-    :return: None
+    :return: bool
     """
     doc = fitz.open(f_name)
-    page = doc.loadPage(0)
-    _cover = render_pdf_page(page)
-    label = QtWidgets.QLabel(None)
-    label.setScaledContents(True)
-    label.setPixmap(QtGui.QPixmap(_cover))
-    widget.table.setCellWidget(widget.x, widget.y, label)
-    del label  # delete label (important)
-    widget.crow, widget.col = widget.x, widget.y
-    try:
-        if (not widget.y % (widget.w_col-1)) and widget.y:
-            # 每（self.w_col）个元素换行
-            widget.x += 1
-            widget.y = 0
-        else:
-            widget.y += 1
-    except ZeroDivisionError:
-        pass
+    if doc.needsPass:
+        return False
+    else:
+        page = doc.loadPage(0)
+        _cover = render_pdf_page(page)
+        label = QtWidgets.QLabel(None)
+        label.setScaledContents(True)
+        label.setPixmap(QtGui.QPixmap(_cover))
+        widget.table.setCellWidget(widget.x, widget.y, label)
+        del label  # delete label (important)
+        widget.crow, widget.col = widget.x, widget.y
+        try:
+            if (not widget.y % (widget.w_col-1)) and widget.y:
+                # 每（self.w_col）个元素换行
+                widget.x += 1
+                widget.y = 0
+            else:
+                widget.y += 1
+        except ZeroDivisionError:
+            pass
+        return True
 
 
 def cover(words: str, widget: QWidget):
@@ -170,8 +177,10 @@ def add(main: QWidget, widget: QWidget):
                                             main.s_dir, '(*.pdf)')
     if _:
         if f_name not in widget.book_list:
-            widget.book_list.append(f_name)
-            set_icon(f_name, widget)
+            if set_icon(f_name, widget):
+                widget.book_list.append(f_name)
+            else:
+                pass
     else:
         pass
 
@@ -211,12 +220,15 @@ def delete(row, col, widget: QWidget):
         set_icon(f_name, widget)
 
 
-def generate_menu(pos, widget: QWidget):
+def generate_menu(pos, widget: QWidget, select=0, main=None):
     """
     generate menu
 
     :param pos: position
+    :param select: select=0 => only delete;
+                   select=1 => with save as
     :param widget: widget
+    :param main: main
     :return: None
     """
     row_num = col_num = -1
@@ -226,12 +238,17 @@ def generate_menu(pos, widget: QWidget):
     if (row_num < widget.crow) or (row_num == widget.crow and col_num <= widget.col):
         menu = QtWidgets.QMenu()
         item1 = menu.addAction('delete')
+        item2 = None
+        if select == 1:
+            item2 = menu.addAction('save as')
         action = menu.exec_(widget.table.mapToGlobal(pos))
         if action == item1:
             try:
                 delete(row_num, col_num, widget)
             except IndexError:
                 pass
+        if action == item2:
+            save_as(row_num, col_num, widget, main)
 
 
 def reset_table(book_len, widget: QWidget):
@@ -242,11 +259,54 @@ def reset_table(book_len, widget: QWidget):
     :param widget: widget
     :return: None
     """
-    w_row = book_len//4 + book_len % 4
+    if book_len % 4 == 0:
+        w_row = book_len//4
+    else:
+        w_row = book_len//4 + 1
     widget.w_row = w_row
     widget.table.setRowCount(widget.w_row)
     for i in range(widget.w_col):
-        widget.table.setColumnWidth(i, (875 - 16) // widget.w_col)
+        widget.table.setColumnWidth(i, (895 - 15) // widget.w_col)
     for i in range(widget.w_row):
-        widget.table.setRowHeight(i, ((875 - 16) // widget.w_col) * 4 // 3)
+        widget.table.setRowHeight(i, ((895 - 15) // widget.w_col) * 4 // 3)
     cover(words='page', widget=widget)
+
+
+def clean(select=0):
+    """
+    clean all PDF cache files in cache\\
+
+    :param select: select=0 => no information out;
+                   select=1 => information out
+    :return: None
+    """
+    i = 0
+    for root, _, files in os.walk('cache'):
+        for name in files:
+            if name.endswith('.pdf'):
+                i += 1
+                os.remove(os.path.join(root, name))
+    if select == 1:
+        QMessageBox.information(None, 'clean', '{} cache files have been removed.'.format(str(i)),
+                                QMessageBox.Yes | QMessageBox.No)
+
+
+def save_as(row, col, widget: QWidget, main: QWidget):
+    """
+    save the selected page as PDF file
+
+    :param row: row index
+    :param col: column index
+    :param widget: widget
+    :param main: main
+    :return: None
+    """
+    index = row * widget.w_col + col  # get position
+    doc = fitz.open(widget.book_list[index])
+    f_name = os.path.splitext(os.path.basename(widget.book_list[index]))[0]+'.pdf'
+    file_name, ok = QFileDialog.getSaveFileName(None, "save",
+                                                main.o_dir + f_name,
+                                                ".pdf")
+    if ok:
+        doc.save(file_name.replace('/', '\\'))
+        doc.close()
