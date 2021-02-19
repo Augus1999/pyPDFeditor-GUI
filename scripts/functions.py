@@ -189,36 +189,23 @@ def add(main: QWidget, widget: QWidget):
         pass
 
 
-def delete(row, col, widget: QWidget):
+def delete(index, widget: QWidget):
     """
     delete select file/page
 
-    :param row: row index
-    :param col: column index
+    :param index: position index
     :param widget: widget
     :return: None
     """
-    index = row * widget.w_col + col  # get position
-    widget.x = row
-    widget.y = col
     if index >= 0:
         widget.book_list.pop(index)
-    i, j = row, col
-    while 1:
-        # 移除 i 行 j 列单元格的元素
-        widget.table.removeCellWidget(i, j)
-        # 一直删到最后一个有元素的单元格
-        if i == widget.crow and j == widget.col:
-            break
-        if (not j % (widget.w_col-1)) and j:
-            i += 1
-            j = 0
-        else:
-            j += 1
+    widget.table.clear()
+    widget.x, widget.y = 0, 0
+    cover(words='', widget=widget)
     if not widget.book_list:
         widget.crow = -1
         widget.col = -1
-    for f_name in widget.book_list[index:]:
+    for f_name in widget.book_list:
         # reset images
         cover(words='', widget=widget)
         set_icon(f_name, widget)
@@ -239,7 +226,8 @@ def generate_menu(pos, widget: QWidget, select=0, main=None):
     for i in widget.table.selectionModel().selection().indexes():
         row_num = i.row()
         col_num = i.column()
-    if (row_num < widget.crow) or (row_num == widget.crow and col_num <= widget.col):
+    index = row_num * widget.w_col + col_num  # get position
+    if 0 <= index < len(widget.book_list):
         menu = QtWidgets.QMenu()
         item1 = menu.addAction('delete')
         item2 = None
@@ -248,11 +236,14 @@ def generate_menu(pos, widget: QWidget, select=0, main=None):
         action = menu.exec_(widget.table.mapToGlobal(pos))
         if action == item1:
             try:
-                delete(row_num, col_num, widget)
+                delete(index, widget)
             except IndexError:
                 pass
-        if action == item2:
-            save_as(row_num, col_num, widget, main)
+        if action == item2 and select == 1:
+            try:
+                save_as(index, widget, main)
+            except IndexError:
+                pass
 
 
 def reset_table(book_len, widget: QWidget):
@@ -295,17 +286,15 @@ def clean(select=0):
                                 QMessageBox.Yes | QMessageBox.No)
 
 
-def save_as(row, col, widget: QWidget, main: QWidget):
+def save_as(index, widget: QWidget, main: QWidget):
     """
     save the selected page as PDF file
 
-    :param row: row index
-    :param col: column index
+    :param index: position index
     :param widget: widget
     :param main: main
     :return: None
     """
-    index = row * widget.w_col + col  # get position
     doc = fitz.open(widget.book_list[index])
     f_name = os.path.splitext(os.path.basename(widget.book_list[index]))[0]+'.pdf'
     file_name, ok = QFileDialog.getSaveFileName(None, "save",
