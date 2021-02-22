@@ -44,6 +44,7 @@ def pdf_split(input_pdf: str):
     if doc0.needsPass:
         QMessageBox.critical(None, 'Error', 'Cannot open an encrypted file.',
                              QMessageBox.Yes | QMessageBox.No)
+        doc0.close()
         return book_list
     else:
         for page in range(doc0.pageCount):
@@ -132,6 +133,7 @@ def set_icon(f_name, widget):
     if doc.needsPass:
         QMessageBox.critical(None, 'Error', 'Cannot open an encrypted file.',
                              QMessageBox.Yes | QMessageBox.No)
+        doc.close()
         return False
     else:
         page = doc.loadPage(0)
@@ -151,6 +153,7 @@ def set_icon(f_name, widget):
                 widget.y += 1
         except ZeroDivisionError:
             pass
+        doc.close()
         return True
 
 
