@@ -63,6 +63,12 @@ class Main(MainR):
         self.tab2.button3.clicked.connect(self.clean)
         self.tab3.button1.clicked.connect(self.add3)
         self.tab3.button2.clicked.connect(self.save3)
+        if float(self.colour_r) > 1:
+            self.colour_r = str(float(self.colour_r)/255)
+        if float(self.colour_g) > 1:
+            self.colour_g = str(float(self.colour_g)/255)
+        if float(self.colour_b) > 1:
+            self.colour_b = str(float(self.colour_b)/255)
 
     def save1(self):
         if len(self.tab1.book_list) != 0:
@@ -170,6 +176,8 @@ class Main(MainR):
         self.tab2.book_list = list()
         self.tab2.x, self.tab2.y = 0, 0
         self.tab2.col, self.tab2.crow = -1, -1
+        self.tab2.table.clear()
+        cover(words='page', widget=self.tab2)
 
     def get_data(self, par1, par2, par3):
         self.s_dir = par1
