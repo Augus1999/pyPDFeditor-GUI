@@ -8,7 +8,7 @@ try:
     import fitz
 except ImportError:
     while True:
-        c = sp.call('pip install -r requirement.txt', shell=True)
+        c = sp.call('pip install -r requirements.txt', shell=True)
         if c == 0:
             break
 _platform = platform.system()
