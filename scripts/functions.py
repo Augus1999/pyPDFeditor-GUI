@@ -143,6 +143,7 @@ def set_icon(f_name, widget):
         label.setPixmap(QtGui.QPixmap(_cover))
         widget.table.setCellWidget(widget.x, widget.y, label)
         del label  # delete label (important)
+        del _cover
         widget.crow, widget.col = widget.x, widget.y
         try:
             if (not widget.y % (widget.w_col-1)) and widget.y:
@@ -155,21 +156,6 @@ def set_icon(f_name, widget):
             pass
         doc.close()
         return True
-
-
-def cover(words: str, widget: QWidget):
-    """
-    add a image to table element
-
-    :param words: word in table element
-    :param widget: widget
-    :return: None
-    """
-    for i in range(widget.w_row):
-        for j in range(widget.w_col):
-            icon = QtWidgets.QTableWidgetItem(QtGui.QIcon('.\\ico\\pdf.png'), "\n"+words)
-            widget.table.setItem(i, j, icon)
-            del icon  # delete icon (important)
 
 
 def add(main: QWidget, widget: QWidget):
@@ -203,14 +189,13 @@ def delete(index, widget: QWidget):
     if index >= 0:
         widget.book_list.pop(index)
     widget.table.clear()
+    reset_table(len(widget.book_list), widget)
     widget.x, widget.y = 0, 0
-    cover(words='', widget=widget)
     if not widget.book_list:
         widget.crow = -1
         widget.col = -1
     for f_name in widget.book_list:
         # reset images
-        cover(words='', widget=widget)
         set_icon(f_name, widget)
 
 
@@ -267,7 +252,6 @@ def reset_table(book_len, widget: QWidget):
         widget.table.setColumnWidth(i, (895 - 15) // widget.w_col)
     for i in range(widget.w_row):
         widget.table.setRowHeight(i, ((895 - 15) // widget.w_col) * 4 // 3)
-    cover(words='page', widget=widget)
 
 
 def clean(select=0):
@@ -305,4 +289,4 @@ def save_as(index, widget: QWidget, main: QWidget):
                                                 ".pdf")
     if ok:
         doc.save(file_name.replace('/', '\\'))
-        doc.close()
+    doc.close()
