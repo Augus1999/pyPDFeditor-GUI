@@ -49,9 +49,6 @@ class Main(MainR):
             self.tab2.table.setRowHeight(i, ((895-15)//self.tab2.w_col)*4//3)
         self.tab3.table.setColumnWidth(0, 397)
         self.tab3.table.setRowHeight(0, 530)
-        cover(words='PDF file', widget=self.tab1)
-        cover(words='page', widget=self.tab2)
-        cover(words='PDF file', widget=self.tab3)
         self.tab1.table.customContextMenuRequested.connect(self.gen1)
         self.tab2.table.customContextMenuRequested.connect(self.gen2)
         self.tab3.table.customContextMenuRequested.connect(self.gen3)
@@ -141,7 +138,6 @@ class Main(MainR):
                 reset_table(book_len, self.tab1)
                 self.tab1.table.clear()
                 self.tab1.x, self.tab1.y = 0, 0
-                cover('', self.tab1)
                 for item in self.tab1.book_list:
                     if not set_icon(item, self.tab1):
                         self.tab1.book_list.remove(item)
@@ -177,7 +173,6 @@ class Main(MainR):
         self.tab2.x, self.tab2.y = 0, 0
         self.tab2.col, self.tab2.crow = -1, -1
         self.tab2.table.clear()
-        cover(words='page', widget=self.tab2)
 
     def get_data(self, par1, par2, par3):
         self.s_dir = par1
