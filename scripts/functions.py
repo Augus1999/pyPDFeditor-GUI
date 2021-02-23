@@ -189,14 +189,15 @@ def delete(index, widget: QWidget):
     if index >= 0:
         widget.book_list.pop(index)
     widget.table.clear()
-    reset_table(len(widget.book_list), widget)
     widget.x, widget.y = 0, 0
     if not widget.book_list:
         widget.crow = -1
         widget.col = -1
-    for f_name in widget.book_list:
-        # reset images
-        set_icon(f_name, widget)
+    if len(widget.book_list) != 0:
+        reset_table(len(widget.book_list), widget)
+        for f_name in widget.book_list:
+            # reset images
+            set_icon(f_name, widget)
 
 
 def generate_menu(pos, widget: QWidget, select=0, main=None):
