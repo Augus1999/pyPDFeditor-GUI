@@ -13,8 +13,7 @@ except ImportError:
             break
 _platform = platform.system()
 if _platform == 'Windows':
-    bat_script = '@echo off\npython main.py'
-    vbs_script = r'CreateObject("WScript.Shell").Run "run.bat \c*",0'
+    vbs_script = r'CreateObject("WScript.Shell").Run "pythonw main.py \c*",0'
     try:
         from win32com.shell import shell
     except ImportError:
@@ -41,8 +40,6 @@ if _platform == 'Windows':
             print(e.args)
 
 
-    with open('run.bat', 'w', encoding='utf-8') as f:
-        f.write(bat_script)
     with open('run.vbs', 'w', encoding='utf-8') as f:
         f.write(vbs_script)
     set_shortcut(filename=os.getcwd()+"\\run.vbs",
