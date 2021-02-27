@@ -173,6 +173,7 @@ class Main(MainR):
         self.tab2.x, self.tab2.y = 0, 0
         self.tab2.col, self.tab2.crow = -1, -1
         self.tab2.table.clear()
+        reset_table(book_len=1, widget=self.tab2)
 
     def get_data(self, par1, par2, par3):
         self.s_dir = par1
