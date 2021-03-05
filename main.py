@@ -24,6 +24,7 @@ class Main(MainR):
         self.tab1.book_list = list()
         self.tab2.book_list = list()
         self.tab3.book_list = list()
+        self.tab2.book_name = str()
         self.tab1.x, self.tab1.y = 0, 0
         self.tab2.x, self.tab2.y = 0, 0
         self.tab3.x, self.tab3.y = 0, 0
@@ -84,18 +85,14 @@ class Main(MainR):
 
     def save2(self):
         if len(self.tab2.book_list) != 0:
-            doc0 = fitz.open(self.tab2.book_list[0])
-            for item in self.tab2.book_list[1:]:
-                doc = fitz.open(item)
-                doc0.insertPDF(doc)
-                doc.close()
+            doc0 = fitz.open(self.tab2.book_name)
+            doc0.select(self.tab2.book_list)
             file_name, ok = QFileDialog.getSaveFileName(None, "save",
                                                         self.o_dir + "new.pdf",
                                                         ".pdf")
             if ok:
                 doc0.save(file_name.replace('/', '\\'))
                 doc0.close()
-                clean()
                 sp.Popen('explorer ' + file_name.replace('/', '\\'), shell=True)
 
     def save3(self):
@@ -131,18 +128,17 @@ class Main(MainR):
     def add1(self):
         f_name, _ = QFileDialog.getOpenFileName(None, 'Open files',
                                                 self.s_dir, '(*.pdf)')
-        if _:
-            if f_name.replace('/', '\\') not in self.tab1.book_list:
-                self.tab1.book_list.append(f_name.replace('/', '\\'))
-                book_len = len(self.tab1.book_list)
-                reset_table(book_len, self.tab1)
-                self.tab1.table.clear()
-                self.tab1.x, self.tab1.y = 0, 0
-                for item in self.tab1.book_list:
-                    if not set_icon(item, self.tab1):
-                        self.tab1.book_list.remove(item)
-            else:
-                pass
+        if _ and (f_name.replace('/', '\\') not in self.tab1.book_list):
+            self.tab1.book_list.append(f_name.replace('/', '\\'))
+            book_len = len(self.tab1.book_list)
+            reset_table(book_len, self.tab1)
+            self.tab1.table.clear()
+            self.tab1.x, self.tab1.y = 0, 0
+            for item in self.tab1.book_list:
+                if not set_icon(item, self.tab1):
+                    self.tab1.book_list.remove(item)
+                else:
+                    pass
         else:
             pass
 
@@ -151,13 +147,14 @@ class Main(MainR):
             f_name, _ = QFileDialog.getOpenFileName(None, 'Open files',
                                                     self.s_dir, '(*.pdf)')
             if _:
-                b_l = pdf_split(f_name.replace('/', '\\'))
+                self.tab2.book_name = f_name.replace('/', '\\')
+                b_l = pdf_split(self.tab2.book_name)
                 if len(b_l) != 0:
                     self.tab2.book_list = b_l
                     book_len = len(self.tab2.book_list)
                     reset_table(book_len, self.tab2)
                     for item in self.tab2.book_list:
-                        set_icon(item, self.tab2)
+                        set_icon(self.tab2.book_name, self.tab2, item)
                 else:
                     pass
             else:
@@ -168,7 +165,6 @@ class Main(MainR):
             add(self, self.tab3)
 
     def clean(self):
-        clean(select=1)
         self.tab2.book_list = list()
         self.tab2.x, self.tab2.y = 0, 0
         self.tab2.col, self.tab2.crow = -1, -1
