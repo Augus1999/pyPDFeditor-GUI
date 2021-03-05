@@ -15,7 +15,7 @@ def render_pdf_page(page_data):
     :param page_data: page data
     :return: a QPixmap
     """
-    zoom_matrix = fitz.Matrix(1, 1)
+    zoom_matrix = fitz.Matrix(1, 0.5)
     page_pixmap = page_data.getPixmap(matrix=zoom_matrix,
                                       alpha=False)
     image_format = QtGui.QImage.Format_RGB888
@@ -39,7 +39,6 @@ def pdf_split(input_pdf: str):
     :return: book_list
     """
     book_list = list()
-    f_name = os.path.splitext(os.path.basename(input_pdf))[0]
     doc0 = fitz.open(input_pdf)
     if doc0.needsPass:
         QMessageBox.critical(None, 'Error', 'Cannot open an encrypted file.',
@@ -48,12 +47,7 @@ def pdf_split(input_pdf: str):
         return book_list
     else:
         for page in range(doc0.pageCount):
-            out_file_name = 'cache\\{}-{}.pdf'.format(f_name, page+1)
-            book_list.append(out_file_name)
-            doc = fitz.open(input_pdf)
-            doc.select([page])
-            doc.save(out_file_name)
-            doc.close()
+            book_list.append(page)
         doc0.close()
         return book_list
 
@@ -121,12 +115,13 @@ def setting_warning(set_file_name: str):
         exit()
 
 
-def set_icon(f_name, widget):
+def set_icon(f_name, widget, _page=0):
     """
     add image of first page into table element
 
     :param f_name: import file name
     :param widget: widget
+    :param _page: page index
     :return: bool
     """
     doc = fitz.open(f_name)
@@ -136,7 +131,7 @@ def set_icon(f_name, widget):
         doc.close()
         return False
     else:
-        page = doc.loadPage(0)
+        page = doc.loadPage(_page)
         _cover = render_pdf_page(page)
         label = QtWidgets.QLabel(None)
         label.setScaledContents(True)
@@ -168,12 +163,11 @@ def add(main: QWidget, widget: QWidget):
     """
     f_name, _ = QFileDialog.getOpenFileName(None, 'Open files',
                                             main.s_dir, '(*.pdf)')
-    if _:
-        if f_name not in widget.book_list:
-            if set_icon(f_name, widget):
-                widget.book_list.append(f_name)
-            else:
-                pass
+    if _ and (f_name not in widget.book_list):
+        if set_icon(f_name, widget):
+            widget.book_list.append(f_name)
+        else:
+            pass
     else:
         pass
 
@@ -197,7 +191,11 @@ def delete(index, widget: QWidget):
         reset_table(len(widget.book_list), widget)
         for f_name in widget.book_list:
             # reset images
-            set_icon(f_name, widget)
+            if type(f_name) is str:
+                set_icon(f_name, widget)
+            if type(f_name) is int:
+                set_icon(widget.book_name, widget, f_name)
+    print(widget.book_list)
 
 
 def generate_menu(pos, widget: QWidget, select=0, main=None):
@@ -255,25 +253,6 @@ def reset_table(book_len, widget: QWidget):
         widget.table.setRowHeight(i, ((895 - 15) // widget.w_col) * 4 // 3)
 
 
-def clean(select=0):
-    """
-    clean all PDF cache files in cache\\
-
-    :param select: select=0 => no information out;
-                   select=1 => information out
-    :return: None
-    """
-    i = 0
-    for root, _, files in os.walk('cache'):
-        for name in files:
-            if name.endswith('.pdf'):
-                i += 1
-                os.remove(os.path.join(root, name))
-    if select == 1:
-        QMessageBox.information(None, 'clean', '{} cache files have been removed.'.format(str(i)),
-                                QMessageBox.Yes | QMessageBox.No)
-
-
 def save_as(index, widget: QWidget, main: QWidget):
     """
     save the selected page as PDF file
@@ -283,11 +262,14 @@ def save_as(index, widget: QWidget, main: QWidget):
     :param main: main
     :return: None
     """
-    doc = fitz.open(widget.book_list[index])
-    f_name = os.path.splitext(os.path.basename(widget.book_list[index]))[0]+'.pdf'
+    print(index, widget.book_list[index])
+    doc = fitz.open(widget.book_name)
+    f_name = os.path.splitext(os.path.basename(widget.book_name))[0]+'{}{}{}'.\
+        format('-', widget.book_list[index]+1, '.pdf')
     file_name, ok = QFileDialog.getSaveFileName(None, "save",
                                                 main.o_dir + f_name,
                                                 ".pdf")
     if ok:
+        doc.select([widget.book_list[index]])
         doc.save(file_name.replace('/', '\\'))
     doc.close()
