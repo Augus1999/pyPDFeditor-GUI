@@ -15,4 +15,4 @@ double click [setup.py](https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/s
 * <img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/new.png" width="30" alt="add"/> open a file
 * <img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/disk.png" width="30" alt="add"/> save
 * <img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/settings.png" width="30" alt="add"/> settings
-* <img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/clean.png" width="30" alt="add"/> clean cache files
+* <img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/clean.png" width="30" alt="add"/> clear
