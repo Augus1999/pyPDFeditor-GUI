@@ -3,8 +3,7 @@
 import os
 import fitz
 import json
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 
@@ -15,16 +14,20 @@ def render_pdf_page(page_data):
     :param page_data: page data
     :return: a QPixmap
     """
-    zoom_matrix = fitz.Matrix(1, 0.5)
-    page_pixmap = page_data.getPixmap(matrix=zoom_matrix,
-                                      alpha=False)
-    image_format = QtGui.QImage.Format_RGB888
+    page_pixmap = page_data.get_pixmap(
+        matrix=fitz.Matrix(0.7, 0.7)
+    )
+    if page_pixmap.alpha:
+        image_format = QtGui.QImage.Format_RGBA8888
+    else:
+        image_format = QtGui.QImage.Format_RGB888
     page_image = QtGui.QImage(
         page_pixmap.samples,
         page_pixmap.width,
         page_pixmap.height,
         page_pixmap.stride,
-        image_format)
+        image_format,
+    )
     pixmap = QtGui.QPixmap()
     pixmap.convertFromImage(page_image)
     return pixmap
@@ -32,8 +35,7 @@ def render_pdf_page(page_data):
 
 def pdf_split(input_pdf: str):
     """
-    split the selected PDF file into one page a file;
-    then save all into cache\\
+    split the selected PDF file into pages;
 
     :param input_pdf: target PDF file to be split
     :return: book_list
@@ -41,7 +43,8 @@ def pdf_split(input_pdf: str):
     book_list = list()
     doc0 = fitz.open(input_pdf)
     if doc0.needsPass:
-        QMessageBox.critical(None, 'Error', 'Cannot open an encrypted file.',
+        QMessageBox.critical(None, 'Error',
+                             'Cannot open an encrypted file.',
                              QMessageBox.Yes | QMessageBox.No)
         doc0.close()
         return book_list
@@ -68,7 +71,7 @@ def security(input_pdf: str,
     :param output_pdf: export file name
     :param text: content of watermark
     :param rotate: rotation angle of watermark; must be 0, 90, 180, 270, 360
-    :param colour: colour of watermark; in form of (a, b, c,); all element in tuple range from 0 to 1
+    :param colour: colour of watermark; in form of (a, b, c,)
     :param font_size: font size of little in watermark
     :param opacity: opacity of the watermark; range from 0 to 100
     :param owner_pass: owner password
@@ -86,8 +89,16 @@ def security(input_pdf: str,
     for page in doc:
         r1 = fitz.Rect(10, 10, page.rect.width-10, page.rect.height-10)
         shape = page.newShape()
-        shape.insertTextbox(r1, text, rotate=rotate, color=colour, fontsize=font_size,
-                            stroke_opacity=0.5, fill_opacity=opacity, align=1)
+        shape.insertTextbox(
+                        r1,
+                        text,
+                        rotate=rotate,
+                        color=colour,
+                        fontsize=font_size,
+                        stroke_opacity=0.5,
+                        fill_opacity=opacity,
+                        align=1,
+                        )
         shape.commit()
     doc.save(output_pdf,
              encryption=encrypt_meth,  # set the encryption method
@@ -109,9 +120,13 @@ def setting_warning(set_file_name: str):
         with open(set_file_name, 'r', encoding='utf-8') as f:
             content = json.load(f)
         return content
-    except FileNotFoundError:  # do this first
-        QMessageBox.warning(None, 'Error', 'Cannot find '+set_file_name.split('\\')[-1],
-                            QMessageBox.Yes | QMessageBox.No)
+    except FileNotFoundError:
+        QMessageBox.warning(
+            None,
+            'Error',
+            'Cannot find '+set_file_name.split('\\')[-1],
+            QMessageBox.Yes | QMessageBox.No,
+        )
         exit()
 
 
@@ -126,7 +141,8 @@ def set_icon(f_name, widget, _page=0):
     """
     doc = fitz.open(f_name)
     if doc.needsPass:
-        QMessageBox.critical(None, 'Error', 'Cannot open an encrypted file.',
+        QMessageBox.critical(None, 'Error',
+                             'Cannot open an encrypted file.',
                              QMessageBox.Yes | QMessageBox.No)
         doc.close()
         return False
@@ -134,11 +150,23 @@ def set_icon(f_name, widget, _page=0):
         page = doc.loadPage(_page)
         _cover = render_pdf_page(page)
         label = QtWidgets.QLabel(None)
-        label.setScaledContents(True)
-        label.setPixmap(QtGui.QPixmap(_cover))
+        scaled_width, scaled_height = None, None
+        if _cover.height()/_cover.width() > 4/3:
+            scaled_height = (widget.table.width()-15)//widget.w_col*4/3-5
+            scaled_width = scaled_height*(_cover.width()/_cover.height())
+        if _cover.height()/_cover.width() <= 4/3:
+            scaled_width = (widget.table.width()-15)//widget.w_col-5
+            scaled_height = scaled_width*(_cover.height()/_cover.width())
+        label.setPixmap(
+            QtGui.QPixmap(_cover).scaled(scaled_width,
+                                         scaled_height,
+                                         QtCore.Qt.IgnoreAspectRatio,
+                                         QtCore.Qt.SmoothTransformation),
+            )
+        label.setAlignment(QtCore.Qt.AlignCenter)
         widget.table.setCellWidget(widget.x, widget.y, label)
         del label  # delete label (important)
-        del _cover
+        del _cover, scaled_width, scaled_height
         widget.crow, widget.col = widget.x, widget.y
         try:
             if (not widget.y % (widget.w_col-1)) and widget.y:
@@ -195,7 +223,6 @@ def delete(index, widget: QWidget):
                 set_icon(f_name, widget)
             if type(f_name) is int:
                 set_icon(widget.book_name, widget, f_name)
-    print(widget.book_list)
 
 
 def generate_menu(pos, widget: QWidget, select=0, main=None):
@@ -241,16 +268,22 @@ def reset_table(book_len, widget: QWidget):
     :param widget: widget
     :return: None
     """
-    if book_len % 4 == 0:
-        w_row = book_len//4
+    if book_len % widget.w_col == 0:
+        w_row = book_len//widget.w_col
     else:
-        w_row = book_len//4 + 1
+        w_row = book_len//widget.w_col + 1
     widget.w_row = w_row
     widget.table.setRowCount(widget.w_row)
     for i in range(widget.w_col):
-        widget.table.setColumnWidth(i, (895 - 15) // widget.w_col)
+        widget.table.setColumnWidth(
+            i,
+            (widget.table.width()-15)//widget.w_col,
+        )
     for i in range(widget.w_row):
-        widget.table.setRowHeight(i, ((895 - 15) // widget.w_col) * 4 // 3)
+        widget.table.setRowHeight(
+            i,
+            ((widget.table.width()-15)//widget.w_col)*4//3,
+        )
 
 
 def save_as(index, widget: QWidget, main: QWidget):
@@ -262,7 +295,6 @@ def save_as(index, widget: QWidget, main: QWidget):
     :param main: main
     :return: None
     """
-    print(index, widget.book_list[index])
     doc = fitz.open(widget.book_name)
     f_name = os.path.splitext(os.path.basename(widget.book_name))[0]+'{}{}{}'.\
         format('-', widget.book_list[index]+1, '.pdf')
@@ -273,3 +305,16 @@ def save_as(index, widget: QWidget, main: QWidget):
         doc.select([widget.book_list[index]])
         doc.save(file_name.replace('/', '\\'))
     doc.close()
+
+
+def clean(widget: QWidget):
+    """
+
+    :param widget: widget
+    :return: None
+    """
+    widget.book_list = list()
+    widget.x, widget.y = 0, 0
+    widget.col, widget.crow = -1, -1
+    widget.table.clear()
+    reset_table(book_len=1, widget=widget)
