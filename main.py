@@ -148,7 +148,7 @@ class Main(MainR):
                     opacity=opacity,
                     owner_pass=o_password,
                     user_pass=u_password,
-                    )
+                    font_file='C:\\Windows\\Fonts\\Deng.ttf')
                 if self.tab3.check.isChecked():
                     sp.Popen(
                         'explorer '+file_name.replace('/', '\\'),
