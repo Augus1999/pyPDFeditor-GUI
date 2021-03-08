@@ -61,6 +61,7 @@ def security(input_pdf: str,
              rotate: int,
              colour: tuple,
              font_size: int,
+             font_file: str,
              opacity=0.5,
              owner_pass='',
              user_pass=''):
@@ -73,6 +74,7 @@ def security(input_pdf: str,
     :param rotate: rotation angle of watermark; must be 0, 90, 180, 270, 360
     :param colour: colour of watermark; in form of (a, b, c,)
     :param font_size: font size of little in watermark
+    :param font_file: font file location
     :param opacity: opacity of the watermark; range from 0 to 100
     :param owner_pass: owner password
     :param user_pass: user password
@@ -98,6 +100,8 @@ def security(input_pdf: str,
                         stroke_opacity=0.5,
                         fill_opacity=opacity,
                         align=1,
+                        fontfile=font_file,
+                        fontname="EXT_0"
                         )
         shape.commit()
     doc.save(output_pdf,
