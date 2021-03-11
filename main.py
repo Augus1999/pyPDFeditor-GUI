@@ -4,10 +4,9 @@ import os
 import sys
 import json
 import fitz
-import subprocess as sp
 from scripts import *
+from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon
-from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog, QColorDialog
 
 
@@ -25,8 +24,12 @@ class Main(MainR):
         self.colour_b = 0.1
         self.s_dir = content["start dir"]
         self.o_dir = content["save dir"]
+        self.js_dir = content["pdf.js dir"]
+        self.font_dir = content["font dir"]
         self.language = content["language"]
         self.ChildDialog = Setting()
+        self.Viewer = PDFViewR()
+        self.About = AboutR()
         self.tab1.book_list = list()
         self.tab2.book_list = list()
         self.tab3.book_list = list()
@@ -65,6 +68,7 @@ class Main(MainR):
         self.tab1.button2.clicked.connect(self.save1)
         self.tab1.button3.clicked.connect(self._set)
         self.tab1.button4.clicked.connect(self.clean1)
+        self.tab1.button5.clicked.connect(self._about)
         self.tab2.button1.clicked.connect(self.add2)
         self.tab2.button2.clicked.connect(self.save2)
         self.tab2.button3.clicked.connect(self._set)
@@ -92,6 +96,19 @@ class Main(MainR):
             LANGUAGE[self.language][2],
         )
 
+    def _about(self):
+        self.About.show()
+
+    def view(self, index=None, widget=None, f_name=None):
+        pdf_js = 'file:///{}/web/viewer.html'.format(
+            self.js_dir.replace("\\", "/")
+        )
+        if f_name is not None:
+            self.Viewer.view(f_name, pdf_js)
+        else:
+            self.Viewer.view(widget.book_list[index], pdf_js)
+        self.Viewer.show()
+
     def save1(self):
         if len(self.tab1.book_list) != 0:
             doc0 = fitz.open(self.tab1.book_list[0])
@@ -99,31 +116,31 @@ class Main(MainR):
                 doc = fitz.open(item)
                 doc0.insertPDF(doc)
                 doc.close()
-            file_name, ok = QFileDialog.getSaveFileName(None, "save",
-                                                        self.o_dir + "new.pdf",
-                                                        ".pdf")
+            file_name, ok = QFileDialog.getSaveFileName(
+                None,
+                "save",
+                self.o_dir + "new.pdf",
+                ".pdf",
+            )
             if ok:
                 doc0.save(file_name.replace('/', '\\'))
                 doc0.close()
-                sp.Popen(
-                    'explorer ' + file_name.replace('/', '\\'),
-                    shell=True,
-                    )
+                self.view(f_name=file_name)
 
     def save2(self):
         if len(self.tab2.book_list) != 0:
             doc0 = fitz.open(self.tab2.book_name)
             doc0.select(self.tab2.book_list)
-            file_name, ok = QFileDialog.getSaveFileName(None, "save",
-                                                        self.o_dir + "new.pdf",
-                                                        ".pdf")
+            file_name, ok = QFileDialog.getSaveFileName(
+                None,
+                "save",
+                self.o_dir + "new.pdf",
+                ".pdf",
+            )
             if ok:
                 doc0.save(file_name.replace('/', '\\'))
                 doc0.close()
-                sp.Popen(
-                    'explorer ' + file_name.replace('/', '\\'),
-                    shell=True,
-                    )
+                self.view(f_name=file_name)
 
     def save3(self):
         u_password = self.tab3.line1.text()
@@ -132,9 +149,12 @@ class Main(MainR):
         watermark = self.tab3.text.toPlainText()
         opacity = int(self.tab3.line4.text())/100
         if len(self.tab3.book_list) != 0:
-            file_name, ok = QFileDialog.getSaveFileName(None, "save",
-                                                        self.o_dir + "new.pdf",
-                                                        ".pdf")
+            file_name, ok = QFileDialog.getSaveFileName(
+                None,
+                "save",
+                self.o_dir + "new.pdf",
+                ".pdf",
+            )
             if ok:
                 security(
                     input_pdf=self.tab3.book_list[0],
@@ -148,25 +168,23 @@ class Main(MainR):
                     opacity=opacity,
                     owner_pass=o_password,
                     user_pass=u_password,
-                    font_file='C:\\Windows\\Fonts\\Deng.ttf')
+                    font_file=self.font_dir,
+                )
                 if self.tab3.check.isChecked():
-                    sp.Popen(
-                        'explorer '+file_name.replace('/', '\\'),
-                        shell=True,
-                        )
+                    self.view(f_name=file_name)
 
     def _set(self):
         self.ChildDialog.show()
         self.ChildDialog.signal.connect(self.get_data)
 
     def gen1(self, pos):
-        generate_menu(pos, self.tab1)
+        generate_menu(pos, self.tab1, main=self)
 
     def gen2(self, pos):
         generate_menu(pos, self.tab2, select=1, main=self)
 
     def gen3(self, pos):
-        generate_menu(pos, self.tab3)
+        generate_menu(pos, self.tab3, main=self)
 
     def add1(self):
         f_name, _ = QFileDialog.getOpenFileName(None, 'Open files',
@@ -197,7 +215,11 @@ class Main(MainR):
                     book_len = len(self.tab2.book_list)
                     reset_table(book_len, self.tab2)
                     for item in self.tab2.book_list:
-                        set_icon(self.tab2.book_name, self.tab2, item)
+                        set_icon(
+                            self.tab2.book_name,
+                            self.tab2,
+                            item,
+                        )
                 else:
                     pass
             else:
@@ -213,10 +235,12 @@ class Main(MainR):
     def clean2(self):
         clean(self.tab2)
 
-    def get_data(self, par1, par2, par3):
+    def get_data(self, par1, par2, par3, par4, par5):
         self.s_dir = par1
         self.o_dir = par2
-        self.language = par3
+        self.js_dir = par3
+        self.font_dir = par4
+        self.language = par5
         self._change()
 
     def get_colour(self):
@@ -241,7 +265,13 @@ class Setting(SettingR):
     """
     setting window
     """
-    signal = QtCore.pyqtSignal(str, str, str)
+    signal = QtCore.pyqtSignal(
+        str,
+        str,
+        str,
+        str,
+        str,
+    )
 
     def __init__(self):
         super(Setting, self).__init__()
@@ -250,48 +280,69 @@ class Setting(SettingR):
             )
         self.s_dir = content["start dir"]
         self.o_dir = content["save dir"]
+        self.js_dir = content["pdf.js dir"]
+        self.font_dir = content["font dir"]
         self.language = content["language"]
         self.line1.setText(self.s_dir)
         self.line2.setText(self.o_dir)
+        self.line3.setText(self.js_dir)
+        self.line4.setText(self.font_dir)
         self.button1.clicked.connect(self.select1)
         self.button2.clicked.connect(self.select2)
+        self.button4.clicked.connect(self.select3)
+        self.button5.clicked.connect(self.select4)
         self.button3.clicked.connect(self.out)
 
     def out(self):
-        self.signal.emit(self.line1.text(),
-                         self.line2.text(),
-                         self.combobox.currentText(),)
+        self.signal.emit(
+            self.line1.text(),
+            self.line2.text(),
+            self.line3.text(),
+            self.line4.text(),
+            self.combobox.currentText(),
+        )
         _settings = {
             "start dir": self.line1.text(),
             "save dir": self.line2.text(),
+            "pdf.js dir": self.line3.text(),
+            "font dir": self.line4.text(),
             "language": self.combobox.currentText()
         }
-        with open('settings\\main_settings.json', 'w', encoding='utf-8') as f:
+        with open(
+                'settings\\main_settings.json',
+                'w',
+                encoding='utf-8',
+        ) as f:
             json.dump(_settings, f)
         self.close()
 
     def select1(self):
-        root = QtWidgets.QFileDialog.getExistingDirectory(
-            None,
-            "choose",
-            self.s_dir,
-            )
-        if len(root) != 0:
-            self.line1.setText(root.replace('/', '\\'))
+        choose(self.line1, self.s_dir)
 
     def select2(self):
-        root = QtWidgets.QFileDialog.getExistingDirectory(
+        choose(self.line2, self.o_dir)
+
+    def select3(self):
+        choose(self.line3, os.getcwd())
+
+    def select4(self):
+        file_name, ok = QFileDialog.getOpenFileName(
             None,
-            "choose",
-            self.o_dir,
+            'Open files',
+            'C:\\Windows\\Fonts',
+            '',
+        )
+        if ok:
+            self.line4.setText(
+                file_name.replace('/', '\\')
             )
-        if len(root) != 0:
-            self.line2.setText(root.replace('/', '\\'))
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main = Main()
     _set = Setting()
+    _view = PDFViewR()
+    _about = AboutR()
     main.show()
     sys.exit(app.exec_())
