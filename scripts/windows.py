@@ -88,7 +88,7 @@ class MainR(QTabWidget):
             QtCore.QRect(self.width()-80, 20, 50, 50)
         )
         self.tab1.button3.setToolTip('Settings')
-        self.tab1.button4.setToolTip('about')
+        self.tab1.button5.setToolTip('about')
         self.tab1.table.setVerticalScrollBar(self.tab1.scroll_bar)
         self.tab1.table.setShowGrid(False)
         self.tab1.table.verticalHeader().setVisible(False)
