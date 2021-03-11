@@ -2,7 +2,7 @@
 # Author: Nianze A. TAO
 from PyQt5.QtGui import QIcon
 from .basics import MAX_WIDTH, MAX_HEIGHT
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets, QtWebEngineWidgets
 from PyQt5.QtWidgets import (QWidget, QTabWidget, QLabel, QTextEdit, QComboBox,
                              QLineEdit, QPushButton, QTableWidget, QCheckBox)
 
@@ -30,7 +30,7 @@ class MainR(QTabWidget):
         border-top:1px solid #E5E5E5;
         border-right:1px solid #E5E5E5}
         ''')
-        self.setWindowIcon(QtGui.QIcon('ico\\pdf icon.ico'))
+        self.setWindowIcon(QIcon('ico\\pdf icon.ico'))
         self.setTabShape(QTabWidget.Rounded)
         self.setIconSize(QtCore.QSize(40, 40))
         self.tab1 = QWidget()
@@ -52,10 +52,12 @@ class MainR(QTabWidget):
         self.tab1.button2 = QPushButton(self.tab1)
         self.tab1.button3 = QPushButton(self.tab1)
         self.tab1.button4 = QPushButton(self.tab1)
+        self.tab1.button5 = QPushButton(self.tab1)
         self.tab1.button1.setIcon(QIcon('ico\\new.png'))
         self.tab1.button2.setIcon(QIcon('ico\\disk.png'))
         self.tab1.button3.setIcon(QIcon('ico\\settings.png'))
         self.tab1.button4.setIcon(QIcon('ico\\clean.png'))
+        self.tab1.button5.setIcon(QIcon('ico\\about.png'))
         self.tab1.button1.setStyleSheet(
             'QPushButton{border-radius:10px}'
             'QPushButton:hover{background-color:#9DBDC6}'
@@ -69,10 +71,12 @@ class MainR(QTabWidget):
             'QPushButton{border-radius:10px}'
             'QPushButton:hover{background-color:#9DBDC6}'
         )
+        self.tab1.button5.setStyleSheet('border-radius:10px')
         self.tab1.button1.setIconSize(QtCore.QSize(60, 60))
         self.tab1.button2.setIconSize(QtCore.QSize(60, 60))
         self.tab1.button3.setIconSize(QtCore.QSize(60, 60))
         self.tab1.button4.setIconSize(QtCore.QSize(60, 60))
+        self.tab1.button5.setIconSize(QtCore.QSize(30, 30))
         self.tab1.table.setGeometry(
             QtCore.QRect(0, 100, self.width()-5, self.height()-170)
         )
@@ -80,6 +84,11 @@ class MainR(QTabWidget):
         self.tab1.button2.setGeometry(QtCore.QRect(120, 10, 80, 80))
         self.tab1.button3.setGeometry(QtCore.QRect(230, 10, 80, 80))
         self.tab1.button4.setGeometry(QtCore.QRect(400, 10, 80, 80))
+        self.tab1.button5.setGeometry(
+            QtCore.QRect(self.width()-80, 20, 50, 50)
+        )
+        self.tab1.button3.setToolTip('Settings')
+        self.tab1.button4.setToolTip('about')
         self.tab1.table.setVerticalScrollBar(self.tab1.scroll_bar)
         self.tab1.table.setShowGrid(False)
         self.tab1.table.verticalHeader().setVisible(False)
@@ -136,6 +145,7 @@ class MainR(QTabWidget):
         self.tab2.button2.setGeometry(QtCore.QRect(120, 10, 80, 80))
         self.tab2.button3.setGeometry(QtCore.QRect(230, 10, 80, 80))
         self.tab2.button4.setGeometry(QtCore.QRect(400, 10, 80, 80))
+        self.tab2.button3.setToolTip('Settings')
         self.tab2.table.setShowGrid(False)
         self.tab2.table.setVerticalScrollBar(self.tab2.scroll_bar)
         self.tab2.table.verticalHeader().setVisible(False)
@@ -209,6 +219,7 @@ class MainR(QTabWidget):
         self.tab3.button2.setIconSize(QtCore.QSize(60, 60))
         self.tab3.button3.setIconSize(QtCore.QSize(60, 60))
         self.tab3.button4.setIconSize(QtCore.QSize(30, 30))
+        self.tab3.button3.setToolTip('Settings')
         self.tab3.button1.setGeometry(QtCore.QRect(10, 10, 80, 80))
         self.tab3.button2.setGeometry(QtCore.QRect(120, 10, 80, 80))
         self.tab3.button3.setGeometry(QtCore.QRect(230, 10, 80, 80))
@@ -292,32 +303,43 @@ class SettingR(QWidget):
     """
     setting window
     """
-    signal = QtCore.pyqtSignal(str, str, list)
 
     def __init__(self):
         super(SettingR, self).__init__()
         self.setFixedSize(600, 400)
         self.setWindowTitle('Setting')
-        self.setWindowIcon(QtGui.QIcon('ico\\settings.png'))
+        self.setWindowIcon(QIcon('ico\\settings.png'))
         self.setStyleSheet('background-color: #FFFFFF')
         self.label1 = QLabel(self)
         self.label2 = QLabel(self)
+        self.label3 = QLabel(self)
+        self.label4 = QLabel(self)
         self.line1 = QLineEdit(self)
         self.line2 = QLineEdit(self)
+        self.line3 = QLineEdit(self)
+        self.line4 = QLineEdit(self)
         self.button1 = QPushButton(self)
         self.button2 = QPushButton(self)
         self.button3 = QPushButton(self)
+        self.button4 = QPushButton(self)
+        self.button5 = QPushButton(self)
         self.combobox = QComboBox(self)
         self.button1.setText('view')
         self.button2.setText('view')
         self.button3.setText('confirm')
+        self.button4.setText('view')
+        self.button5.setText('view')
         self.label1.setText('START DIR')
         self.label2.setText('SAVE DIR')
+        self.label3.setText('PDF.JS DIR')
+        self.label4.setText('FONT FILE')
         self.combobox.addItem('English')
         self.combobox.addItem('中文')
         self.combobox.addItem('日本語')
         self.label1.setStyleSheet('font-size:9pt;font-family:calibri')
         self.label2.setStyleSheet('font-size:9pt;font-family:calibri')
+        self.label3.setStyleSheet('font-size:9pt;font-family:calibri')
+        self.label4.setStyleSheet('font-size:9pt;font-family:calibri')
         self.combobox.setStyleSheet(
             'font-size:12pt;font-family:calibri;'
             'border-radius:2px;background-color:rgba(245,233,190,100)'
@@ -334,21 +356,81 @@ class SettingR(QWidget):
             'font-size:9t;background-color:rgba(255,255,255,80);'
             'color:#A77E5E;font-weight:bold;font-family:calibri'
         )
+        self.button4.setStyleSheet(
+            'font-size:9t;background-color:rgba(255,255,255,0);'
+            'color:#A77E5E;font-weight:bold;font-family:calibri'
+        )
+        self.button5.setStyleSheet(
+            'font-size:9t;background-color:rgba(255,255,255,0);'
+            'color:#A77E5E;font-weight:bold;font-family:calibri'
+        )
         self.line1.setStyleSheet(
             'font-size:12pt;border-radius:15px;;color:#363942;'
             'background-color:#F5DCE3;font-family:calibri'
         )
         self.line2.setStyleSheet(
             'font-size:12pt;border-radius:15px;color:#363942;'
+            'background-color:#F5DCE3;font-family:calibri'
+        )
+        self.line3.setStyleSheet(
+            'font-size:12pt;border-radius:15px;color:#363942;'
             'background-color:#F1F2FF;font-family:calibri'
+        )
+        self.line4.setStyleSheet(
+            'font-size:12pt;border-radius:15px;color:#363942;'
+            'background-color:#F3F2FF;font-family:calibri'
         )
         self.label1.setAlignment(QtCore.Qt.AlignCenter)
         self.label2.setAlignment(QtCore.Qt.AlignCenter)
+        self.label3.setAlignment(QtCore.Qt.AlignCenter)
+        self.label4.setAlignment(QtCore.Qt.AlignCenter)
         self.line1.setGeometry(QtCore.QRect(160, 20, 400, 40))
         self.line2.setGeometry(QtCore.QRect(160, 80, 400, 40))
+        self.line3.setGeometry(QtCore.QRect(160, 140, 400, 40))
+        self.line4.setGeometry(QtCore.QRect(160, 200, 400, 40))
         self.label1.setGeometry(QtCore.QRect(40, 20, 100, 40))
         self.label2.setGeometry(QtCore.QRect(40, 80, 100, 40))
+        self.label3.setGeometry(QtCore.QRect(40, 140, 100, 40))
+        self.label4.setGeometry(QtCore.QRect(40, 200, 100, 40))
         self.button1.setGeometry(QtCore.QRect(510, 20, 50, 40))
         self.button2.setGeometry(QtCore.QRect(510, 80, 50, 40))
         self.button3.setGeometry(QtCore.QRect(510, 350, 80, 40))
-        self.combobox.setGeometry(QtCore.QRect(370, 140, 180, 40))
+        self.button4.setGeometry(QtCore.QRect(510, 140, 50, 40))
+        self.button5.setGeometry(QtCore.QRect(510, 200, 50, 40))
+        self.combobox.setGeometry(QtCore.QRect(370, 260, 180, 40))
+
+
+class PDFViewR(QtWebEngineWidgets.QWebEngineView):
+    def __init__(self):
+        super(PDFViewR, self).__init__()
+        self.resize(800, 600)
+        self.setWindowTitle('PDF viewer')
+        self.setWindowIcon(QIcon('ico\\pdf icon.ico'))
+
+    def view(self, pdf_address, pdf_js_address):
+        self.load(QtCore.QUrl.fromUserInput(
+            '%s?file=%s' % (pdf_js_address, pdf_address))
+        )
+
+
+class AboutR(QWidget):
+    def __init__(self):
+        super(AboutR, self).__init__()
+        self.setFixedSize(500, 350)
+        self.setWindowTitle('About')
+        self.setWindowIcon(QIcon('ico\\about.png'))
+        self.setStyleSheet('background-color:#FFFFFF')
+        self.label = QLabel(self)
+        self.label.setText(
+            "<p>Author: Nianze A. Tao</p>"
+            "<p>MIT licence</p>"
+            "<p>Github page:</p>"
+            "<a href='https://github.com/Augus1999/pyPDFeditor-GUI'>"
+            "<small>https://github.com/Augus1999/pyPDFeditor-GUI</small></a>"
+        )
+        self.label.setStyleSheet('font-size:12pt;font-family:calibri')
+        self.label.setAlignment(QtCore.Qt.AlignTop)
+        self.label.setGeometry(
+            QtCore.QRect(20, 20, self.width()-40, self.height()-20)
+        )
+        self.label.setOpenExternalLinks(True)

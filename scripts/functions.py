@@ -15,7 +15,8 @@ def render_pdf_page(page_data):
     :return: a QPixmap
     """
     page_pixmap = page_data.get_pixmap(
-        matrix=fitz.Matrix(0.7, 0.7)
+        matrix=fitz.Matrix(0.7, 0.7),
+        clip=True,
     )
     if page_pixmap.alpha:
         image_format = QtGui.QImage.Format_RGBA8888
@@ -30,6 +31,7 @@ def render_pdf_page(page_data):
     )
     pixmap = QtGui.QPixmap()
     pixmap.convertFromImage(page_image)
+    del page_pixmap
     return pixmap
 
 
@@ -47,11 +49,13 @@ def pdf_split(input_pdf: str):
                              'Cannot open an encrypted file.',
                              QMessageBox.Yes | QMessageBox.No)
         doc0.close()
+        del doc0
         return book_list
     else:
         for page in range(doc0.pageCount):
             book_list.append(page)
         doc0.close()
+        del doc0
         return book_list
 
 
@@ -111,6 +115,7 @@ def security(input_pdf: str,
              permissions=perm,  # set permissions
              )
     doc.close()
+    del doc
 
 
 def setting_warning(set_file_name: str):
@@ -149,6 +154,7 @@ def set_icon(f_name, widget, _page=0):
                              'Cannot open an encrypted file.',
                              QMessageBox.Yes | QMessageBox.No)
         doc.close()
+        del doc
         return False
     else:
         page = doc.loadPage(_page)
@@ -182,6 +188,7 @@ def set_icon(f_name, widget, _page=0):
         except ZeroDivisionError:
             pass
         doc.close()
+        del doc
         return True
 
 
@@ -214,7 +221,7 @@ def delete(index, widget: QWidget):
     """
     if index >= 0:
         widget.book_list.pop(index)
-    widget.table.clear()
+    widget.table.clearContents()
     widget.x, widget.y = 0, 0
     if not widget.book_list:
         widget.crow = -1
@@ -248,7 +255,9 @@ def generate_menu(pos, widget: QWidget, select=0, main=None):
     if 0 <= index < len(widget.book_list):
         menu = QtWidgets.QMenu()
         item1 = menu.addAction('delete')
-        item2 = None
+        item2, item3 = None, None
+        if select == 0:
+            item3 = menu.addAction('view')
         if select == 1:
             item2 = menu.addAction('save as')
         action = menu.exec_(widget.table.mapToGlobal(pos))
@@ -262,6 +271,8 @@ def generate_menu(pos, widget: QWidget, select=0, main=None):
                 save_as(index, widget, main)
             except IndexError:
                 pass
+        if action == item3 and select == 0 and main is not None:
+            main.view(index, widget)
 
 
 def reset_table(book_len, widget: QWidget):
@@ -320,5 +331,20 @@ def clean(widget: QWidget):
     widget.book_list = list()
     widget.x, widget.y = 0, 0
     widget.col, widget.crow = -1, -1
-    widget.table.clear()
+    widget.table.clearContents()
     reset_table(book_len=1, widget=widget)
+
+
+def choose(widget, c_dir):
+    """
+
+    :param widget: widget
+    :param c_dir: from where to choose
+    """
+    root = QFileDialog.getExistingDirectory(
+        None,
+        "choose",
+        c_dir,
+    )
+    if len(root) != 0:
+        widget.setText(root.replace('/', '\\'))
