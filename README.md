@@ -15,7 +15,7 @@ Double click [setup.py](https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/s
 Download [PDF.js](https://mozilla.github.io/pdf.js/).
 
 ## Usage
-<img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/workspace.jpg" width="500" alt="add"/>
+<img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/workspace.jpg" width="600" alt="add"/>
 
 * <img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/new.png" width="30" alt="add"/> open a file
 * <img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/disk.png" width="30" alt="add"/> save
