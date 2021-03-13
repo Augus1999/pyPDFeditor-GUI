@@ -17,7 +17,7 @@ class Main(MainR):
     def __init__(self):
         super(Main, self).__init__()
         content = setting_warning(
-            os.getcwd()+'\\'+'settings\\main_settings.json',
+            os.getcwd()+'\\settings\\main_settings.json',
             )
         self.colour_r = 0.1
         self.colour_g = 0.1
@@ -102,7 +102,7 @@ class Main(MainR):
     def view(self, index=None, widget=None, f_name=None):
         pdf_js = 'file:///{}/web/viewer.html'.format(
             self.js_dir.replace("\\", "/")
-        )
+        )  # important format
         if f_name is not None:
             self.Viewer.view(f_name, pdf_js)
         else:
@@ -187,8 +187,12 @@ class Main(MainR):
         generate_menu(pos, self.tab3, main=self)
 
     def add1(self):
-        f_name, _ = QFileDialog.getOpenFileName(None, 'Open files',
-                                                self.s_dir, '(*.pdf)')
+        f_name, _ = QFileDialog.getOpenFileName(
+            None,
+            'Open files',
+            self.s_dir,
+            '(*.pdf)',
+        )
         if _ and (f_name.replace('/', '\\') not in self.tab1.book_list):
             self.tab1.book_list.append(f_name.replace('/', '\\'))
             book_len = len(self.tab1.book_list)
@@ -205,8 +209,12 @@ class Main(MainR):
 
     def add2(self):
         if len(self.tab2.book_list) == 0:
-            f_name, _ = QFileDialog.getOpenFileName(None, 'Open files',
-                                                    self.s_dir, '(*.pdf)')
+            f_name, _ = QFileDialog.getOpenFileName(
+                None,
+                'Open files',
+                self.s_dir,
+                '(*.pdf)',
+            )
             if _:
                 self.tab2.book_name = f_name.replace('/', '\\')
                 b_l = pdf_split(self.tab2.book_name)
@@ -276,7 +284,7 @@ class Setting(SettingR):
     def __init__(self):
         super(Setting, self).__init__()
         content = setting_warning(
-            os.getcwd()+'\\{}'.format('settings\\main_settings.json'),
+            os.getcwd()+'\\settings\\main_settings.json',
             )
         self.s_dir = content["start dir"]
         self.o_dir = content["save dir"]
@@ -287,6 +295,7 @@ class Setting(SettingR):
         self.line2.setText(self.o_dir)
         self.line3.setText(self.js_dir)
         self.line4.setText(self.font_dir)
+        self.combobox.setCurrentText(self.language)
         self.button1.clicked.connect(self.select1)
         self.button2.clicked.connect(self.select2)
         self.button4.clicked.connect(self.select3)
@@ -313,7 +322,13 @@ class Setting(SettingR):
                 'w',
                 encoding='utf-8',
         ) as f:
-            json.dump(_settings, f)
+            json.dump(
+                _settings,
+                f,
+                sort_keys=True,
+                indent=4,
+                separators=(",", ": "),
+            )
         self.close()
 
     def select1(self):
