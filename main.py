@@ -19,6 +19,7 @@ class Main(MainR):
         content = setting_warning(
             os.getcwd()+'\\settings\\main_settings.json',
             )
+        self.move(100, 20)
         self.colour_r = 0.1
         self.colour_g = 0.1
         self.colour_b = 0.1
@@ -34,6 +35,7 @@ class Main(MainR):
         self.tab2.book_list = list()
         self.tab3.book_list = list()
         self.tab2.book_name = str()
+        self.tab2.click_counts = 0
         self.tab1.x, self.tab1.y = 0, 0
         self.tab2.x, self.tab2.y = 0, 0
         self.tab3.x, self.tab3.y = 0, 0
@@ -73,6 +75,7 @@ class Main(MainR):
         self.tab2.button2.clicked.connect(self.save2)
         self.tab2.button3.clicked.connect(self._set)
         self.tab2.button4.clicked.connect(self.clean2)
+        self.tab2.button5.clicked.connect(self.table_flip)
         self.tab3.button1.clicked.connect(self.add3)
         self.tab3.button2.clicked.connect(self.save3)
         self.tab3.button3.clicked.connect(self._set)
@@ -112,8 +115,14 @@ class Main(MainR):
     def save1(self):
         if len(self.tab1.book_list) != 0:
             doc0 = fitz.open(self.tab1.book_list[0])
+            if not self.tab1.book_list[0].endswith('.pdf'):
+                pdf_bites0 = doc0.convert_to_pdf()
+                doc0 = fitz.open('pdf', pdf_bites0)
             for item in self.tab1.book_list[1:]:
                 doc = fitz.open(item)
+                if not item.endswith('.pdf'):
+                    pdf_bites = doc.convert_to_pdf()
+                    doc = fitz.open('pdf', pdf_bites)
                 doc0.insertPDF(doc)
                 doc.close()
             file_name, ok = QFileDialog.getSaveFileName(
@@ -191,7 +200,7 @@ class Main(MainR):
             None,
             'Open files',
             self.s_dir,
-            '(*.pdf)',
+            'PDF files (*.pdf);;images (*.png *.jpg)',
         )
         if _ and (f_name.replace('/', '\\') not in self.tab1.book_list):
             self.tab1.book_list.append(f_name.replace('/', '\\'))
@@ -267,6 +276,37 @@ class Main(MainR):
                     self.colour_b*255,
                 )
             )
+
+    def table_flip(self):
+        if self.tab2.click_counts % 2 == 0:
+            self.tab2.button5.setToolTip('multi-columns')
+            self.tab2.button5.setIcon(QIcon('ico\\col2.png'))
+            self.tab2.w_col = 2
+            self.tab2.table.clearContents()
+            self.tab2.x, self.tab2.y = 0, 0
+            book_len = len(self.tab2.book_list)
+            reset_table(book_len, self.tab2)
+            for item in self.tab2.book_list:
+                set_icon(
+                    self.tab2.book_name,
+                    self.tab2,
+                    item,
+                )
+        if self.tab2.click_counts % 2 == 1:
+            self.tab2.button5.setToolTip('dual columns')
+            self.tab2.button5.setIcon(QIcon('ico\\col1.png'))
+            self.tab2.w_col = COLUMN_COUNTER
+            self.tab2.table.clearContents()
+            self.tab2.x, self.tab2.y = 0, 0
+            book_len = len(self.tab2.book_list)
+            reset_table(book_len, self.tab2)
+            for item in self.tab2.book_list:
+                set_icon(
+                    self.tab2.book_name,
+                    self.tab2,
+                    item,
+                )
+        self.tab2.click_counts += 1
 
 
 class Setting(SettingR):
@@ -354,10 +394,28 @@ class Setting(SettingR):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    arg = sys.argv
+    app = QApplication(arg)
     main = Main()
     _set = Setting()
     _view = PDFViewR()
     _about = AboutR()
-    main.show()
+    try:
+        if arg[1] == '-m':
+            main.show()
+        if arg[1] == '-v':
+            try:
+                main.Viewer.resize(1200, 800)
+                main.view(f_name=arg[2])
+            except IndexError:
+                print('lose of file_name after -v')
+                exit()
+    except IndexError:
+        print('main.py [-m]\n'
+              '        [-v] [file_name]')
+        ans = input('start the main window? y/n\n>>>')
+        if ans == 'y':
+            main.show()
+        else:
+            exit()
     sys.exit(app.exec_())
