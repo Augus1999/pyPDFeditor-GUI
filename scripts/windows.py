@@ -117,10 +117,12 @@ class MainR(QTabWidget):
         self.tab2.button2 = QPushButton(self.tab2)
         self.tab2.button3 = QPushButton(self.tab2)
         self.tab2.button4 = QPushButton(self.tab2)
+        self.tab2.button5 = QPushButton(self.tab2)
         self.tab2.button1.setIcon(QIcon('ico\\new.png'))
         self.tab2.button2.setIcon(QIcon('ico\\disk.png'))
         self.tab2.button3.setIcon(QIcon('ico\\settings.png'))
         self.tab2.button4.setIcon(QIcon('ico\\clean.png'))
+        self.tab2.button5.setIcon(QIcon('ico\\col1.png'))
         self.tab2.button1.setStyleSheet(
             'QPushButton{border-radius:10px;}'
             'QPushButton:hover{background-color:#9DBDC6}'
@@ -134,10 +136,12 @@ class MainR(QTabWidget):
             'QPushButton{border-radius:10px}'
             'QPushButton:hover{background-color:#9DBDC6}'
         )
+        self.tab2.button5.setStyleSheet('border-radius:10px')
         self.tab2.button1.setIconSize(QtCore.QSize(60, 60))
         self.tab2.button2.setIconSize(QtCore.QSize(60, 60))
         self.tab2.button3.setIconSize(QtCore.QSize(60, 60))
         self.tab2.button4.setIconSize(QtCore.QSize(60, 60))
+        self.tab2.button5.setIconSize(QtCore.QSize(30, 30))
         self.tab2.table.setGeometry(
             QtCore.QRect(0, 100, self.width()-5, self.height()-170)
         )
@@ -145,7 +149,11 @@ class MainR(QTabWidget):
         self.tab2.button2.setGeometry(QtCore.QRect(120, 10, 80, 80))
         self.tab2.button3.setGeometry(QtCore.QRect(230, 10, 80, 80))
         self.tab2.button4.setGeometry(QtCore.QRect(400, 10, 80, 80))
+        self.tab2.button5.setGeometry(
+            QtCore.QRect(self.width() - 80, 20, 50, 50)
+        )
         self.tab2.button3.setToolTip('Settings')
+        self.tab2.button5.setToolTip('dual columns')
         self.tab2.table.setShowGrid(False)
         self.tab2.table.setVerticalScrollBar(self.tab2.scroll_bar)
         self.tab2.table.verticalHeader().setVisible(False)
@@ -401,6 +409,9 @@ class SettingR(QWidget):
 
 
 class PDFViewR(QtWebEngineWidgets.QWebEngineView):
+    """
+    PDF viewer window
+    """
     def __init__(self):
         super(PDFViewR, self).__init__()
         self.resize(800, 600)
@@ -414,6 +425,9 @@ class PDFViewR(QtWebEngineWidgets.QWebEngineView):
 
 
 class AboutR(QWidget):
+    """
+    about window
+    """
     def __init__(self):
         super(AboutR, self).__init__()
         self.setFixedSize(500, 350)
