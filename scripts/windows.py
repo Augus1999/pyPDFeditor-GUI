@@ -159,7 +159,7 @@ class MainR(QTabWidget):
         self.tab2.table.verticalHeader().setVisible(False)
         self.tab2.table.horizontalHeader().setVisible(False)
         self.tab2.table.setStyleSheet(
-            'QTableWidget{border:0px;background-color:#FFFFFF}'
+            'QTableWidget{border:0px;background-color:#FFFFFF;}'
         )
         self.tab2.table.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.tab2.table.setHorizontalScrollBarPolicy(
@@ -200,10 +200,12 @@ class MainR(QTabWidget):
         self.tab3.button2 = QPushButton(self.tab3)
         self.tab3.button3 = QPushButton(self.tab3)
         self.tab3.button4 = QPushButton(self.tab3)
+        self.tab3.button5 = QPushButton(self.tab3)
         self.tab3.button1.setIcon(QIcon('ico\\new.png'))
         self.tab3.button2.setIcon(QIcon('ico\\disk.png'))
         self.tab3.button3.setIcon(QIcon('ico\\settings.png'))
         self.tab3.button4.setIcon(QIcon('ico\\palette.png'))
+        self.tab3.button5.setIcon(QIcon('ico\\view.png'))
         self.tab3.button1.setStyleSheet(
             'QPushButton{border-radius:10px;}'
             'QPushButton:hover{background-color:rgba(10,10,10,30)}'
@@ -217,6 +219,10 @@ class MainR(QTabWidget):
             'QPushButton{border-radius:15px}'
             'QPushButton:hover{background-color:rgba(245,233,190,80)}'
         )
+        self.tab3.button5.setStyleSheet(
+            'QPushButton{border-radius:15px}'
+            'QPushButton:hover{background-color:rgba(245,233,190,80)}'
+        )
         self.tab3.scroll_bar = QtWidgets.QScrollBar(self.tab3)
         self.tab3.scroll_bar.setStyleSheet(
             'QScrollBar:vertical{width:15px;}'
@@ -227,16 +233,21 @@ class MainR(QTabWidget):
         self.tab3.button2.setIconSize(QtCore.QSize(60, 60))
         self.tab3.button3.setIconSize(QtCore.QSize(60, 60))
         self.tab3.button4.setIconSize(QtCore.QSize(30, 30))
+        self.tab3.button5.setIconSize(QtCore.QSize(30, 30))
         self.tab3.button3.setToolTip('Settings')
+        self.tab3.button4.setToolTip('colours')
+        self.tab3.button5.setToolTip('preview')
         self.tab3.button1.setGeometry(QtCore.QRect(10, 10, 80, 80))
         self.tab3.button2.setGeometry(QtCore.QRect(120, 10, 80, 80))
         self.tab3.button3.setGeometry(QtCore.QRect(230, 10, 80, 80))
         self.tab3.button4.setGeometry(QtCore.QRect(1042, 550, 40, 40))
+        self.tab3.button5.setGeometry(QtCore.QRect(1042, 600, 40, 40))
         self.tab3.text = QTextEdit(self.tab3)
         self.tab3.line1 = QLineEdit(self.tab3)
         self.tab3.line2 = QLineEdit(self.tab3)
         self.tab3.line3 = QLineEdit(self.tab3)
         self.tab3.line4 = QLineEdit(self.tab3)
+        self.tab3.line5 = QLineEdit(self.tab3)
         self.tab3.label1 = QLabel(self.tab3)
         self.tab3.label2 = QLabel(self.tab3)
         self.tab3.label3 = QLabel(self.tab3)
@@ -245,15 +256,19 @@ class MainR(QTabWidget):
         self.tab3.label6 = QLabel(self.tab3)
         self.tab3.label7 = QLabel(self.tab3)
         self.tab3.label8 = QLabel(self.tab3)
+        self.tab3.label9 = QLabel(self.tab3)
+        self.tab3.label10 = QLabel(self.tab3)
         self.tab3.text.setGeometry(QtCore.QRect(733, 360, 300, 120))
         self.tab3.line1.setGeometry(QtCore.QRect(733, 160, 300, 40))
         self.tab3.line2.setGeometry(QtCore.QRect(733, 240, 300, 40))
         self.tab3.line3.setGeometry(QtCore.QRect(952, 500, 40, 40))
         self.tab3.line4.setGeometry(QtCore.QRect(952, 550, 40, 40))
+        self.tab3.line5.setGeometry(QtCore.QRect(952, 600, 40, 40))
         self.tab3.line1.setPlaceholderText('user password here')
         self.tab3.line2.setPlaceholderText('owner password here')
         self.tab3.line3.setText('90')
         self.tab3.line4.setText('40')
+        self.tab3.line5.setText(' 0')
         self.tab3.text.setStyleSheet('font-size:14pt;border-radius:5px;'
                                      'background-color:rgba(245,233,190,80);'
                                      'color:#174c4f;font-family:calibri')
@@ -269,6 +284,9 @@ class MainR(QTabWidget):
         self.tab3.line4.setStyleSheet('font-size:12pt;border-radius:15px;'
                                       'background-color:#F1F3FF;'
                                       'color:#382513;font-family:calibri')
+        self.tab3.line5.setStyleSheet('font-size:12pt;border-radius:15px;'
+                                      'background-color:#F1F3FF;'
+                                      'color:#382513;font-family:calibri')
         self.tab3.label1.setStyleSheet('font-size:9pt;font-family:calibri')
         self.tab3.label2.setStyleSheet('font-size:9pt;font-family:calibri')
         self.tab3.label3.setStyleSheet('font-size:9pt;font-family:calibri')
@@ -277,6 +295,8 @@ class MainR(QTabWidget):
         self.tab3.label6.setStyleSheet('font-size:9pt;font-family:calibri')
         self.tab3.label7.setStyleSheet('font-size:9pt;font-family:calibri')
         self.tab3.label8.setStyleSheet('font-size:9pt;font-family:calibri')
+        self.tab3.label9.setStyleSheet('font-size:9pt;font-family:calibri')
+        self.tab3.label10.setStyleSheet('font-size:9pt;font-family:calibri')
         self.tab3.text.setVerticalScrollBar(self.tab3.scroll_bar)
         self.tab3.label1.setGeometry(QtCore.QRect(733, 100, 300, 40))
         self.tab3.label2.setGeometry(QtCore.QRect(733, 300, 300, 40))
@@ -285,7 +305,9 @@ class MainR(QTabWidget):
         self.tab3.label5.setGeometry(QtCore.QRect(880, 840, 160, 40))
         self.tab3.label6.setGeometry(QtCore.QRect(992, 550, 40, 40))
         self.tab3.label7.setGeometry(QtCore.QRect(850, 550, 100, 40))
-        self.tab3.label8.setGeometry(QtCore.QRect(733, 600, 300, 40))
+        self.tab3.label8.setGeometry(QtCore.QRect(733, 630, 300, 40))
+        self.tab3.label9.setGeometry(QtCore.QRect(850, 600, 100, 40))
+        self.tab3.label10.setGeometry(QtCore.QRect(992, 600, 40, 40))
         self.tab3.label1.setText('.'*10+'password'+'.'*10)
         self.tab3.label2.setText('.' * 10 + 'watermark' + '.' * 10)
         self.tab3.label3.setText('pt')
@@ -294,6 +316,8 @@ class MainR(QTabWidget):
         self.tab3.label6.setText('%')
         self.tab3.label7.setText('Opacity:')
         self.tab3.label8.setText('.'*50)
+        self.tab3.label9.setText('Rotation:')
+        self.tab3.label10.setText('°')
         self.tab3.label1.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label2.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label3.setAlignment(QtCore.Qt.AlignCenter)
@@ -302,6 +326,8 @@ class MainR(QTabWidget):
         self.tab3.label6.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label7.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label8.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab3.label9.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab3.label10.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.check = QCheckBox(self.tab3)
         self.tab3.check.setChecked(True)
         self.tab3.check.setGeometry(QtCore.QRect(1050, 840, 40, 40))

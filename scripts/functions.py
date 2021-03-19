@@ -63,7 +63,7 @@ def pdf_split(input_pdf: str):
 
 
 def security(input_pdf: str,
-             output_pdf: str,
+             output_pdf: (str, None,),
              text: str,
              rotate: int,
              colour: tuple,
@@ -71,21 +71,23 @@ def security(input_pdf: str,
              font_file: str,
              opacity=0.5,
              owner_pass='',
-             user_pass=''):
+             user_pass='',
+             save=True):
     """
     add password and/or watermark
 
     :param input_pdf: import file name
     :param output_pdf: export file name
     :param text: content of watermark
-    :param rotate: rotation angle of watermark; must be 0, 90, 180, 270, 360
+    :param rotate: rotation angle of watermark
     :param colour: colour of watermark; in form of (a, b, c,)
     :param font_size: font size of little in watermark
     :param font_file: font file location
     :param opacity: opacity of the watermark; range from 0 to 100
     :param owner_pass: owner password
     :param user_pass: user password
-    :return: None
+    :param save: bool, whether save or return doc
+    :return: None if save==True; fitz.doc if save==False
     """
     perm = int(
         fitz.PDF_PERM_ACCESSIBILITY  # always use this
@@ -102,29 +104,46 @@ def security(input_pdf: str,
             page.rect.width-10,
             page.rect.height-10,
         )
-        shape = page.newShape()
-        shape.insertTextbox(
-            r1,
+        pos = r1.tl
+        # shape = page.newShape()
+        # shape.insertTextbox(
+        #     r1,
+        #     text,
+        #     rotate=rotate,
+        #     color=colour,
+        #     fontsize=font_size,
+        #     stroke_opacity=0.5,
+        #     fill_opacity=opacity,
+        #     align=1,
+        #     fontfile=font_file,
+        #     fontname="EXT_0",
+        # )
+        # shape.commit()
+        page.insert_text(
+            pos,
             text,
-            rotate=rotate,
+            morph=(
+                pos,
+                fitz.Matrix(rotate),
+            ),
             color=colour,
             fontsize=font_size,
-            stroke_opacity=0.5,
             fill_opacity=opacity,
-            align=1,
             fontfile=font_file,
             fontname="EXT_0",
         )
-        shape.commit()
-    doc.save(
-        output_pdf,
-        encryption=encrypt_meth,  # set the encryption method
-        owner_pw=owner_pass,  # set the owner password
-        user_pw=user_pass,  # set the user password
-        permissions=perm,  # set permissions
-    )
-    doc.close()
-    del doc
+    if not save:
+        return doc
+    if save:
+        doc.save(
+            output_pdf,
+            encryption=encrypt_meth,  # set the encryption method
+            owner_pw=owner_pass,  # set the owner password
+            user_pw=user_pass,  # set the user password
+            permissions=perm,  # set permissions
+        )
+        doc.close()
+        del doc
 
 
 def setting_warning(set_file_name: str):
@@ -150,16 +169,22 @@ def setting_warning(set_file_name: str):
 
 def set_icon(f_name: str,
              widget: QWidget,
-             _page: int = 0):
+             _page: int = 0,
+             doc_=None):
     """
     add image of first page into table element
 
     :param f_name: import file name
     :param widget: widget
     :param _page: page index
+    :param doc_: doc
     :return: bool
     """
-    doc = fitz.open(f_name)
+    doc = None
+    if doc_ is None:
+        doc = fitz.open(f_name)
+    if doc_ is not None:
+        doc = doc_
     if doc.needsPass:
         QMessageBox.critical(
             None,
