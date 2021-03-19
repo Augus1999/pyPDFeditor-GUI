@@ -13,7 +13,7 @@ except ImportError:
             break
 _platform = platform.system()
 if _platform == 'Windows':
-    vbs_script = r'CreateObject("WScript.Shell").Run "pythonw main.py \c*",0'
+    vbs_script = r'CreateObject("WScript.Shell").Run "pythonw main.py -m",0'
     try:
         from win32com.shell import shell
     except ImportError:
