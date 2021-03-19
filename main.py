@@ -80,6 +80,7 @@ class Main(MainR):
         self.tab3.button2.clicked.connect(self.save3)
         self.tab3.button3.clicked.connect(self._set)
         self.tab3.button4.clicked.connect(self.get_colour)
+        self.tab3.button5.clicked.connect(self.preview)
         self._change()
 
     def _change(self):
@@ -154,6 +155,7 @@ class Main(MainR):
     def save3(self):
         u_password = self.tab3.line1.text()
         o_password = self.tab3.line2.text()
+        rotation = int(self.tab3.line5.text())
         font_size = int(self.tab3.line3.text())
         watermark = self.tab3.text.toPlainText()
         opacity = int(self.tab3.line4.text())/100
@@ -169,7 +171,7 @@ class Main(MainR):
                     input_pdf=self.tab3.book_list[0],
                     output_pdf=file_name.replace('/', '\\'),
                     text=watermark,
-                    rotate=0,
+                    rotate=rotation,
                     colour=(self.colour_r,
                             self.colour_g,
                             self.colour_b,),
@@ -307,6 +309,29 @@ class Main(MainR):
                     item,
                 )
         self.tab2.click_counts += 1
+
+    def preview(self):
+        rotation = int(self.tab3.line5.text())
+        font_size = int(self.tab3.line3.text())
+        watermark = self.tab3.text.toPlainText()
+        opacity = int(self.tab3.line4.text())/100
+        if len(self.tab3.book_list) != 0:
+            doc = security(
+                input_pdf=self.tab3.book_list[0],
+                output_pdf=None,
+                text=watermark,
+                rotate=rotation,
+                colour=(self.colour_r,
+                        self.colour_g,
+                        self.colour_b,),
+                font_size=font_size,
+                opacity=opacity,
+                font_file=self.font_dir,
+                save=False,
+            )
+            self.tab3.table.clear()
+            self.tab3.x, self.tab3.y = 0, 0
+            set_icon('', widget=self.tab3, doc_=doc)
 
 
 class Setting(SettingR):
