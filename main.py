@@ -17,7 +17,7 @@ class Main(MainR):
     def __init__(self):
         super(Main, self).__init__()
         content = setting_warning(
-            os.getcwd()+'\\settings\\main_settings.json',
+            'settings\\main_settings.json',
             )
         self.move(100, 20)
         self.colour_r = 0.1
@@ -202,10 +202,12 @@ class Main(MainR):
             None,
             'Open files',
             self.s_dir,
-            'PDF files (*.pdf);;images (*.png *.jpg)',
+            'PDF files (*.pdf);;images (*.png *.jpg *.jpeg *.bmp)',
         )
         if _ and (f_name.replace('/', '\\') not in self.tab1.book_list):
-            self.tab1.book_list.append(f_name.replace('/', '\\'))
+            self.tab1.book_list.append(
+                f_name.replace('/', '\\'),
+            )
             book_len = len(self.tab1.book_list)
             reset_table(book_len, self.tab1)
             self.tab1.table.clear()
@@ -254,7 +256,12 @@ class Main(MainR):
     def clean2(self):
         clean(self.tab2)
 
-    def get_data(self, par1, par2, par3, par4, par5):
+    def get_data(self,
+                 par1,
+                 par2,
+                 par3,
+                 par4,
+                 par5):
         self.s_dir = par1
         self.o_dir = par2
         self.js_dir = par3
@@ -329,9 +336,10 @@ class Main(MainR):
                 font_file=self.font_dir,
                 save=False,
             )
-            self.tab3.table.clear()
+            self.tab3.table.clearContents()
             self.tab3.x, self.tab3.y = 0, 0
             set_icon('', widget=self.tab3, doc_=doc)
+            del doc
 
 
 class Setting(SettingR):
@@ -349,7 +357,7 @@ class Setting(SettingR):
     def __init__(self):
         super(Setting, self).__init__()
         content = setting_warning(
-            os.getcwd()+'\\settings\\main_settings.json',
+            'settings\\main_settings.json',
             )
         self.s_dir = content["start dir"]
         self.o_dir = content["save dir"]
@@ -420,6 +428,12 @@ class Setting(SettingR):
 
 if __name__ == '__main__':
     arg = sys.argv
+    print(os.path.dirname(arg[0]))
+    os.chdir(
+        os.path.dirname(
+            arg[0],
+        ),
+    )
     app = QApplication(arg)
     main = Main()
     _set = Setting()
@@ -433,12 +447,16 @@ if __name__ == '__main__':
                 main.Viewer.resize(1200, 800)
                 main.view(f_name=arg[2])
             except IndexError:
-                print('lose of file_name after -v')
+                print(
+                    'lose of file_name after -v',
+                )
                 exit()
     except IndexError:
         print('main.py [-m]\n'
               '        [-v] [file_name]')
-        ans = input('start the main window? y/n\n>>>')
+        ans = input(
+            'start the main window? y/n\n>>>',
+        )
         if ans == 'y':
             main.show()
         else:
