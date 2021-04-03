@@ -12,7 +12,7 @@ This project is based on PyQt5 and PyMuPDF.
 * encrypte and add watermarks
 
 ## Install
-Double click [setup.py](https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/setup.py) or run ```python setup.py``` to install all required packages.
+Run ```pip install -r requirements.txt``` to install all required packages.
 
 Download [PDF.js](https://mozilla.github.io/pdf.js/).
 
