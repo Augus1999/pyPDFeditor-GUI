@@ -428,12 +428,12 @@ class Setting(SettingR):
 
 if __name__ == '__main__':
     arg = sys.argv
-    print(os.path.dirname(arg[0]))
-    os.chdir(
-        os.path.dirname(
-            arg[0],
-        ),
-    )
+    if arg[0] != 'main.py':
+        os.chdir(
+            os.path.dirname(
+                arg[0],
+            ),
+        )
     app = QApplication(arg)
     main = Main()
     _set = Setting()
