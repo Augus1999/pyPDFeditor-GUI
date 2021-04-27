@@ -3,8 +3,17 @@
 import os
 import fitz
 import json
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
+from PyQt5 import (
+    QtGui,
+    QtCore,
+    QtWidgets,
+)
+from PyQt5.QtWidgets import (
+    QFileDialog,
+    QMessageBox,
+    QWidget,
+)
+# Attention: ignore all warnings in fitz.open(.)
 
 
 def render_pdf_page(page_data):
@@ -69,10 +78,12 @@ def security(input_pdf: str,
              colour: tuple,
              font_size: int,
              font_file: str,
+             perm: int = 0,
              opacity=0.5,
              owner_pass='',
              user_pass='',
-             save=True):
+             save=True,
+             select=None):
     """
     add password and/or watermark
 
@@ -81,22 +92,20 @@ def security(input_pdf: str,
     :param text: content of watermark
     :param rotate: rotation angle of watermark
     :param colour: colour of watermark; in form of (a, b, c,)
-    :param font_size: font size of little in watermark
+    :param font_size: font size of letter in watermark
     :param font_file: font file location
+    :param perm: int; set permissions
     :param opacity: opacity of the watermark; range from 0 to 100
     :param owner_pass: owner password
     :param user_pass: user password
     :param save: bool, whether save or return doc
+    :param select: None or int;
     :return: None if save==True; fitz.doc if save==False
     """
-    perm = int(
-        fitz.PDF_PERM_ACCESSIBILITY  # always use this
-        | fitz.PDF_PERM_PRINT  # permit printing
-        | fitz.PDF_PERM_COPY  # permit copying
-        | fitz.PDF_PERM_ANNOTATE  # permit annotations
-    )
     encrypt_meth = fitz.PDF_ENCRYPT_AES_256  # strongest algorithm
     doc = fitz.open(input_pdf)
+    if select is not None:
+        doc.select([select])
     for page in doc:
         r1 = fitz.Rect(
             10,
@@ -104,39 +113,34 @@ def security(input_pdf: str,
             page.rect.width-10,
             page.rect.height-10,
         )
-        pos = r1.tl
-        # shape = page.newShape()
-        # shape.insertTextbox(
-        #     r1,
-        #     text,
-        #     rotate=rotate,
-        #     color=colour,
-        #     fontsize=font_size,
-        #     stroke_opacity=0.5,
-        #     fill_opacity=opacity,
-        #     align=1,
-        #     fontfile=font_file,
-        #     fontname="EXT_0",
-        # )
-        # shape.commit()
-        page.insert_text(
-            pos,
+        pos0 = fitz.Point(
+            page.rect.width//2,
+            page.rect.height//2,
+        )
+        shape = page.newShape()
+        shape.insertTextbox(
+            r1,
             text,
-            morph=(
-                pos,
-                fitz.Matrix(rotate),
-            ),
+            rotate=0,
             color=colour,
             fontsize=font_size,
+            stroke_opacity=0.5,
             fill_opacity=opacity,
+            align=1,
             fontfile=font_file,
             fontname="EXT_0",
+            morph=(
+                pos0,
+                fitz.Matrix(rotate)
+            ),
         )
+        shape.commit()
     if not save:
         return doc
     if save:
         doc.save(
             output_pdf,
+            garbage=1,  # remove unused objects
             encryption=encrypt_meth,  # set the encryption method
             owner_pw=owner_pass,  # set the owner password
             user_pw=user_pass,  # set the user password
@@ -154,7 +158,11 @@ def setting_warning(set_file_name: str):
     :return: a dist loaded from JSON file
     """
     try:
-        with open(set_file_name, 'r', encoding='utf-8') as f:
+        with open(
+                set_file_name,
+                'r',
+                encoding='utf-8',
+        ) as f:
             content = json.load(f)
         return content
     except FileNotFoundError:
@@ -168,7 +176,7 @@ def setting_warning(set_file_name: str):
 
 
 def set_icon(f_name: str,
-             widget: QWidget,
+             widget: QWidget.window,
              _page: int = 0,
              doc_=None):
     """
@@ -214,8 +222,14 @@ def set_icon(f_name: str,
                 QtCore.Qt.SmoothTransformation,
             ),
         )
-        label.setAlignment(QtCore.Qt.AlignCenter)
-        widget.table.setCellWidget(widget.x, widget.y, label)
+        label.setAlignment(
+            QtCore.Qt.AlignCenter,
+        )
+        widget.table.setCellWidget(
+            widget.x,
+            widget.y,
+            label,
+        )
         del label  # delete label (important)
         del _cover, scaled_width, scaled_height
         widget.crow, widget.col = widget.x, widget.y
@@ -436,7 +450,10 @@ def clean(widget: QWidget):
     widget.x, widget.y = 0, 0
     widget.col, widget.crow = -1, -1
     widget.table.clearContents()
-    reset_table(book_len=1, widget=widget)
+    reset_table(
+        book_len=1,
+        widget=widget,
+    )
 
 
 def extract_img(index: int,
@@ -461,7 +478,10 @@ def extract_img(index: int,
         )
         img_name = main.s_dir+'\\'+f_name
         # xref is inf[0]
-        img = fitz.Pixmap(doc, inf[0])
+        img = fitz.Pixmap(
+            doc,
+            inf[0],
+        )
         img.writePNG(img_name)
     QMessageBox.information(
         None,
@@ -488,4 +508,6 @@ def choose(widget: QWidget,
         c_dir,
     )
     if len(root) != 0:
-        widget.setText(root.replace('/', '\\'))
+        widget.setText(
+            root.replace('/', '\\'),
+        )

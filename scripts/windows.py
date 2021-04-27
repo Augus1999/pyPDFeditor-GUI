@@ -1,10 +1,26 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
 from PyQt5.QtGui import QIcon
-from .basics import MAX_WIDTH, MAX_HEIGHT
-from PyQt5 import QtGui, QtCore, QtWidgets, QtWebEngineWidgets
-from PyQt5.QtWidgets import (QWidget, QTabWidget, QLabel, QTextEdit, QComboBox,
-                             QLineEdit, QPushButton, QTableWidget, QCheckBox)
+from .basics import (
+    MAX_WIDTH,
+    MAX_HEIGHT,
+)
+from PyQt5 import (
+    QtCore,
+    QtWidgets,
+    QtWebEngineWidgets,
+)
+from PyQt5.QtWidgets import (
+    QWidget,
+    QTabWidget,
+    QLabel,
+    QTextEdit,
+    QComboBox,
+    QLineEdit,
+    QPushButton,
+    QTableWidget,
+    QCheckBox,
+)
 
 
 class MainR(QTabWidget):
@@ -24,13 +40,15 @@ class MainR(QTabWidget):
         min-width:40ex;
         padding:8px;
         font-size:20px;
-        font-family:calibri;}
+        font-family:Dengxian;}
         QTabBar::tab:selected{
         background-color:#FFFFFF;
         border-top:1px solid #E5E5E5;
         border-right:1px solid #E5E5E5}
         ''')
-        self.setWindowIcon(QIcon('ico\\pdf icon.ico'))
+        self.setWindowIcon(
+            QIcon('ico\\pdf icon.ico'),
+        )
         self.setTabShape(QTabWidget.Rounded)
         self.setIconSize(QtCore.QSize(40, 40))
         self.tab1 = QWidget()
@@ -80,16 +98,26 @@ class MainR(QTabWidget):
         self.tab1.table.setGeometry(
             QtCore.QRect(0, 100, self.width()-5, self.height()-170)
         )
-        self.tab1.button1.setGeometry(QtCore.QRect(10, 10, 80, 80))
-        self.tab1.button2.setGeometry(QtCore.QRect(120, 10, 80, 80))
-        self.tab1.button3.setGeometry(QtCore.QRect(230, 10, 80, 80))
-        self.tab1.button4.setGeometry(QtCore.QRect(400, 10, 80, 80))
+        self.tab1.button1.setGeometry(
+            QtCore.QRect(10, 10, 80, 80),
+        )
+        self.tab1.button2.setGeometry(
+            QtCore.QRect(120, 10, 80, 80),
+        )
+        self.tab1.button3.setGeometry(
+            QtCore.QRect(230, 10, 80, 80),
+        )
+        self.tab1.button4.setGeometry(
+            QtCore.QRect(400, 10, 80, 80),
+        )
         self.tab1.button5.setGeometry(
             QtCore.QRect(self.width()-80, 20, 50, 50)
         )
         self.tab1.button3.setToolTip('Settings')
         self.tab1.button5.setToolTip('about')
-        self.tab1.table.setVerticalScrollBar(self.tab1.scroll_bar)
+        self.tab1.table.setVerticalScrollBar(
+            self.tab1.scroll_bar,
+        )
         self.tab1.table.setShowGrid(False)
         self.tab1.table.verticalHeader().setVisible(False)
         self.tab1.table.horizontalHeader().setVisible(False)
@@ -102,7 +130,9 @@ class MainR(QTabWidget):
         self.tab1.table.setStyleSheet(
             'QTableWidget{border:0px;background-color:#FFFFFF};'
         )
-        self.tab1.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tab1.table.setContextMenuPolicy(
+            QtCore.Qt.CustomContextMenu,
+        )
         self.tab1.setStyleSheet('background-color:#DAEAEF')
 
     def tab2_init(self):
@@ -161,15 +191,21 @@ class MainR(QTabWidget):
         self.tab2.table.setStyleSheet(
             'QTableWidget{border:0px;background-color:#FFFFFF;}'
         )
-        self.tab2.table.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.tab2.table.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarAlwaysOn,
+        )
         self.tab2.table.setHorizontalScrollBarPolicy(
             QtCore.Qt.ScrollBarAlwaysOff
         )
         self.tab2.table.setEditTriggers(
             QtWidgets.QAbstractItemView.NoEditTriggers
         )
-        self.tab2.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.tab2.setStyleSheet('background-color:#DAEAEF')
+        self.tab2.table.setContextMenuPolicy(
+            QtCore.Qt.CustomContextMenu,
+        )
+        self.tab2.setStyleSheet(
+            'background-color:#DAEAEF',
+        )
 
     def tab3_init(self):
         self.tab3.table = QTableWidget(self.tab3)
@@ -201,11 +237,13 @@ class MainR(QTabWidget):
         self.tab3.button3 = QPushButton(self.tab3)
         self.tab3.button4 = QPushButton(self.tab3)
         self.tab3.button5 = QPushButton(self.tab3)
+        self.tab3.button6 = QPushButton(self.tab3)
         self.tab3.button1.setIcon(QIcon('ico\\new.png'))
         self.tab3.button2.setIcon(QIcon('ico\\disk.png'))
         self.tab3.button3.setIcon(QIcon('ico\\settings.png'))
         self.tab3.button4.setIcon(QIcon('ico\\palette.png'))
         self.tab3.button5.setIcon(QIcon('ico\\view.png'))
+        self.tab3.button6.setText('...')
         self.tab3.button1.setStyleSheet(
             'QPushButton{border-radius:10px;}'
             'QPushButton:hover{background-color:rgba(10,10,10,30)}'
@@ -223,6 +261,10 @@ class MainR(QTabWidget):
             'QPushButton{border-radius:15px}'
             'QPushButton:hover{background-color:rgba(245,233,190,80)}'
         )
+        self.tab3.button6.setStyleSheet(
+            'QPushButton{border-radius:15px}'
+            'QPushButton:hover{background-color:rgba(245,233,190,80)}'
+        )
         self.tab3.scroll_bar = QtWidgets.QScrollBar(self.tab3)
         self.tab3.scroll_bar.setStyleSheet(
             'QScrollBar:vertical{width:15px;}'
@@ -237,11 +279,13 @@ class MainR(QTabWidget):
         self.tab3.button3.setToolTip('Settings')
         self.tab3.button4.setToolTip('colours')
         self.tab3.button5.setToolTip('preview')
+        self.tab3.button6.setToolTip('more')
         self.tab3.button1.setGeometry(QtCore.QRect(10, 10, 80, 80))
         self.tab3.button2.setGeometry(QtCore.QRect(120, 10, 80, 80))
         self.tab3.button3.setGeometry(QtCore.QRect(230, 10, 80, 80))
         self.tab3.button4.setGeometry(QtCore.QRect(1042, 550, 40, 40))
         self.tab3.button5.setGeometry(QtCore.QRect(1042, 600, 40, 40))
+        self.tab3.button6.setGeometry(QtCore.QRect(1080, 760, 40, 40))
         self.tab3.text = QTextEdit(self.tab3)
         self.tab3.line1 = QLineEdit(self.tab3)
         self.tab3.line2 = QLineEdit(self.tab3)
@@ -258,6 +302,8 @@ class MainR(QTabWidget):
         self.tab3.label8 = QLabel(self.tab3)
         self.tab3.label9 = QLabel(self.tab3)
         self.tab3.label10 = QLabel(self.tab3)
+        self.tab3.label11 = QLabel(self.tab3)
+        self.tab3.label12 = QLabel(self.tab3)
         self.tab3.text.setGeometry(QtCore.QRect(733, 360, 300, 120))
         self.tab3.line1.setGeometry(QtCore.QRect(733, 160, 300, 40))
         self.tab3.line2.setGeometry(QtCore.QRect(733, 240, 300, 40))
@@ -297,6 +343,8 @@ class MainR(QTabWidget):
         self.tab3.label8.setStyleSheet('font-size:9pt;font-family:calibri')
         self.tab3.label9.setStyleSheet('font-size:9pt;font-family:calibri')
         self.tab3.label10.setStyleSheet('font-size:9pt;font-family:calibri')
+        self.tab3.label11.setStyleSheet('font-size:9pt;font-family:calibri')
+        self.tab3.label12.setStyleSheet('font-size:9pt;font-family:calibri')
         self.tab3.text.setVerticalScrollBar(self.tab3.scroll_bar)
         self.tab3.label1.setGeometry(QtCore.QRect(733, 100, 300, 40))
         self.tab3.label2.setGeometry(QtCore.QRect(733, 300, 300, 40))
@@ -308,6 +356,8 @@ class MainR(QTabWidget):
         self.tab3.label8.setGeometry(QtCore.QRect(733, 630, 300, 40))
         self.tab3.label9.setGeometry(QtCore.QRect(850, 600, 100, 40))
         self.tab3.label10.setGeometry(QtCore.QRect(992, 600, 40, 40))
+        self.tab3.label11.setGeometry(QtCore.QRect(880, 800, 160, 40))
+        self.tab3.label12.setGeometry(QtCore.QRect(880, 760, 160, 40))
         self.tab3.label1.setText('.'*10+'password'+'.'*10)
         self.tab3.label2.setText('.' * 10 + 'watermark' + '.' * 10)
         self.tab3.label3.setText('pt')
@@ -318,6 +368,8 @@ class MainR(QTabWidget):
         self.tab3.label8.setText('.'*50)
         self.tab3.label9.setText('Rotation:')
         self.tab3.label10.setText('°')
+        self.tab3.label11.setText('Preview Mode')
+        self.tab3.label12.setText('Edit Restriction')
         self.tab3.label1.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label2.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label3.setAlignment(QtCore.Qt.AlignCenter)
@@ -328,9 +380,17 @@ class MainR(QTabWidget):
         self.tab3.label8.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label9.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label10.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab3.label11.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab3.label12.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.check = QCheckBox(self.tab3)
+        self.tab3.check1 = QCheckBox(self.tab3)
+        self.tab3.check2 = QCheckBox(self.tab3)
         self.tab3.check.setChecked(True)
+        self.tab3.check1.setChecked(False)
+        self.tab3.check2.setChecked(False)
         self.tab3.check.setGeometry(QtCore.QRect(1050, 840, 40, 40))
+        self.tab3.check1.setGeometry(QtCore.QRect(1050, 800, 40, 40))
+        self.tab3.check2.setGeometry(QtCore.QRect(1050, 760, 40, 40))
 
 
 class SettingR(QWidget):
@@ -342,8 +402,12 @@ class SettingR(QWidget):
         super(SettingR, self).__init__()
         self.setFixedSize(600, 400)
         self.setWindowTitle('Setting')
-        self.setWindowIcon(QIcon('ico\\settings.png'))
-        self.setStyleSheet('background-color: #FFFFFF')
+        self.setWindowIcon(
+            QIcon('ico\\settings.png'),
+        )
+        self.setStyleSheet(
+            'background-color:#FFFFFF',
+        )
         self.label1 = QLabel(self)
         self.label2 = QLabel(self)
         self.label3 = QLabel(self)
@@ -360,7 +424,7 @@ class SettingR(QWidget):
         self.combobox = QComboBox(self)
         self.button1.setText('view')
         self.button2.setText('view')
-        self.button3.setText('confirm')
+        self.button3.setText('Apply')
         self.button4.setText('view')
         self.button5.setText('view')
         self.label1.setText('START DIR')
@@ -370,10 +434,18 @@ class SettingR(QWidget):
         self.combobox.addItem('English')
         self.combobox.addItem('中文')
         self.combobox.addItem('日本語')
-        self.label1.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.label2.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.label3.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.label4.setStyleSheet('font-size:9pt;font-family:calibri')
+        self.label1.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.label2.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.label3.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.label4.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
         self.combobox.setStyleSheet(
             'font-size:12pt;font-family:calibri;'
             'border-radius:2px;background-color:rgba(245,233,190,100)'
@@ -442,7 +514,9 @@ class PDFViewR(QtWebEngineWidgets.QWebEngineView):
         super(PDFViewR, self).__init__()
         self.resize(800, 600)
         self.setWindowTitle('PDF viewer')
-        self.setWindowIcon(QIcon('ico\\pdf icon.ico'))
+        self.setWindowIcon(
+            QIcon('ico\\pdf icon.ico'),
+        )
 
     def view(self, pdf_address, pdf_js_address):
         self.load(QtCore.QUrl.fromUserInput(
@@ -468,9 +542,106 @@ class AboutR(QWidget):
             "<a href='https://github.com/Augus1999/pyPDFeditor-GUI'>"
             "<small>https://github.com/Augus1999/pyPDFeditor-GUI</small></a>"
         )
-        self.label.setStyleSheet('font-size:12pt;font-family:calibri')
+        self.label.setStyleSheet(
+            'font-size:12pt;font-family:calibri',
+        )
         self.label.setAlignment(QtCore.Qt.AlignTop)
         self.label.setGeometry(
             QtCore.QRect(20, 20, self.width()-40, self.height()-20)
         )
         self.label.setOpenExternalLinks(True)
+
+
+class PermMenuR(QWidget):
+    """
+    permission setting menu window
+    """
+    def __init__(self):
+        super(PermMenuR, self).__init__()
+        self.setFixedSize(400, 240)
+        self.setWindowTitle(' ')
+        self.setWindowIcon(QIcon('ico\\tab3.png'))
+        self.setStyleSheet('background-color:#FFFFFF')
+        self.check1 = QCheckBox(self)
+        self.check2 = QCheckBox(self)
+        self.check3 = QCheckBox(self)
+        self.check4 = QCheckBox(self)
+        self.check5 = QCheckBox(self)
+        self.check6 = QCheckBox(self)
+        self.check7 = QCheckBox(self)
+        self.check8 = QCheckBox(self)
+        self.label1 = QLabel(self)
+        self.label2 = QLabel(self)
+        self.label3 = QLabel(self)
+        self.label4 = QLabel(self)
+        self.label5 = QLabel(self)
+        self.label6 = QLabel(self)
+        self.label7 = QLabel(self)
+        self.label8 = QLabel(self)
+        self.button = QPushButton(self)
+        self.button.setText('Apply')
+        self.label1.setText('permit print')
+        self.label2.setText('allow modify')
+        self.label3.setText('allow copy')
+        self.label4.setText('allow annotate')
+        self.label5.setText('allow fill in form')
+        self.label6.setText('access content')
+        self.label7.setText('allow page edit')
+        self.label8.setText('permit HD print')
+        self.label1.setAlignment(QtCore.Qt.AlignLeft)
+        self.label2.setAlignment(QtCore.Qt.AlignLeft)
+        self.label3.setAlignment(QtCore.Qt.AlignLeft)
+        self.label4.setAlignment(QtCore.Qt.AlignLeft)
+        self.label5.setAlignment(QtCore.Qt.AlignLeft)
+        self.label6.setAlignment(QtCore.Qt.AlignLeft)
+        self.label7.setAlignment(QtCore.Qt.AlignLeft)
+        self.label8.setAlignment(QtCore.Qt.AlignLeft)
+        self.button.setGeometry(QtCore.QRect(300, 180, 80, 40))
+        self.check1.setGeometry(QtCore.QRect(20, 20, 40, 40))
+        self.check2.setGeometry(QtCore.QRect(20, 60, 40, 40))
+        self.check3.setGeometry(QtCore.QRect(20, 100, 40, 40))
+        self.check4.setGeometry(QtCore.QRect(20, 140, 40, 40))
+        self.check5.setGeometry(QtCore.QRect(220, 20, 40, 40))
+        self.check6.setGeometry(QtCore.QRect(220, 60, 40, 40))
+        self.check7.setGeometry(QtCore.QRect(220, 100, 40, 40))
+        self.check8.setGeometry(QtCore.QRect(220, 140, 40, 40))
+        self.label1.setGeometry(QtCore.QRect(50, 25, 120, 40))
+        self.label2.setGeometry(QtCore.QRect(50, 65, 120, 40))
+        self.label3.setGeometry(QtCore.QRect(50, 105, 120, 40))
+        self.label4.setGeometry(QtCore.QRect(50, 145, 120, 40))
+        self.label5.setGeometry(QtCore.QRect(250, 25, 120, 40))
+        self.label6.setGeometry(QtCore.QRect(250, 65, 120, 40))
+        self.label7.setGeometry(QtCore.QRect(250, 105, 120, 40))
+        self.label8.setGeometry(QtCore.QRect(250, 145, 120, 40))
+        self.button.setStyleSheet(
+            'font-size:9t;background-color:rgba(255,255,255,80);'
+            'color:#A77E5E;font-weight:bold;font-family:calibri'
+        )
+        self.label1.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.label2.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.label3.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.label4.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.label5.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.label6.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.label7.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.label8.setStyleSheet(
+            'font-size:9pt;font-family:calibri',
+        )
+        self.check1.setChecked(True)
+        self.check5.setChecked(True)
+        self.check6.setChecked(True)
+        self.check8.setChecked(True)

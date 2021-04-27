@@ -7,7 +7,12 @@ import fitz
 from scripts import *
 from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QFileDialog, QColorDialog
+from PyQt5.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QColorDialog,
+)
+# Attention: ignore all warnings in fitz.open(.)
 
 
 class Main(MainR):
@@ -23,12 +28,14 @@ class Main(MainR):
         self.colour_r = 0.1
         self.colour_g = 0.1
         self.colour_b = 0.1
+        self.perm_int = 4028
         self.s_dir = content["start dir"]
         self.o_dir = content["save dir"]
         self.js_dir = content["pdf.js dir"]
         self.font_dir = content["font dir"]
         self.language = content["language"]
-        self.ChildDialog = Setting()
+        self.SettingCD = Setting()
+        self.PermMenuCD = PermMenu()
         self.Viewer = PDFViewR()
         self.About = AboutR()
         self.tab1.book_list = list()
@@ -81,6 +88,11 @@ class Main(MainR):
         self.tab3.button3.clicked.connect(self._set)
         self.tab3.button4.clicked.connect(self.get_colour)
         self.tab3.button5.clicked.connect(self.preview)
+        self.tab3.line3.returnPressed.connect(self.preview)
+        self.tab3.line4.returnPressed.connect(self.preview)
+        self.tab3.line5.returnPressed.connect(self.preview)
+        self.tab3.check1.stateChanged.connect(self.enable_preview)
+        self.tab3.check2.stateChanged.connect(self.enable_perm_set)
         self._change()
 
     def _change(self):
@@ -100,17 +112,39 @@ class Main(MainR):
             LANGUAGE[self.language][2],
         )
 
+    def enable_preview(self):
+        if self.tab3.check1.isChecked():
+            self.tab3.text.textChanged.connect(self.preview)
+        else:
+            self.tab3.text.textChanged.disconnect(self.preview)
+
+    def enable_perm_set(self):
+        if self.tab3.check2.isChecked():
+            self.tab3.button6.clicked.connect(self._perm_set)
+        else:
+            self.tab3.button6.clicked.disconnect(self._perm_set)
+            self.perm_int = 4028
+
     def _about(self):
         self.About.show()
 
-    def view(self, index=None, widget=None, f_name=None):
+    def view(self,
+             index=None,
+             widget=None,
+             f_name=None):
         pdf_js = 'file:///{}/web/viewer.html'.format(
             self.js_dir.replace("\\", "/")
         )  # important format
         if f_name is not None:
-            self.Viewer.view(f_name, pdf_js)
+            self.Viewer.view(
+                f_name,
+                pdf_js,
+            )
         else:
-            self.Viewer.view(widget.book_list[index], pdf_js)
+            self.Viewer.view(
+                widget.book_list[index],
+                pdf_js,
+            )
         self.Viewer.show()
 
     def save1(self):
@@ -180,13 +214,14 @@ class Main(MainR):
                     owner_pass=o_password,
                     user_pass=u_password,
                     font_file=self.font_dir,
+                    perm=self.perm_int,
                 )
                 if self.tab3.check.isChecked():
                     self.view(f_name=file_name)
 
     def _set(self):
-        self.ChildDialog.show()
-        self.ChildDialog.signal.connect(self.get_data)
+        self.SettingCD.show()
+        self.SettingCD.signal.connect(self.get_data)
 
     def gen1(self, pos):
         generate_menu(pos, self.tab1, main=self)
@@ -229,7 +264,10 @@ class Main(MainR):
                 '(*.pdf)',
             )
             if _:
-                self.tab2.book_name = f_name.replace('/', '\\')
+                self.tab2.book_name = f_name.replace(
+                    '/',
+                    '\\',
+                )
                 b_l = pdf_split(self.tab2.book_name)
                 if len(b_l) != 0:
                     self.tab2.book_list = b_l
@@ -269,6 +307,10 @@ class Main(MainR):
         self.language = par5
         self._change()
 
+    def get_perm_para(self,
+                      par):
+        self.perm_int = par
+
     def get_colour(self):
         _colour = QColorDialog.getColor()
         if _colour.isValid():
@@ -285,6 +327,12 @@ class Main(MainR):
                     self.colour_b*255,
                 )
             )
+            if self.tab3.check1.isChecked():
+                self.preview()
+
+    def _perm_set(self):
+        self.PermMenuCD.show()
+        self.PermMenuCD.signal.connect(self.get_perm_para)
 
     def table_flip(self):
         if self.tab2.click_counts % 2 == 0:
@@ -322,7 +370,7 @@ class Main(MainR):
         font_size = int(self.tab3.line3.text())
         watermark = self.tab3.text.toPlainText()
         opacity = int(self.tab3.line4.text())/100
-        if len(self.tab3.book_list) != 0:
+        if len(self.tab3.book_list) != 0 and watermark != '':
             doc = security(
                 input_pdf=self.tab3.book_list[0],
                 output_pdf=None,
@@ -335,6 +383,7 @@ class Main(MainR):
                 opacity=opacity,
                 font_file=self.font_dir,
                 save=False,
+                select=0,
             )
             self.tab3.table.clearContents()
             self.tab3.x, self.tab3.y = 0, 0
@@ -422,8 +471,40 @@ class Setting(SettingR):
         )
         if ok:
             self.line4.setText(
-                file_name.replace('/', '\\')
+                file_name.replace('/', '\\'),
             )
+
+
+class PermMenu(PermMenuR):
+    """
+    permission setting menu window
+    """
+    signal = QtCore.pyqtSignal(int)
+
+    def __init__(self):
+        super(PermMenu, self).__init__()
+        self.button.clicked.connect(self.out)
+
+    def out(self):
+        perm_int = 0
+        if self.check1.isChecked():
+            perm_int += fitz.PDF_PERM_PRINT
+        if self.check2.isChecked():
+            perm_int += fitz.PDF_PERM_MODIFY
+        if self.check3.isChecked():
+            perm_int += fitz.PDF_PERM_COPY
+        if self.check4.isChecked():
+            perm_int += fitz.PDF_PERM_ANNOTATE
+        if self.check5.isChecked():
+            perm_int += fitz.PDF_PERM_FORM
+        if self.check6.isChecked():
+            perm_int += fitz.PDF_PERM_ACCESSIBILITY
+        if self.check7.isChecked():
+            perm_int += fitz.PDF_PERM_ASSEMBLE
+        if self.check8.isChecked():
+            perm_int += fitz.PDF_PERM_PRINT_HQ
+        self.signal.emit(perm_int)
+        self.close()
 
 
 if __name__ == '__main__':
