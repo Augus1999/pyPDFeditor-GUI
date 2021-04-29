@@ -5,7 +5,7 @@ import sys
 import json
 import fitz
 from scripts import *
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QApplication,
@@ -110,6 +110,11 @@ class Main(MainR):
             self.tab3,
             QIcon('ico\\tab3.png'),
             LANGUAGE[self.language][2],
+        )
+        font = QtGui.QFontDatabase.addApplicationFont(self.font_dir)
+        font_family = QtGui.QFontDatabase.applicationFontFamilies(font)
+        self.setStyleSheet(
+            TAB_STYLE.format(font_family[0]),
         )
 
     def enable_preview(self):
@@ -520,26 +525,9 @@ if __name__ == '__main__':
     _set = Setting()
     _view = PDFViewR()
     _about = AboutR()
-    try:
-        if arg[1] == '-m':
-            main.show()
-        if arg[1] == '-v':
-            try:
-                main.Viewer.resize(1200, 800)
-                main.view(f_name=arg[2])
-            except IndexError:
-                print(
-                    'lose of file_name after -v',
-                )
-                exit()
-    except IndexError:
-        print('main.py [-m]\n'
-              '        [-v] [file_name]')
-        ans = input(
-            'start the main window? y/n\n>>>',
-        )
-        if ans == 'y':
-            main.show()
-        else:
-            exit()
+    if len(arg) == 1:
+        main.show()
+    if len(arg) == 2:
+        main.Viewer.resize(1200, 800)
+        main.view(f_name=arg[1])
     sys.exit(app.exec_())

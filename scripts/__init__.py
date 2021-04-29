@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
+from .styleSheets import TAB_STYLE
 from .basics import (
     COLUMN_COUNTER,
     LANGUAGE,
@@ -38,5 +39,6 @@ __all__ = [
     "PDFViewR",
     "choose",
     "AboutR",
-    "PermMenuR"
+    "PermMenuR",
+    "TAB_STYLE"
 ]

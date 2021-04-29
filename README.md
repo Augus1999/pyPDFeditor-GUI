@@ -20,9 +20,9 @@ Download [PDF.js](https://mozilla.github.io/pdf.js/).
 <img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/workspace.jpg" width="600" alt="add"/>
 
 ### Commond line
-```python main.py -m```: open the main window
+```python main.py```: open the main window
 
-```python main.py -v file_name```: open pdf file in viewer window
+```python main.py "file_name"```: open pdf file in viewer window
 ### GUI
 * <img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/new.png" width="30" alt="add"/> open a file
 * <img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/ico/disk.png" width="30" alt="add"/> save

@@ -5,6 +5,24 @@ from .basics import (
     MAX_WIDTH,
     MAX_HEIGHT,
 )
+from .styleSheets import (
+    SCROLL_BAR_STYLE,
+    COMBO_BOX_STYLE,
+    LINE_EDIT_STYLE1,
+    LINE_EDIT_STYLE2,
+    TEXTEDIT_STYlE,
+    BUTTON_STYLE1,
+    BUTTON_STYLE2,
+    BUTTON_STYLE3,
+    BUTTON_STYLE4,
+    BUTTON_STYLE5,
+    BUTTON_STYLE6,
+    TABLE_STYLE1,
+    TABLE_STYLE2,
+    LABEL_STYLE,
+    BGC_STYLE1,
+    BGC_STYLE2,
+)
 from PyQt5 import (
     QtCore,
     QtWidgets,
@@ -31,21 +49,6 @@ class MainR(QTabWidget):
         super(MainR, self).__init__()
         self.setFixedSize(MAX_WIDTH, MAX_HEIGHT)
         self.setWindowTitle('PDF Editor')
-        self.setStyleSheet('''
-        QTabBar::tab{
-        border:none;
-        border-bottom-color:#FFFFFF;
-        border-top-right-radius:20px;
-        border-bottom-right-radius:20px;
-        min-width:40ex;
-        padding:8px;
-        font-size:20px;
-        font-family:Dengxian;}
-        QTabBar::tab:selected{
-        background-color:#FFFFFF;
-        border-top:1px solid #E5E5E5;
-        border-right:1px solid #E5E5E5}
-        ''')
         self.setWindowIcon(
             QIcon('ico\\pdf icon.ico'),
         )
@@ -61,11 +64,7 @@ class MainR(QTabWidget):
     def tab1_init(self):
         self.tab1.table = QTableWidget(self.tab1)
         self.tab1.scroll_bar = QtWidgets.QScrollBar(self.tab1)
-        self.tab1.scroll_bar.setStyleSheet(
-            'QScrollBar:vertical{width:15px}'
-            'QScrollBar::handle:vertical{background-color:#F1F1FF;'
-            'border-radius:1px;min-height:45px}'
-        )
+        self.tab1.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE)
         self.tab1.button1 = QPushButton(self.tab1)
         self.tab1.button2 = QPushButton(self.tab1)
         self.tab1.button3 = QPushButton(self.tab1)
@@ -76,20 +75,11 @@ class MainR(QTabWidget):
         self.tab1.button3.setIcon(QIcon('ico\\settings.png'))
         self.tab1.button4.setIcon(QIcon('ico\\clean.png'))
         self.tab1.button5.setIcon(QIcon('ico\\about.png'))
-        self.tab1.button1.setStyleSheet(
-            'QPushButton{border-radius:10px}'
-            'QPushButton:hover{background-color:#9DBDC6}'
-        )
-        self.tab1.button2.setStyleSheet(
-            'QPushButton{border-radius:10px}'
-            'QPushButton:hover{background-color:#9DBDC6}'
-        )
-        self.tab1.button3.setStyleSheet('border-radius:10px')
-        self.tab1.button4.setStyleSheet(
-            'QPushButton{border-radius:10px}'
-            'QPushButton:hover{background-color:#9DBDC6}'
-        )
-        self.tab1.button5.setStyleSheet('border-radius:10px')
+        self.tab1.button1.setStyleSheet(BUTTON_STYLE1)
+        self.tab1.button2.setStyleSheet(BUTTON_STYLE1)
+        self.tab1.button3.setStyleSheet(BUTTON_STYLE6)
+        self.tab1.button4.setStyleSheet(BUTTON_STYLE1)
+        self.tab1.button5.setStyleSheet(BUTTON_STYLE6)
         self.tab1.button1.setIconSize(QtCore.QSize(60, 60))
         self.tab1.button2.setIconSize(QtCore.QSize(60, 60))
         self.tab1.button3.setIconSize(QtCore.QSize(60, 60))
@@ -127,22 +117,16 @@ class MainR(QTabWidget):
         self.tab1.table.setEditTriggers(
             QtWidgets.QAbstractItemView.NoEditTriggers
         )
-        self.tab1.table.setStyleSheet(
-            'QTableWidget{border:0px;background-color:#FFFFFF};'
-        )
+        self.tab1.table.setStyleSheet(TABLE_STYLE1)
         self.tab1.table.setContextMenuPolicy(
             QtCore.Qt.CustomContextMenu,
         )
-        self.tab1.setStyleSheet('background-color:#DAEAEF')
+        self.tab1.setStyleSheet(BGC_STYLE1)
 
     def tab2_init(self):
         self.tab2.table = QTableWidget(self.tab2)
         self.tab2.scroll_bar = QtWidgets.QScrollBar(self.tab2)
-        self.tab2.scroll_bar.setStyleSheet(
-            'QScrollBar:vertical{width:15px;}'
-            'QScrollBar::handle:vertical{background-color:#F1F1FF;'
-            'border-radius:1px;min-height:45px}'
-        )
+        self.tab2.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE)
         self.tab2.button1 = QPushButton(self.tab2)
         self.tab2.button2 = QPushButton(self.tab2)
         self.tab2.button3 = QPushButton(self.tab2)
@@ -153,20 +137,11 @@ class MainR(QTabWidget):
         self.tab2.button3.setIcon(QIcon('ico\\settings.png'))
         self.tab2.button4.setIcon(QIcon('ico\\clean.png'))
         self.tab2.button5.setIcon(QIcon('ico\\col1.png'))
-        self.tab2.button1.setStyleSheet(
-            'QPushButton{border-radius:10px;}'
-            'QPushButton:hover{background-color:#9DBDC6}'
-        )
-        self.tab2.button2.setStyleSheet(
-            'QPushButton{border-radius:10px}'
-            'QPushButton:hover{background-color:#9DBDC6}'
-        )
-        self.tab2.button3.setStyleSheet('border-radius:10px')
-        self.tab2.button4.setStyleSheet(
-            'QPushButton{border-radius:10px}'
-            'QPushButton:hover{background-color:#9DBDC6}'
-        )
-        self.tab2.button5.setStyleSheet('border-radius:10px')
+        self.tab2.button1.setStyleSheet(BUTTON_STYLE1)
+        self.tab2.button2.setStyleSheet(BUTTON_STYLE1)
+        self.tab2.button3.setStyleSheet(BUTTON_STYLE6)
+        self.tab2.button4.setStyleSheet(BUTTON_STYLE1)
+        self.tab2.button5.setStyleSheet(BUTTON_STYLE6)
         self.tab2.button1.setIconSize(QtCore.QSize(60, 60))
         self.tab2.button2.setIconSize(QtCore.QSize(60, 60))
         self.tab2.button3.setIconSize(QtCore.QSize(60, 60))
@@ -188,9 +163,7 @@ class MainR(QTabWidget):
         self.tab2.table.setVerticalScrollBar(self.tab2.scroll_bar)
         self.tab2.table.verticalHeader().setVisible(False)
         self.tab2.table.horizontalHeader().setVisible(False)
-        self.tab2.table.setStyleSheet(
-            'QTableWidget{border:0px;background-color:#FFFFFF;}'
-        )
+        self.tab2.table.setStyleSheet(TABLE_STYLE1)
         self.tab2.table.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarAlwaysOn,
         )
@@ -203,9 +176,7 @@ class MainR(QTabWidget):
         self.tab2.table.setContextMenuPolicy(
             QtCore.Qt.CustomContextMenu,
         )
-        self.tab2.setStyleSheet(
-            'background-color:#DAEAEF',
-        )
+        self.tab2.setStyleSheet(BGC_STYLE1)
 
     def tab3_init(self):
         self.tab3.table = QTableWidget(self.tab3)
@@ -228,9 +199,7 @@ class MainR(QTabWidget):
         )
         self.tab3.table.setColumnWidth(0, self.tab3.table.width())
         self.tab3.table.setRowHeight(0, self.tab3.table.height())
-        self.tab3.table.setStyleSheet(
-            'QTableWidget{border:0px;background-color:#DAEAEF}'
-        )
+        self.tab3.table.setStyleSheet(TABLE_STYLE2)
         self.tab3.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tab3.button1 = QPushButton(self.tab3)
         self.tab3.button2 = QPushButton(self.tab3)
@@ -244,33 +213,14 @@ class MainR(QTabWidget):
         self.tab3.button4.setIcon(QIcon('ico\\palette.png'))
         self.tab3.button5.setIcon(QIcon('ico\\view.png'))
         self.tab3.button6.setText('...')
-        self.tab3.button1.setStyleSheet(
-            'QPushButton{border-radius:10px;}'
-            'QPushButton:hover{background-color:rgba(10,10,10,30)}'
-        )
-        self.tab3.button2.setStyleSheet(
-            'QPushButton{border-radius:10px}'
-            'QPushButton:hover{background-color:rgba(10,10,10,20)}'
-        )
-        self.tab3.button3.setStyleSheet('border-radius:10px')
-        self.tab3.button4.setStyleSheet(
-            'QPushButton{border-radius:15px}'
-            'QPushButton:hover{background-color:rgba(245,233,190,80)}'
-        )
-        self.tab3.button5.setStyleSheet(
-            'QPushButton{border-radius:15px}'
-            'QPushButton:hover{background-color:rgba(245,233,190,80)}'
-        )
-        self.tab3.button6.setStyleSheet(
-            'QPushButton{border-radius:15px}'
-            'QPushButton:hover{background-color:rgba(245,233,190,80)}'
-        )
+        self.tab3.button1.setStyleSheet(BUTTON_STYLE2)
+        self.tab3.button2.setStyleSheet(BUTTON_STYLE2)
+        self.tab3.button3.setStyleSheet(BUTTON_STYLE6)
+        self.tab3.button4.setStyleSheet(BUTTON_STYLE3)
+        self.tab3.button5.setStyleSheet(BUTTON_STYLE3)
+        self.tab3.button6.setStyleSheet(BUTTON_STYLE3)
         self.tab3.scroll_bar = QtWidgets.QScrollBar(self.tab3)
-        self.tab3.scroll_bar.setStyleSheet(
-            'QScrollBar:vertical{width:15px;}'
-            'QScrollBar::handle:vertical{background-color:#F1F1FF;'
-            'border-radius:1px;min-height:45px}'
-        )
+        self.tab3.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE)
         self.tab3.button1.setIconSize(QtCore.QSize(60, 60))
         self.tab3.button2.setIconSize(QtCore.QSize(60, 60))
         self.tab3.button3.setIconSize(QtCore.QSize(60, 60))
@@ -315,36 +265,24 @@ class MainR(QTabWidget):
         self.tab3.line3.setText('90')
         self.tab3.line4.setText('40')
         self.tab3.line5.setText(' 0')
-        self.tab3.text.setStyleSheet('font-size:14pt;border-radius:5px;'
-                                     'background-color:rgba(245,233,190,80);'
-                                     'color:#174c4f;font-family:calibri')
-        self.tab3.line1.setStyleSheet('font-size:12pt;border-radius:15px;'
-                                      'background-color:#F1F2FF;'
-                                      'color:#382513;font-family:calibri')
-        self.tab3.line2.setStyleSheet('font-size:12pt;border-radius:15px;'
-                                      'background-color:#F1F1FF;'
-                                      'color:#382513;font-family:calibri')
-        self.tab3.line3.setStyleSheet('font-size:12pt;border-radius:15px;'
-                                      'background-color:#F1F3FF;'
-                                      'color:#382513;font-family:calibri')
-        self.tab3.line4.setStyleSheet('font-size:12pt;border-radius:15px;'
-                                      'background-color:#F1F3FF;'
-                                      'color:#382513;font-family:calibri')
-        self.tab3.line5.setStyleSheet('font-size:12pt;border-radius:15px;'
-                                      'background-color:#F1F3FF;'
-                                      'color:#382513;font-family:calibri')
-        self.tab3.label1.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label2.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label3.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label4.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label5.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label6.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label7.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label8.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label9.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label10.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label11.setStyleSheet('font-size:9pt;font-family:calibri')
-        self.tab3.label12.setStyleSheet('font-size:9pt;font-family:calibri')
+        self.tab3.text.setStyleSheet(TEXTEDIT_STYlE)
+        self.tab3.line1.setStyleSheet(LINE_EDIT_STYLE1.format("#F1F2FF"))
+        self.tab3.line2.setStyleSheet(LINE_EDIT_STYLE1.format("#F1F1FF"))
+        self.tab3.line3.setStyleSheet(LINE_EDIT_STYLE1.format("#F1F3FF"))
+        self.tab3.line4.setStyleSheet(LINE_EDIT_STYLE1.format("#F1F3FF"))
+        self.tab3.line5.setStyleSheet(LINE_EDIT_STYLE1.format("#F1F3FF"))
+        self.tab3.label1.setStyleSheet(LABEL_STYLE)
+        self.tab3.label2.setStyleSheet(LABEL_STYLE)
+        self.tab3.label3.setStyleSheet(LABEL_STYLE)
+        self.tab3.label4.setStyleSheet(LABEL_STYLE)
+        self.tab3.label5.setStyleSheet(LABEL_STYLE)
+        self.tab3.label6.setStyleSheet(LABEL_STYLE)
+        self.tab3.label7.setStyleSheet(LABEL_STYLE)
+        self.tab3.label8.setStyleSheet(LABEL_STYLE)
+        self.tab3.label9.setStyleSheet(LABEL_STYLE)
+        self.tab3.label10.setStyleSheet(LABEL_STYLE)
+        self.tab3.label11.setStyleSheet(LABEL_STYLE)
+        self.tab3.label12.setStyleSheet(LABEL_STYLE)
         self.tab3.text.setVerticalScrollBar(self.tab3.scroll_bar)
         self.tab3.label1.setGeometry(QtCore.QRect(733, 100, 300, 40))
         self.tab3.label2.setGeometry(QtCore.QRect(733, 300, 300, 40))
@@ -405,9 +343,7 @@ class SettingR(QWidget):
         self.setWindowIcon(
             QIcon('ico\\settings.png'),
         )
-        self.setStyleSheet(
-            'background-color:#FFFFFF',
-        )
+        self.setStyleSheet(BGC_STYLE2)
         self.label1 = QLabel(self)
         self.label2 = QLabel(self)
         self.label3 = QLabel(self)
@@ -434,58 +370,20 @@ class SettingR(QWidget):
         self.combobox.addItem('English')
         self.combobox.addItem('中文')
         self.combobox.addItem('日本語')
-        self.label1.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.label2.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.label3.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.label4.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.combobox.setStyleSheet(
-            'font-size:12pt;font-family:calibri;'
-            'border-radius:2px;background-color:rgba(245,233,190,100)'
-        )
-        self.button1.setStyleSheet(
-            'font-size:9t;background-color:rgba(255,255,255,0);'
-            'color:#A77E5E;font-weight:bold;font-family:calibri'
-        )
-        self.button2.setStyleSheet(
-            'font-size:9t;background-color:rgba(255,255,255,0);'
-            'color:#A77E5E;font-weight:bold;font-family:calibri'
-        )
-        self.button3.setStyleSheet(
-            'font-size:9t;background-color:rgba(255,255,255,80);'
-            'color:#A77E5E;font-weight:bold;font-family:calibri'
-        )
-        self.button4.setStyleSheet(
-            'font-size:9t;background-color:rgba(255,255,255,0);'
-            'color:#A77E5E;font-weight:bold;font-family:calibri'
-        )
-        self.button5.setStyleSheet(
-            'font-size:9t;background-color:rgba(255,255,255,0);'
-            'color:#A77E5E;font-weight:bold;font-family:calibri'
-        )
-        self.line1.setStyleSheet(
-            'font-size:12pt;border-radius:15px;;color:#363942;'
-            'background-color:#F5DCE3;font-family:calibri'
-        )
-        self.line2.setStyleSheet(
-            'font-size:12pt;border-radius:15px;color:#363942;'
-            'background-color:#F5DCE3;font-family:calibri'
-        )
-        self.line3.setStyleSheet(
-            'font-size:12pt;border-radius:15px;color:#363942;'
-            'background-color:#F1F2FF;font-family:calibri'
-        )
-        self.line4.setStyleSheet(
-            'font-size:12pt;border-radius:15px;color:#363942;'
-            'background-color:#F3F2FF;font-family:calibri'
-        )
+        self.label1.setStyleSheet(LABEL_STYLE)
+        self.label2.setStyleSheet(LABEL_STYLE)
+        self.label3.setStyleSheet(LABEL_STYLE)
+        self.label4.setStyleSheet(LABEL_STYLE)
+        self.combobox.setStyleSheet(COMBO_BOX_STYLE)
+        self.button1.setStyleSheet(BUTTON_STYLE4)
+        self.button2.setStyleSheet(BUTTON_STYLE4)
+        self.button3.setStyleSheet(BUTTON_STYLE5)
+        self.button4.setStyleSheet(BUTTON_STYLE4)
+        self.button5.setStyleSheet(BUTTON_STYLE4)
+        self.line1.setStyleSheet(LINE_EDIT_STYLE2.format("#F5DCE3"))
+        self.line2.setStyleSheet(LINE_EDIT_STYLE2.format("#F5DCE3"))
+        self.line3.setStyleSheet(LINE_EDIT_STYLE2.format("#F1F2FF"))
+        self.line4.setStyleSheet(LINE_EDIT_STYLE2.format("#F3F2FF"))
         self.label1.setAlignment(QtCore.Qt.AlignCenter)
         self.label2.setAlignment(QtCore.Qt.AlignCenter)
         self.label3.setAlignment(QtCore.Qt.AlignCenter)
@@ -530,10 +428,10 @@ class AboutR(QWidget):
     """
     def __init__(self):
         super(AboutR, self).__init__()
-        self.setFixedSize(500, 350)
-        self.setWindowTitle('About')
+        self.setFixedSize(350, 200)
+        self.setWindowTitle(' ')
         self.setWindowIcon(QIcon('ico\\about.png'))
-        self.setStyleSheet('background-color:#FFFFFF')
+        self.setStyleSheet(BGC_STYLE2)
         self.label = QLabel(self)
         self.label.setText(
             "<p>Author: Nianze A. Tao</p>"
@@ -542,12 +440,10 @@ class AboutR(QWidget):
             "<a href='https://github.com/Augus1999/pyPDFeditor-GUI'>"
             "<small>https://github.com/Augus1999/pyPDFeditor-GUI</small></a>"
         )
-        self.label.setStyleSheet(
-            'font-size:12pt;font-family:calibri',
-        )
+        self.label.setStyleSheet(LABEL_STYLE)
         self.label.setAlignment(QtCore.Qt.AlignTop)
         self.label.setGeometry(
-            QtCore.QRect(20, 20, self.width()-40, self.height()-20)
+            QtCore.QRect(20, 0, self.width()-40, self.height()-20)
         )
         self.label.setOpenExternalLinks(True)
 
@@ -561,7 +457,7 @@ class PermMenuR(QWidget):
         self.setFixedSize(400, 240)
         self.setWindowTitle(' ')
         self.setWindowIcon(QIcon('ico\\tab3.png'))
-        self.setStyleSheet('background-color:#FFFFFF')
+        self.setStyleSheet(BGC_STYLE2)
         self.check1 = QCheckBox(self)
         self.check2 = QCheckBox(self)
         self.check3 = QCheckBox(self)
@@ -613,34 +509,15 @@ class PermMenuR(QWidget):
         self.label6.setGeometry(QtCore.QRect(250, 65, 120, 40))
         self.label7.setGeometry(QtCore.QRect(250, 105, 120, 40))
         self.label8.setGeometry(QtCore.QRect(250, 145, 120, 40))
-        self.button.setStyleSheet(
-            'font-size:9t;background-color:rgba(255,255,255,80);'
-            'color:#A77E5E;font-weight:bold;font-family:calibri'
-        )
-        self.label1.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.label2.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.label3.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.label4.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.label5.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.label6.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.label7.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
-        self.label8.setStyleSheet(
-            'font-size:9pt;font-family:calibri',
-        )
+        self.button.setStyleSheet(BUTTON_STYLE5)
+        self.label1.setStyleSheet(LABEL_STYLE)
+        self.label2.setStyleSheet(LABEL_STYLE)
+        self.label3.setStyleSheet(LABEL_STYLE)
+        self.label4.setStyleSheet(LABEL_STYLE)
+        self.label5.setStyleSheet(LABEL_STYLE)
+        self.label6.setStyleSheet(LABEL_STYLE)
+        self.label7.setStyleSheet(LABEL_STYLE)
+        self.label8.setStyleSheet(LABEL_STYLE)
         self.check1.setChecked(True)
         self.check5.setChecked(True)
         self.check6.setChecked(True)
