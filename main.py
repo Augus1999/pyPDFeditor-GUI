@@ -3,6 +3,8 @@
 import os
 import sys
 import json
+import time
+
 import fitz
 from scripts import *
 from PyQt5 import QtCore, QtGui
@@ -24,6 +26,18 @@ class Main(MainR):
         content = setting_warning(
             'settings\\main_settings.json',
             )
+        if os.path.exists(
+                'settings\\metadata.json',
+        ):
+            with open(
+                'settings\\metadata.json',
+                mode='r',
+                encoding='utf-8',
+            ) as m:
+                metadata = json.load(m)
+            self.Author = metadata["Author"]
+        else:
+            self.Author = None
         self.move(100, 20)
         self.colour_r = 0.1
         self.colour_g = 0.1
@@ -165,6 +179,20 @@ class Main(MainR):
                     doc = fitz.open('pdf', pdf_bites)
                 doc0.insertPDF(doc)
                 doc.close()
+            _time = time.localtime(time.time())
+            metadata = doc0.metadata
+            metadata["producer"] = "pyPDFEditor-GUI"
+            metadata["modDate"] = "D:{}{}{}{}{}{}".format(
+                _time[0],
+                str(_time[1]).zfill(2),
+                str(_time[2]).zfill(2),
+                str(_time[3]).zfill(2),
+                str(_time[4]).zfill(2),
+                str(_time[5]).zfill(2,)
+            )
+            if self.Author is not None:
+                metadata["author"] = self.Author
+            doc0.set_metadata(metadata)
             file_name, ok = QFileDialog.getSaveFileName(
                 None,
                 "save",
@@ -172,7 +200,10 @@ class Main(MainR):
                 ".pdf",
             )
             if ok:
-                doc0.save(file_name.replace('/', '\\'))
+                doc0.save(
+                    file_name.replace('/', '\\'),
+                    garbage=1,
+                )
                 doc0.close()
                 self.view(f_name=file_name)
 
@@ -186,8 +217,25 @@ class Main(MainR):
                 self.o_dir + "new.pdf",
                 ".pdf",
             )
+            _time = time.localtime(time.time())
+            metadata = doc0.metadata
+            metadata["producer"] = "pyPDFEditor-GUI"
+            metadata["modDate"] = "D:{}{}{}{}{}{}".format(
+                _time[0],
+                str(_time[1]).zfill(2),
+                str(_time[2]).zfill(2),
+                str(_time[3]).zfill(2),
+                str(_time[4]).zfill(2),
+                str(_time[5]).zfill(2, )
+            )
+            if self.Author is not None:
+                metadata["author"] = self.Author
+            doc0.set_metadata(metadata)
             if ok:
-                doc0.save(file_name.replace('/', '\\'))
+                doc0.save(
+                    file_name.replace('/', '\\'),
+                    garbage=1,
+                )
                 doc0.close()
                 self.view(f_name=file_name)
 
