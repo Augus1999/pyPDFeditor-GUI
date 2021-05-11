@@ -57,9 +57,11 @@ class MainR(QTabWidget):
         self.tab1 = QWidget()
         self.tab2 = QWidget()
         self.tab3 = QWidget()
+        self.tab4 = QWidget()
         self.tab1_init()
         self.tab2_init()
         self.tab3_init()
+        self.tab4_init()
 
     def tab1_init(self):
         self.tab1.table = QTableWidget(self.tab1)
@@ -80,13 +82,13 @@ class MainR(QTabWidget):
         self.tab1.button3.setStyleSheet(BUTTON_STYLE6)
         self.tab1.button4.setStyleSheet(BUTTON_STYLE1)
         self.tab1.button5.setStyleSheet(BUTTON_STYLE6)
-        self.tab1.button1.setIconSize(QtCore.QSize(60, 60))
-        self.tab1.button2.setIconSize(QtCore.QSize(60, 60))
-        self.tab1.button3.setIconSize(QtCore.QSize(60, 60))
-        self.tab1.button4.setIconSize(QtCore.QSize(60, 60))
+        self.tab1.button1.setIconSize(QtCore.QSize(50, 50))
+        self.tab1.button2.setIconSize(QtCore.QSize(50, 50))
+        self.tab1.button3.setIconSize(QtCore.QSize(50, 50))
+        self.tab1.button4.setIconSize(QtCore.QSize(50, 50))
         self.tab1.button5.setIconSize(QtCore.QSize(30, 30))
         self.tab1.table.setGeometry(
-            QtCore.QRect(0, 100, self.width()-5, self.height()-170)
+            QtCore.QRect(0, 100, self.width()-5, self.height()-170),
         )
         self.tab1.button1.setGeometry(
             QtCore.QRect(10, 10, 80, 80),
@@ -112,10 +114,10 @@ class MainR(QTabWidget):
         self.tab1.table.verticalHeader().setVisible(False)
         self.tab1.table.horizontalHeader().setVisible(False)
         self.tab1.table.setHorizontalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOff
+            QtCore.Qt.ScrollBarAlwaysOff,
         )
         self.tab1.table.setEditTriggers(
-            QtWidgets.QAbstractItemView.NoEditTriggers
+            QtWidgets.QAbstractItemView.NoEditTriggers,
         )
         self.tab1.table.setStyleSheet(TABLE_STYLE1)
         self.tab1.table.setContextMenuPolicy(
@@ -142,13 +144,13 @@ class MainR(QTabWidget):
         self.tab2.button3.setStyleSheet(BUTTON_STYLE6)
         self.tab2.button4.setStyleSheet(BUTTON_STYLE1)
         self.tab2.button5.setStyleSheet(BUTTON_STYLE6)
-        self.tab2.button1.setIconSize(QtCore.QSize(60, 60))
-        self.tab2.button2.setIconSize(QtCore.QSize(60, 60))
-        self.tab2.button3.setIconSize(QtCore.QSize(60, 60))
-        self.tab2.button4.setIconSize(QtCore.QSize(60, 60))
+        self.tab2.button1.setIconSize(QtCore.QSize(50, 50))
+        self.tab2.button2.setIconSize(QtCore.QSize(50, 50))
+        self.tab2.button3.setIconSize(QtCore.QSize(50, 50))
+        self.tab2.button4.setIconSize(QtCore.QSize(50, 50))
         self.tab2.button5.setIconSize(QtCore.QSize(30, 30))
         self.tab2.table.setGeometry(
-            QtCore.QRect(0, 100, self.width()-5, self.height()-170)
+            QtCore.QRect(0, 100, self.width()-5, self.height()-170),
         )
         self.tab2.button1.setGeometry(QtCore.QRect(10, 10, 80, 80))
         self.tab2.button2.setGeometry(QtCore.QRect(120, 10, 80, 80))
@@ -168,10 +170,10 @@ class MainR(QTabWidget):
             QtCore.Qt.ScrollBarAlwaysOn,
         )
         self.tab2.table.setHorizontalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOff
+            QtCore.Qt.ScrollBarAlwaysOff,
         )
         self.tab2.table.setEditTriggers(
-            QtWidgets.QAbstractItemView.NoEditTriggers
+            QtWidgets.QAbstractItemView.NoEditTriggers,
         )
         self.tab2.table.setContextMenuPolicy(
             QtCore.Qt.CustomContextMenu,
@@ -186,19 +188,17 @@ class MainR(QTabWidget):
         self.tab3.table.setGeometry(
             QtCore.QRect(20, 100,
                          (self.height()-170)*3//4,
-                         self.height()-170)
+                         self.height()-170),
         )
         self.tab3.table.setVerticalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOff
+            QtCore.Qt.ScrollBarAlwaysOff,
         )
         self.tab3.table.setHorizontalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOff
+            QtCore.Qt.ScrollBarAlwaysOff,
         )
         self.tab3.table.setEditTriggers(
-            QtWidgets.QAbstractItemView.NoEditTriggers
+            QtWidgets.QAbstractItemView.NoEditTriggers,
         )
-        self.tab3.table.setColumnWidth(0, self.tab3.table.width())
-        self.tab3.table.setRowHeight(0, self.tab3.table.height())
         self.tab3.table.setStyleSheet(TABLE_STYLE2)
         self.tab3.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tab3.button1 = QPushButton(self.tab3)
@@ -221,9 +221,9 @@ class MainR(QTabWidget):
         self.tab3.button6.setStyleSheet(BUTTON_STYLE3)
         self.tab3.scroll_bar = QtWidgets.QScrollBar(self.tab3)
         self.tab3.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE)
-        self.tab3.button1.setIconSize(QtCore.QSize(60, 60))
-        self.tab3.button2.setIconSize(QtCore.QSize(60, 60))
-        self.tab3.button3.setIconSize(QtCore.QSize(60, 60))
+        self.tab3.button1.setIconSize(QtCore.QSize(40, 40))
+        self.tab3.button2.setIconSize(QtCore.QSize(40, 40))
+        self.tab3.button3.setIconSize(QtCore.QSize(40, 40))
         self.tab3.button4.setIconSize(QtCore.QSize(30, 30))
         self.tab3.button5.setIconSize(QtCore.QSize(30, 30))
         self.tab3.button3.setToolTip('Settings')
@@ -329,6 +329,115 @@ class MainR(QTabWidget):
         self.tab3.check.setGeometry(QtCore.QRect(1050, 840, 40, 40))
         self.tab3.check1.setGeometry(QtCore.QRect(1050, 800, 40, 40))
         self.tab3.check2.setGeometry(QtCore.QRect(1050, 760, 40, 40))
+
+    def tab4_init(self):
+        self.tab4.button1 = QPushButton(self.tab4)
+        self.tab4.button2 = QPushButton(self.tab4)
+        self.tab4.button1.setIcon(QIcon('ico\\new.png'))
+        self.tab4.button2.setIcon(QIcon('ico\\disk.png'))
+        self.tab4.button1.setStyleSheet(BUTTON_STYLE2)
+        self.tab4.button2.setStyleSheet(BUTTON_STYLE2)
+        self.tab4.button1.setIconSize(QtCore.QSize(40, 40))
+        self.tab4.button2.setIconSize(QtCore.QSize(40, 40))
+        self.tab4.button1.setGeometry(QtCore.QRect(10, 10, 80, 80))
+        self.tab4.button2.setGeometry(QtCore.QRect(120, 10, 80, 80))
+        self.tab4.table = QTableWidget(self.tab4)
+        self.tab4.table.setShowGrid(False)
+        self.tab4.table.verticalHeader().setVisible(True)
+        self.tab4.table.horizontalHeader().setVisible(False)
+        self.tab4.table.setHorizontalScrollBarPolicy(
+            QtCore.Qt.ScrollBarAlwaysOff,
+        )
+        self.tab4.table.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarAlwaysOn,
+        )
+        self.tab4.table.setEditTriggers(
+            QtWidgets.QAbstractItemView.NoEditTriggers,
+        )
+        self.tab4.table.setGeometry(
+            QtCore.QRect(self.width()//3, 100, self.width()//3, self.height()-170),
+        )
+        self.tab4.table.setStyleSheet(TABLE_STYLE2)
+        self.tab4.scroll_bar0 = QtWidgets.QScrollBar(self.tab4)
+        self.tab4.scroll_bar1 = QtWidgets.QScrollBar(self.tab4)
+        self.tab4.scroll_bar0.setStyleSheet(SCROLL_BAR_STYLE)
+        self.tab4.scroll_bar1.setStyleSheet(SCROLL_BAR_STYLE)
+        self.tab4.table.setVerticalScrollBar(self.tab4.scroll_bar0)
+        self.tab4.text = QTextEdit(self.tab4)
+        self.tab4.text.setStyleSheet(TEXTEDIT_STYlE)
+        self.tab4.text.setVerticalScrollBar(self.tab4.scroll_bar1)
+        self.tab4.text.setGeometry(
+            QtCore.QRect(10, 300, self.width()//3-20, self.height()-400),
+        )
+        self.tab4.label1 = QLabel(self.tab4)
+        self.tab4.label2 = QLabel(self.tab4)
+        self.tab4.label3 = QLabel(self.tab4)
+        self.tab4.label4 = QLabel(self.tab4)
+        self.tab4.label5 = QLabel(self.tab4)
+        self.tab4.label1.setStyleSheet(LABEL_STYLE)
+        self.tab4.label2.setStyleSheet(LABEL_STYLE)
+        self.tab4.label3.setStyleSheet(LABEL_STYLE)
+        self.tab4.label4.setStyleSheet(LABEL_STYLE)
+        self.tab4.label5.setStyleSheet(LABEL_STYLE)
+        self.tab4.label1.setText(
+            '''
+            {}Catalogue{}
+            Edit the catalog in the format of 
+            \"lvl-->title-->page\"
+            e.g.
+            *-->chapter 1-->1
+            **-->section 1-->1
+            **-->section 2-->5
+            *-->chapter 2-->17
+            '''.format('.'*10, '.'*10)
+        )
+        self.tab4.label2.setText('.'*10+'Title'+'.'*10)
+        self.tab4.label3.setText('.'*10+'Author'+'.'*10)
+        self.tab4.label4.setText('.'*10+'Subject'+'.'*10)
+        self.tab4.label5.setText('.'*10+'Keywords'+'.'*10)
+        self.tab4.label1.setGeometry(
+            QtCore.QRect(10, 100, self.width()//3-20, 200),
+        )
+        self.tab4.label2.setGeometry(
+            QtCore.QRect(2*self.width()//3+20, 100, self.width()//3-40, 40),
+        )
+        self.tab4.label3.setGeometry(
+            QtCore.QRect(2*self.width()//3+20, 200, self.width()//3-40, 40),
+        )
+        self.tab4.label4.setGeometry(
+            QtCore.QRect(2*self.width()//3+20, 300, self.width()//3-40, 40),
+        )
+        self.tab4.label5.setGeometry(
+            QtCore.QRect(2*self.width()//3+20, 400, self.width()//3-40, 40),
+        )
+        self.tab4.label2.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab4.label3.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab4.label4.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab4.label5.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab4.line1 = QLineEdit(self.tab4)
+        self.tab4.line2 = QLineEdit(self.tab4)
+        self.tab4.line3 = QLineEdit(self.tab4)
+        self.tab4.line4 = QLineEdit(self.tab4)
+        self.tab4.line1.setStyleSheet(LINE_EDIT_STYLE1.format('#F1F3FF'))
+        self.tab4.line2.setStyleSheet(LINE_EDIT_STYLE1.format('#F1F3FF'))
+        self.tab4.line3.setStyleSheet(LINE_EDIT_STYLE1.format('#F1F3FF'))
+        self.tab4.line4.setStyleSheet(LINE_EDIT_STYLE1.format('#F1F3FF'))
+        self.tab4.line1.setGeometry(
+            QtCore.QRect(2*self.width()//3+40, 150, self.width()//3-80, 40),
+        )
+        self.tab4.line2.setGeometry(
+            QtCore.QRect(2*self.width()//3+40, 250, self.width()//3-80, 40),
+        )
+        self.tab4.line3.setGeometry(
+            QtCore.QRect(2*self.width()//3+40, 350, self.width()//3-80, 40),
+        )
+        self.tab4.line4.setGeometry(
+            QtCore.QRect(2*self.width()//3+40, 450, self.width()//3-80, 40),
+        )
+        self.tab4.line1.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab4.line2.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab4.line3.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab4.line4.setAlignment(QtCore.Qt.AlignCenter)
 
 
 class SettingR(QWidget):

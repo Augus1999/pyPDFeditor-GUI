@@ -8,7 +8,7 @@ TAB_STYLE = '''
         border-bottom-right-radius:20px;
         min-width:40ex;
         padding:8px;
-        font-size:9pt;
+        font-size:{}pt;
         font-family:{};}}
         QTabBar::tab:selected{{
         background-color:#FFFFFF;
@@ -26,7 +26,7 @@ COMBO_BOX_STYLE = '''
         font-size:12pt;
         font-family:calibri;
         border-radius:2px;
-        background-color:rgba(245,233,190,100)
+         background-color:rgba(245,233,190,100)
         '''
 TEXTEDIT_STYlE = '''
         font-size:14pt;

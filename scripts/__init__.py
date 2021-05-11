@@ -1,27 +1,29 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
 from .styleSheets import TAB_STYLE
-from .basics import (
-    COLUMN_COUNTER,
-    LANGUAGE,
-)
+from .language import set_language
+from .basics import COLUMN_COUNTER
 from .windows import (
     MainR,
+    AboutR,
     SettingR,
     PDFViewR,
-    AboutR,
     PermMenuR,
 )
 from .functions import (
     setting_warning,
-    add,
-    set_icon,
-    pdf_split,
-    clean,
+    toc2plaintext,
+    plaintext2toc,
+    set_metadata0,
+    set_metadata1,
     generate_menu,
-    security,
     reset_table,
+    pdf_split,
+    set_icon,
+    security,
     choose,
+    clean,
+    add,
 )
 __all__ = [
     'MainR',
@@ -32,10 +34,14 @@ __all__ = [
     'clean',
     'set_icon',
     'pdf_split',
+    'toc2plaintext',
+    'plaintext2toc',
+    'set_metadata0',
+    'set_metadata1',
     'generate_menu',
     'security',
     'COLUMN_COUNTER',
-    'LANGUAGE',
+    'set_language',
     "PDFViewR",
     "choose",
     "AboutR",

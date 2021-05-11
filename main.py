@@ -3,11 +3,9 @@
 import os
 import sys
 import json
-import time
-
 import fitz
 from scripts import *
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QApplication,
@@ -55,23 +53,27 @@ class Main(MainR):
         self.tab1.book_list = list()
         self.tab2.book_list = list()
         self.tab3.book_list = list()
+        self.tab4.book_list = list()
         self.tab2.book_name = str()
+        self.tab4.book_name = str()
         self.tab2.click_counts = 0
+        self.tab4.metadata = None
         self.tab1.x, self.tab1.y = 0, 0
         self.tab2.x, self.tab2.y = 0, 0
         self.tab3.x, self.tab3.y = 0, 0
-        self.tab1.col, self.tab1.crow = -1, -1
-        self.tab2.col, self.tab2.crow = -1, -1
-        self.tab3.col, self.tab3.crow = -1, -1
+        self.tab4.x, self.tab4.y = 0, 0
         self.tab1.w_col, self.tab1.w_row = COLUMN_COUNTER, 1
         self.tab2.w_row, self.tab2.w_col = 2, COLUMN_COUNTER
         self.tab3.w_row, self.tab3.w_col = 1, 1
+        self.tab4.w_row, self.tab4.w_col = 2, 1
         self.tab1.table.setRowCount(self.tab1.w_row)
         self.tab2.table.setRowCount(self.tab2.w_row)
         self.tab3.table.setRowCount(self.tab3.w_row)
+        self.tab4.table.setRowCount(self.tab4.w_row)
         self.tab1.table.setColumnCount(self.tab1.w_col)
         self.tab2.table.setColumnCount(self.tab2.w_col)
         self.tab3.table.setColumnCount(self.tab3.w_col)
+        self.tab4.table.setColumnCount(self.tab4.w_col)
         tab1_width = (self.tab1.table.width()-15)//self.tab1.w_col
         tab2_width = (self.tab2.table.width()-15)//self.tab2.w_col
         for i in range(self.tab1.w_col):
@@ -82,8 +84,11 @@ class Main(MainR):
             self.tab2.table.setColumnWidth(i, tab2_width)
         for i in range(self.tab2.w_row):
             self.tab2.table.setRowHeight(i, tab2_width*4//3)
+        for i in range(self.tab4.w_row):
+            self.tab4.table.setRowHeight(i, self.tab4.table.width()*4//3)
         self.tab3.table.setColumnWidth(0, self.tab3.table.width())
         self.tab3.table.setRowHeight(0, self.tab3.table.height())
+        self.tab4.table.setColumnWidth(0, self.tab4.table.width())
         self.tab1.table.customContextMenuRequested.connect(self.gen1)
         self.tab2.table.customContextMenuRequested.connect(self.gen2)
         self.tab3.table.customContextMenuRequested.connect(self.gen3)
@@ -107,29 +112,9 @@ class Main(MainR):
         self.tab3.line5.returnPressed.connect(self.preview)
         self.tab3.check1.stateChanged.connect(self.enable_preview)
         self.tab3.check2.stateChanged.connect(self.enable_perm_set)
-        self._change()
-
-    def _change(self):
-        self.addTab(
-            self.tab1,
-            QIcon('ico\\tab1.png'),
-            LANGUAGE[self.language][0],
-        )
-        self.addTab(
-            self.tab2,
-            QIcon('ico\\tab2.png'),
-            LANGUAGE[self.language][1],
-        )
-        self.addTab(
-            self.tab3,
-            QIcon('ico\\tab3.png'),
-            LANGUAGE[self.language][2],
-        )
-        font = QtGui.QFontDatabase.addApplicationFont(self.font_dir)
-        font_family = QtGui.QFontDatabase.applicationFontFamilies(font)
-        self.setStyleSheet(
-            TAB_STYLE.format(font_family[0]),
-        )
+        self.tab4.button1.clicked.connect(self.add4)
+        self.tab4.button2.clicked.connect(self.save4)
+        set_language(self)
 
     def enable_preview(self):
         if self.tab3.check1.isChecked():
@@ -179,20 +164,10 @@ class Main(MainR):
                     doc = fitz.open('pdf', pdf_bites)
                 doc0.insertPDF(doc)
                 doc.close()
-            _time = time.localtime(time.time())
-            metadata = doc0.metadata
-            metadata["producer"] = "pyPDFEditor-GUI"
-            metadata["modDate"] = "D:{}{}{}{}{}{}".format(
-                _time[0],
-                str(_time[1]).zfill(2),
-                str(_time[2]).zfill(2),
-                str(_time[3]).zfill(2),
-                str(_time[4]).zfill(2),
-                str(_time[5]).zfill(2,)
+            set_metadata0(
+                doc=doc0,
+                author=self.Author,
             )
-            if self.Author is not None:
-                metadata["author"] = self.Author
-            doc0.set_metadata(metadata)
             file_name, ok = QFileDialog.getSaveFileName(
                 None,
                 "save",
@@ -217,20 +192,10 @@ class Main(MainR):
                 self.o_dir + "new.pdf",
                 ".pdf",
             )
-            _time = time.localtime(time.time())
-            metadata = doc0.metadata
-            metadata["producer"] = "pyPDFEditor-GUI"
-            metadata["modDate"] = "D:{}{}{}{}{}{}".format(
-                _time[0],
-                str(_time[1]).zfill(2),
-                str(_time[2]).zfill(2),
-                str(_time[3]).zfill(2),
-                str(_time[4]).zfill(2),
-                str(_time[5]).zfill(2, )
+            set_metadata0(
+                doc=doc0,
+                author=self.Author,
             )
-            if self.Author is not None:
-                metadata["author"] = self.Author
-            doc0.set_metadata(metadata)
             if ok:
                 doc0.save(
                     file_name.replace('/', '\\'),
@@ -271,6 +236,36 @@ class Main(MainR):
                 )
                 if self.tab3.check.isChecked():
                     self.view(f_name=file_name)
+
+    def save4(self):
+        title = self.tab4.line1.text()
+        author = self.tab4.line2.text()
+        subject = self.tab4.line3.text()
+        keywords = self.tab4.line4.text()
+        toc = plaintext2toc(self.tab4.text.toPlainText())
+        if len(self.tab4.book_list) != 0:
+            file_name, ok = QFileDialog.getSaveFileName(
+                None,
+                "save",
+                self.o_dir + "new.pdf",
+                ".pdf",
+            )
+            if ok:
+                doc = fitz.open(self.tab4.book_name)
+                metadata = set_metadata1(
+                    self.tab4.metadata,
+                    title=title,
+                    author=author,
+                    subject=subject,
+                    keywords=keywords,
+                )
+                doc.set_toc(toc)
+                doc.set_metadata(metadata)
+                doc.save(
+                    file_name.replace('/', '\\'),
+                    garbage=1,
+                )
+                doc.close()
 
     def _set(self):
         self.SettingCD.show()
@@ -330,7 +325,7 @@ class Main(MainR):
                         set_icon(
                             self.tab2.book_name,
                             self.tab2,
-                            item,
+                            _page=item,
                         )
                 else:
                     pass
@@ -340,6 +335,46 @@ class Main(MainR):
     def add3(self):
         if len(self.tab3.book_list) == 0:
             add(self, self.tab3)
+
+    def add4(self):
+        f_name, _ = QFileDialog.getOpenFileName(
+            None,
+            'Open files',
+            self.s_dir,
+            '(*.pdf)',
+        )
+        if _:
+            self.tab4.metadata = None
+            self.tab4.table.clear()
+            self.tab4.x, self.tab4.y = 0, 0
+            self.tab4.book_name = f_name.replace(
+                '/',
+                '\\',
+            )
+            b_l = pdf_split(self.tab4.book_name)
+            if len(b_l) != 0:
+                self.tab4.book_list = b_l
+                book_len = len(self.tab4.book_list)
+                reset_table(book_len, self.tab4)
+                for item in self.tab4.book_list:
+                    set_icon(
+                        self.tab4.book_name,
+                        self.tab4,
+                        _page=item,
+                    )
+                doc = fitz.open(self.tab4.book_name)
+                self.tab4.metadata = doc.metadata
+                plaintext = toc2plaintext(doc.get_toc())
+                self.tab4.text.setPlainText(plaintext)
+                self.tab4.line1.setText(self.tab4.metadata["title"])
+                self.tab4.line2.setText(self.tab4.metadata["author"])
+                self.tab4.line3.setText(self.tab4.metadata["subject"])
+                self.tab4.line4.setText(self.tab4.metadata["keywords"])
+                doc.close()
+            else:
+                pass
+        else:
+            pass
 
     def clean1(self):
         clean(self.tab1)
@@ -358,7 +393,7 @@ class Main(MainR):
         self.js_dir = par3
         self.font_dir = par4
         self.language = par5
-        self._change()
+        set_language(self)
 
     def get_perm_para(self,
                       par):

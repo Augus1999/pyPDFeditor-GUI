@@ -3,6 +3,7 @@
 import os
 import fitz
 import json
+import time
 from PyQt5 import (
     QtGui,
     QtCore,
@@ -155,7 +156,7 @@ def setting_warning(set_file_name: str):
     import settings in JSON file
 
     :param set_file_name: JSON file name
-    :return: a dist loaded from JSON file
+    :return: a dict loaded from JSON file
     """
     try:
         with open(
@@ -225,6 +226,7 @@ def set_icon(f_name: str,
         label.setAlignment(
             QtCore.Qt.AlignCenter,
         )
+        # print(widget.x, widget.y)
         widget.table.setCellWidget(
             widget.x,
             widget.y,
@@ -232,16 +234,11 @@ def set_icon(f_name: str,
         )
         del label  # delete label (important)
         del _cover, scaled_width, scaled_height
-        widget.crow, widget.col = widget.x, widget.y
-        try:
-            if (not widget.y % (widget.w_col-1)) and widget.y:
-                # 每（self.w_col）个元素换行
-                widget.x += 1
-                widget.y = 0
-            else:
-                widget.y += 1
-        except ZeroDivisionError:
+        if ((widget.x+1)*(widget.y+1))//((widget.x+1)*widget.w_col) == 0:
             widget.y += 1
+        else:
+            widget.x += 1
+            widget.y -= (widget.w_col-1)
         doc.close()
         del doc
         return True
@@ -287,9 +284,6 @@ def delete(index: int,
         widget.book_list.pop(index)
     widget.table.clearContents()
     widget.x, widget.y = 0, 0
-    if not widget.book_list:
-        widget.crow = -1
-        widget.col = -1
     if len(widget.book_list) != 0:
         reset_table(
             book_len=len(widget.book_list),
@@ -482,6 +476,7 @@ def extract_img(index: int,
             doc,
             inf[0],
         )
+        # ignore the warning here
         img.writePNG(img_name)
     QMessageBox.information(
         None,
@@ -511,3 +506,89 @@ def choose(widget: QWidget,
         widget.setText(
             root.replace('/', '\\'),
         )
+
+
+def set_metadata0(doc: fitz.open,
+                  author: (str, None)):
+    """
+    set defeat metadata
+
+    :param doc: fitz Document
+    :param author: str or None
+    :return: None
+    """
+    _time = time.localtime(time.time())
+    metadata = doc.metadata
+    metadata["producer"] = "pyPDFEditor-GUI"
+    metadata["modDate"] = "D:{}{}{}{}{}{}".format(
+        _time[0],
+        str(_time[1]).zfill(2),
+        str(_time[2]).zfill(2),
+        str(_time[3]).zfill(2),
+        str(_time[4]).zfill(2),
+        str(_time[5]).zfill(2),
+    )
+    if author is not None:
+        metadata["author"] = author
+    doc.set_metadata(metadata)
+
+
+def set_metadata1(metadata: dict,
+                  title: str,
+                  author: str,
+                  subject: str,
+                  keywords: str):
+    """
+    set metadata to pdf document
+
+    :return: a dict -> metadata
+    """
+    _time = time.localtime(time.time())
+    metadata["producer"] = "pyPDFEditor-GUI"
+    metadata["modDate"] = "D:{}{}{}{}{}{}".format(
+        _time[0],
+        str(_time[1]).zfill(2),
+        str(_time[2]).zfill(2),
+        str(_time[3]).zfill(2),
+        str(_time[4]).zfill(2),
+        str(_time[5]).zfill(2),
+    )
+    metadata["title"] = title
+    metadata["author"] = author
+    metadata["subject"] = subject
+    metadata["keywords"] = keywords
+    return metadata
+
+
+def toc2plaintext(toc: list):
+    """
+    :param toc: table of content <- DOCUMENT.get_toc()
+    :return: plaintext
+    """
+    plaintext = ''
+    for content in toc:
+        head = '{}-->{}-->{}\n'.format(
+            int(content[0])*'*',
+            content[1],
+            content[2],
+        )
+        plaintext += head
+    return plaintext
+
+
+def plaintext2toc(plaintext: str):
+    """
+    :param plaintext: plaintext
+    :return: table of content -> DOCUMENT.get_toc()
+    """
+    toc = list()
+    contents = plaintext.split('\n')
+    for content in contents:
+        if len(content) != 0:
+            c = content.split('-->')
+            t = list()
+            t.append(len(c[0]))
+            t.append(c[1])
+            t.append(int(c[2]))
+            toc.append(t)
+    return toc
