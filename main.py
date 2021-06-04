@@ -596,6 +596,7 @@ class PermMenu(PermMenuR):
 
 
 if __name__ == '__main__':
+    # 8964
     arg = sys.argv
     if arg[0] != 'main.py':
         os.chdir(
@@ -614,3 +615,4 @@ if __name__ == '__main__':
         main.Viewer.resize(1200, 800)
         main.view(f_name=arg[1])
     sys.exit(app.exec_())
+    # **************** 8 9 6 4 ****************
