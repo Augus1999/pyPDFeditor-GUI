@@ -17,6 +17,35 @@ from PyQt5.QtWidgets import (
 # Attention: ignore all warnings in fitz.open(.)
 
 
+def open_pdf(file_name: str):
+    """
+    :param file_name: pdf file name
+    :return (doc, bool)
+    """
+    try:
+        doc = fitz.open(file_name)
+        if doc.needsPass:
+            QMessageBox.critical(
+                None,
+                'Error',
+                'Cannot open an encrypted file.',
+                QMessageBox.Yes | QMessageBox.No,
+            )
+            doc.close()
+            del doc
+            return None, False
+        else:
+            return doc, True
+    except RuntimeError:
+        QMessageBox.critical(
+            None,
+            'Error',
+            ' Format error:\n cannot open this file',
+            QMessageBox.Yes | QMessageBox.No,
+        )
+        return None, False
+
+
 def render_pdf_page(page_data):
     """
     render PDF page
@@ -45,31 +74,17 @@ def render_pdf_page(page_data):
     return pixmap
 
 
-def pdf_split(input_pdf: str):
+def pdf_split(doc: fitz.fitz):
     """
     split the selected PDF file into pages;
 
-    :param input_pdf: target PDF file to be split
+    :param doc: target PDF file to be split
     :return: book_list
     """
     book_list = list()
-    doc0 = fitz.open(input_pdf)
-    if doc0.needsPass:
-        QMessageBox.critical(
-            None,
-            'Error',
-            'Cannot open an encrypted file.',
-            QMessageBox.Yes | QMessageBox.No,
-        )
-        doc0.close()
-        del doc0
-        return book_list
-    else:
-        for page in range(doc0.pageCount):
-            book_list.append(page)
-        doc0.close()
-        del doc0
-        return book_list
+    for page in range(doc.pageCount):
+        book_list.append(page)
+    return book_list
 
 
 def security(input_pdf: str,
@@ -176,72 +191,56 @@ def setting_warning(set_file_name: str):
         exit()
 
 
-def set_icon(f_name: str,
+def set_icon(doc: fitz.fitz,
              widget: QWidget.window,
-             _page: int = 0,
-             doc_=None):
+             _page: int = 0):
     """
     add image of first page into table element
 
-    :param f_name: import file name
+    :param doc: from open_pdf(.)
     :param widget: widget
     :param _page: page index
-    :param doc_: doc
-    :return: bool
+    :return: None
     """
-    doc = None
-    if doc_ is None:
-        doc = fitz.open(f_name)
-    if doc_ is not None:
-        doc = doc_
-    if doc.needsPass:
-        QMessageBox.critical(
-            None,
-            'Error',
-            'Cannot open an encrypted file.',
-            QMessageBox.Yes | QMessageBox.No,
-        )
-        doc.close()
-        del doc
-        return False
+    page = doc.loadPage(_page)
+    _cover = render_pdf_page(page)
+    label = QtWidgets.QLabel(None)
+    scaled_width, scaled_height = int, int
+    if _cover.height()/_cover.width() > 4/3:
+        scaled_height = (widget.table.width()-15)//widget.w_col*4/3-5
+        scaled_width = scaled_height*(_cover.width()/_cover.height())
+    if _cover.height()/_cover.width() <= 4/3:
+        scaled_width = (widget.table.width()-15)//widget.w_col-5
+        scaled_height = scaled_width*(_cover.height()/_cover.width())
+    label.setPixmap(
+        QtGui.QPixmap(_cover).scaled(
+            scaled_width,
+            scaled_height,
+            QtCore.Qt.IgnoreAspectRatio,
+            QtCore.Qt.SmoothTransformation,
+        ),
+    )
+    label.setAlignment(
+        QtCore.Qt.AlignCenter,
+    )
+    # print(widget.x, widget.y)
+    widget.table.setCellWidget(
+        widget.x,
+        widget.y,
+        label,
+    )
+    del label  # delete label (important)
+    del _cover, scaled_width, scaled_height
+    # do not change the following codes
+    # --------------------------------------------------------------
+    if ((widget.x+1)*(widget.y+1))//((widget.x+1)*widget.w_col) == 0:
+        widget.y += 1
     else:
-        page = doc.loadPage(_page)
-        _cover = render_pdf_page(page)
-        label = QtWidgets.QLabel(None)
-        scaled_width, scaled_height = None, None
-        if _cover.height()/_cover.width() > 4/3:
-            scaled_height = (widget.table.width()-15)//widget.w_col*4/3-5
-            scaled_width = scaled_height*(_cover.width()/_cover.height())
-        if _cover.height()/_cover.width() <= 4/3:
-            scaled_width = (widget.table.width()-15)//widget.w_col-5
-            scaled_height = scaled_width*(_cover.height()/_cover.width())
-        label.setPixmap(
-            QtGui.QPixmap(_cover).scaled(
-                scaled_width,
-                scaled_height,
-                QtCore.Qt.IgnoreAspectRatio,
-                QtCore.Qt.SmoothTransformation,
-            ),
-        )
-        label.setAlignment(
-            QtCore.Qt.AlignCenter,
-        )
-        # print(widget.x, widget.y)
-        widget.table.setCellWidget(
-            widget.x,
-            widget.y,
-            label,
-        )
-        del label  # delete label (important)
-        del _cover, scaled_width, scaled_height
-        if ((widget.x+1)*(widget.y+1))//((widget.x+1)*widget.w_col) == 0:
-            widget.y += 1
-        else:
-            widget.x += 1
-            widget.y -= (widget.w_col-1)
-        doc.close()
-        del doc
-        return True
+        widget.x += 1
+        widget.y -= (widget.w_col-1)
+    # --------------------------------------------------------------
+    # doc.close()
+    # del doc
 
 
 def add(main: QWidget,
@@ -260,13 +259,16 @@ def add(main: QWidget,
         '(*.pdf)',
     )
     if _ and (f_name not in widget.book_list):
-        if set_icon(
-                f_name=f_name,
+        doc, state = open_pdf(file_name=f_name)
+        if state:
+            set_icon(
+                doc=doc,
                 widget=widget,
-        ):
+            )
             widget.book_list.append(f_name)
         else:
             pass
+        del doc
     else:
         pass
 
@@ -289,16 +291,23 @@ def delete(index: int,
             book_len=len(widget.book_list),
             widget=widget,
         )
-        for f_name in widget.book_list:
-            # reset images
-            if type(f_name) is str:
-                set_icon(f_name, widget)
-            if type(f_name) is int:
+        # reset images
+        if type(widget.book_list[0]) == int:
+            doc = fitz.open(widget.book_name)
+            for page in widget.book_list:
                 set_icon(
-                    f_name=widget.book_name,
+                    doc=doc,
                     widget=widget,
-                    _page=f_name,
+                    _page=page,
                 )
+            doc.close()
+            del doc
+        else:
+            for f_name in widget.book_list:
+                doc = fitz.open(f_name)
+                set_icon(doc, widget)
+                doc.close()
+                del doc
 
 
 def generate_menu(pos,

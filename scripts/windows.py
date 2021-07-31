@@ -6,7 +6,8 @@ from .basics import (
     MAX_HEIGHT,
 )
 from .styleSheets import (
-    SCROLL_BAR_STYLE,
+    SCROLL_BAR_STYLE_H,
+    SCROLL_BAR_STYLE_V,
     COMBO_BOX_STYLE,
     LINE_EDIT_STYLE1,
     LINE_EDIT_STYLE2,
@@ -66,7 +67,7 @@ class MainR(QTabWidget):
     def tab1_init(self):
         self.tab1.table = QTableWidget(self.tab1)
         self.tab1.scroll_bar = QtWidgets.QScrollBar(self.tab1)
-        self.tab1.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE)
+        self.tab1.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE_V)
         self.tab1.button1 = QPushButton(self.tab1)
         self.tab1.button2 = QPushButton(self.tab1)
         self.tab1.button3 = QPushButton(self.tab1)
@@ -128,7 +129,7 @@ class MainR(QTabWidget):
     def tab2_init(self):
         self.tab2.table = QTableWidget(self.tab2)
         self.tab2.scroll_bar = QtWidgets.QScrollBar(self.tab2)
-        self.tab2.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE)
+        self.tab2.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE_V)
         self.tab2.button1 = QPushButton(self.tab2)
         self.tab2.button2 = QPushButton(self.tab2)
         self.tab2.button3 = QPushButton(self.tab2)
@@ -181,6 +182,7 @@ class MainR(QTabWidget):
         self.tab2.setStyleSheet(BGC_STYLE1)
 
     def tab3_init(self):
+        self.tab3.setStyleSheet(BGC_STYLE2)
         self.tab3.table = QTableWidget(self.tab3)
         self.tab3.table.setShowGrid(False)
         self.tab3.table.verticalHeader().setVisible(False)
@@ -220,7 +222,7 @@ class MainR(QTabWidget):
         self.tab3.button5.setStyleSheet(BUTTON_STYLE3)
         self.tab3.button6.setStyleSheet(BUTTON_STYLE3)
         self.tab3.scroll_bar = QtWidgets.QScrollBar(self.tab3)
-        self.tab3.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE)
+        self.tab3.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE_V)
         self.tab3.button1.setIconSize(QtCore.QSize(40, 40))
         self.tab3.button2.setIconSize(QtCore.QSize(40, 40))
         self.tab3.button3.setIconSize(QtCore.QSize(40, 40))
@@ -235,7 +237,7 @@ class MainR(QTabWidget):
         self.tab3.button3.setGeometry(QtCore.QRect(230, 10, 80, 80))
         self.tab3.button4.setGeometry(QtCore.QRect(1042, 550, 40, 40))
         self.tab3.button5.setGeometry(QtCore.QRect(1042, 600, 40, 40))
-        self.tab3.button6.setGeometry(QtCore.QRect(1080, 760, 40, 40))
+        self.tab3.button6.setGeometry(QtCore.QRect(1090, 760, 40, 40))
         self.tab3.text = QTextEdit(self.tab3)
         self.tab3.line1 = QLineEdit(self.tab3)
         self.tab3.line2 = QLineEdit(self.tab3)
@@ -265,7 +267,7 @@ class MainR(QTabWidget):
         self.tab3.line3.setText('90')
         self.tab3.line4.setText('40')
         self.tab3.line5.setText(' 0')
-        self.tab3.text.setStyleSheet(TEXTEDIT_STYlE)
+        self.tab3.text.setStyleSheet(TEXTEDIT_STYlE.format('14'))
         self.tab3.line1.setStyleSheet(LINE_EDIT_STYLE1.format("#F1F2FF"))
         self.tab3.line2.setStyleSheet(LINE_EDIT_STYLE1.format("#F1F1FF"))
         self.tab3.line3.setStyleSheet(LINE_EDIT_STYLE1.format("#F1F3FF"))
@@ -291,7 +293,7 @@ class MainR(QTabWidget):
         self.tab3.label5.setGeometry(QtCore.QRect(880, 840, 160, 40))
         self.tab3.label6.setGeometry(QtCore.QRect(992, 550, 40, 40))
         self.tab3.label7.setGeometry(QtCore.QRect(850, 550, 100, 40))
-        self.tab3.label8.setGeometry(QtCore.QRect(733, 630, 300, 40))
+        self.tab3.label8.setGeometry(QtCore.QRect(733, 640, 300, 40))
         self.tab3.label9.setGeometry(QtCore.QRect(850, 600, 100, 40))
         self.tab3.label10.setGeometry(QtCore.QRect(992, 600, 40, 40))
         self.tab3.label11.setGeometry(QtCore.QRect(880, 800, 160, 40))
@@ -331,6 +333,7 @@ class MainR(QTabWidget):
         self.tab3.check2.setGeometry(QtCore.QRect(1050, 760, 40, 40))
 
     def tab4_init(self):
+        self.tab4.setStyleSheet(BGC_STYLE2)
         self.tab4.button1 = QPushButton(self.tab4)
         self.tab4.button2 = QPushButton(self.tab4)
         self.tab4.button1.setIcon(QIcon('ico\\new.png'))
@@ -360,15 +363,20 @@ class MainR(QTabWidget):
         self.tab4.table.setStyleSheet(TABLE_STYLE2)
         self.tab4.scroll_bar0 = QtWidgets.QScrollBar(self.tab4)
         self.tab4.scroll_bar1 = QtWidgets.QScrollBar(self.tab4)
-        self.tab4.scroll_bar0.setStyleSheet(SCROLL_BAR_STYLE)
-        self.tab4.scroll_bar1.setStyleSheet(SCROLL_BAR_STYLE)
+        self.tab4.scroll_bar2 = QtWidgets.QScrollBar(self.tab4)
+        self.tab4.scroll_bar0.setStyleSheet(SCROLL_BAR_STYLE_V)
+        self.tab4.scroll_bar1.setStyleSheet(SCROLL_BAR_STYLE_V)
+        self.tab4.scroll_bar2.setStyleSheet(SCROLL_BAR_STYLE_H)
         self.tab4.table.setVerticalScrollBar(self.tab4.scroll_bar0)
         self.tab4.text = QTextEdit(self.tab4)
-        self.tab4.text.setStyleSheet(TEXTEDIT_STYlE)
+        self.tab4.text.setStyleSheet(TEXTEDIT_STYlE.format('12'))
         self.tab4.text.setVerticalScrollBar(self.tab4.scroll_bar1)
+        self.tab4.text.setHorizontalScrollBar(self.tab4.scroll_bar2)
         self.tab4.text.setGeometry(
-            QtCore.QRect(10, 300, self.width()//3-20, self.height()-400),
+            QtCore.QRect(40, 350, self.width()//3-80, self.height()-500),
         )
+        self.tab4.text.setLineWrapColumnOrWidth(2000)
+        self.tab4.text.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.tab4.label1 = QLabel(self.tab4)
         self.tab4.label2 = QLabel(self.tab4)
         self.tab4.label3 = QLabel(self.tab4)
@@ -381,7 +389,7 @@ class MainR(QTabWidget):
         self.tab4.label5.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setText(
             '''
-            {}Catalogue{}
+            {}Catalogue{}\n
             Edit the catalog in the format of 
             \"lvl-->title-->page\"
             e.g.
@@ -396,7 +404,7 @@ class MainR(QTabWidget):
         self.tab4.label4.setText('.'*10+'Subject'+'.'*10)
         self.tab4.label5.setText('.'*10+'Keywords'+'.'*10)
         self.tab4.label1.setGeometry(
-            QtCore.QRect(10, 100, self.width()//3-20, 200),
+            QtCore.QRect(10, 100, self.width()//3-20, 250),
         )
         self.tab4.label2.setGeometry(
             QtCore.QRect(2*self.width()//3+20, 100, self.width()//3-40, 40),
