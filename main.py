@@ -296,10 +296,12 @@ class Main(MainR):
             self.tab1.table.clear()
             self.tab1.x, self.tab1.y = 0, 0
             for item in self.tab1.book_list:
-                if not set_icon(item, self.tab1):
+                doc, state = open_pdf(item)
+                if not state:
                     self.tab1.book_list.remove(item)
                 else:
-                    pass
+                    set_icon(doc, self.tab1)
+                del doc
         else:
             pass
 
@@ -316,19 +318,21 @@ class Main(MainR):
                     '/',
                     '\\',
                 )
-                b_l = pdf_split(self.tab2.book_name)
-                if len(b_l) != 0:
+                doc, state = open_pdf(self.tab2.book_name)
+                if state:
+                    b_l = pdf_split(doc)
                     self.tab2.book_list = b_l
                     book_len = len(self.tab2.book_list)
                     reset_table(book_len, self.tab2)
                     for item in self.tab2.book_list:
                         set_icon(
-                            self.tab2.book_name,
+                            doc,
                             self.tab2,
                             _page=item,
                         )
                 else:
-                    pass
+                    self.tab2.book_name = str()
+                del doc
             else:
                 pass
 
@@ -351,18 +355,18 @@ class Main(MainR):
                 '/',
                 '\\',
             )
-            b_l = pdf_split(self.tab4.book_name)
-            if len(b_l) != 0:
+            doc, state = open_pdf(self.tab4.book_name)
+            if state:
+                b_l = pdf_split(doc)
                 self.tab4.book_list = b_l
                 book_len = len(self.tab4.book_list)
                 reset_table(book_len, self.tab4)
                 for item in self.tab4.book_list:
                     set_icon(
-                        self.tab4.book_name,
+                        doc,
                         self.tab4,
                         _page=item,
                     )
-                doc = fitz.open(self.tab4.book_name)
                 self.tab4.metadata = doc.metadata
                 plaintext = toc2plaintext(doc.get_toc())
                 self.tab4.text.setPlainText(plaintext)
@@ -372,7 +376,7 @@ class Main(MainR):
                 self.tab4.line4.setText(self.tab4.metadata["keywords"])
                 doc.close()
             else:
-                pass
+                self.tab4.book_name = str()
         else:
             pass
 
@@ -423,6 +427,7 @@ class Main(MainR):
         self.PermMenuCD.signal.connect(self.get_perm_para)
 
     def table_flip(self):
+        doc = fitz.open(self.tab2.book_name)
         if self.tab2.click_counts % 2 == 0:
             self.tab2.button5.setToolTip('multi-columns')
             self.tab2.button5.setIcon(QIcon('ico\\col2.png'))
@@ -433,7 +438,7 @@ class Main(MainR):
             reset_table(book_len, self.tab2)
             for item in self.tab2.book_list:
                 set_icon(
-                    self.tab2.book_name,
+                    doc,
                     self.tab2,
                     item,
                 )
@@ -447,7 +452,7 @@ class Main(MainR):
             reset_table(book_len, self.tab2)
             for item in self.tab2.book_list:
                 set_icon(
-                    self.tab2.book_name,
+                    doc,
                     self.tab2,
                     item,
                 )
@@ -475,7 +480,8 @@ class Main(MainR):
             )
             self.tab3.table.clearContents()
             self.tab3.x, self.tab3.y = 0, 0
-            set_icon('', widget=self.tab3, doc_=doc)
+            set_icon(doc, widget=self.tab3)
+            doc.close()
             del doc
 
 
