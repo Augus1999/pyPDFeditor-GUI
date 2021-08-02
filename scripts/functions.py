@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
 import os
+import sys
 import fitz
 import json
 import time
@@ -188,7 +189,7 @@ def setting_warning(set_file_name: str):
             'Cannot find '+set_file_name.split('\\')[-1],
             QMessageBox.Yes | QMessageBox.No,
         )
-        exit()
+        sys.exit(0)
 
 
 def set_icon(doc: fitz.fitz,
