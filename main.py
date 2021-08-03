@@ -116,7 +116,13 @@ class Main(MainR):
         self.tab4.button2.clicked.connect(self.save4)
         set_language(self)
 
-    def enable_preview(self):
+    def closeEvent(self, event) -> None:
+        """
+        close all child windows
+        """
+        sys.exit(0)
+
+    def enable_preview(self) -> None:
         if self.tab3.check1.isChecked():
             self.tab3.text.textChanged.connect(self.preview)
         else:
