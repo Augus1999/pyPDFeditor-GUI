@@ -46,7 +46,7 @@ LINE_EDIT_STYLE1 = '''
         font-size:12pt;
         border-radius:15px;
         background-color:{};
-        color:#382513;
+        color:#212121;
         font-family:calibri
         '''
 LINE_EDIT_STYLE2 = '''

@@ -51,7 +51,7 @@ class MainR(QTabWidget):
         self.setFixedSize(MAX_WIDTH, MAX_HEIGHT)
         self.setWindowTitle('PDF Editor')
         self.setWindowIcon(
-            QIcon('ico\\pdf icon.ico'),
+            QIcon('ico\\pdf icon.svg'),
         )
         self.setTabShape(QTabWidget.Rounded)
         self.setIconSize(QtCore.QSize(40, 40))
@@ -73,11 +73,11 @@ class MainR(QTabWidget):
         self.tab1.button3 = QPushButton(self.tab1)
         self.tab1.button4 = QPushButton(self.tab1)
         self.tab1.button5 = QPushButton(self.tab1)
-        self.tab1.button1.setIcon(QIcon('ico\\new.png'))
-        self.tab1.button2.setIcon(QIcon('ico\\disk.png'))
-        self.tab1.button3.setIcon(QIcon('ico\\settings.png'))
-        self.tab1.button4.setIcon(QIcon('ico\\clean.png'))
-        self.tab1.button5.setIcon(QIcon('ico\\about.png'))
+        self.tab1.button1.setIcon(QIcon('ico\\Add.svg'))
+        self.tab1.button2.setIcon(QIcon('ico\\down.svg'))
+        self.tab1.button3.setIcon(QIcon('ico\\settings.svg'))
+        self.tab1.button4.setIcon(QIcon('ico\\delete.svg'))
+        self.tab1.button5.setIcon(QIcon('ico\\info.svg'))
         self.tab1.button1.setStyleSheet(BUTTON_STYLE1)
         self.tab1.button2.setStyleSheet(BUTTON_STYLE1)
         self.tab1.button3.setStyleSheet(BUTTON_STYLE6)
@@ -114,6 +114,7 @@ class MainR(QTabWidget):
         self.tab1.table.setShowGrid(False)
         self.tab1.table.verticalHeader().setVisible(False)
         self.tab1.table.horizontalHeader().setVisible(False)
+        self.tab1.table.setFocusPolicy(QtCore.Qt.NoFocus)
         self.tab1.table.setHorizontalScrollBarPolicy(
             QtCore.Qt.ScrollBarAlwaysOff,
         )
@@ -135,11 +136,11 @@ class MainR(QTabWidget):
         self.tab2.button3 = QPushButton(self.tab2)
         self.tab2.button4 = QPushButton(self.tab2)
         self.tab2.button5 = QPushButton(self.tab2)
-        self.tab2.button1.setIcon(QIcon('ico\\new.png'))
-        self.tab2.button2.setIcon(QIcon('ico\\disk.png'))
-        self.tab2.button3.setIcon(QIcon('ico\\settings.png'))
-        self.tab2.button4.setIcon(QIcon('ico\\clean.png'))
-        self.tab2.button5.setIcon(QIcon('ico\\col1.png'))
+        self.tab2.button1.setIcon(QIcon('ico\\Add.svg'))
+        self.tab2.button2.setIcon(QIcon('ico\\down.svg'))
+        self.tab2.button3.setIcon(QIcon('ico\\settings.svg'))
+        self.tab2.button4.setIcon(QIcon('ico\\delete.svg'))
+        self.tab2.button5.setIcon(QIcon('ico\\col1.svg'))
         self.tab2.button1.setStyleSheet(BUTTON_STYLE1)
         self.tab2.button2.setStyleSheet(BUTTON_STYLE1)
         self.tab2.button3.setStyleSheet(BUTTON_STYLE6)
@@ -167,6 +168,7 @@ class MainR(QTabWidget):
         self.tab2.table.verticalHeader().setVisible(False)
         self.tab2.table.horizontalHeader().setVisible(False)
         self.tab2.table.setStyleSheet(TABLE_STYLE1)
+        self.tab2.table.setFocusPolicy(QtCore.Qt.NoFocus)
         self.tab2.table.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarAlwaysOn,
         )
@@ -192,6 +194,7 @@ class MainR(QTabWidget):
                          (self.height()-170)*3//4,
                          self.height()-170),
         )
+        self.tab3.table.setFocusPolicy(QtCore.Qt.NoFocus)
         self.tab3.table.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarAlwaysOff,
         )
@@ -209,11 +212,11 @@ class MainR(QTabWidget):
         self.tab3.button4 = QPushButton(self.tab3)
         self.tab3.button5 = QPushButton(self.tab3)
         self.tab3.button6 = QPushButton(self.tab3)
-        self.tab3.button1.setIcon(QIcon('ico\\new.png'))
-        self.tab3.button2.setIcon(QIcon('ico\\disk.png'))
-        self.tab3.button3.setIcon(QIcon('ico\\settings.png'))
-        self.tab3.button4.setIcon(QIcon('ico\\palette.png'))
-        self.tab3.button5.setIcon(QIcon('ico\\view.png'))
+        self.tab3.button1.setIcon(QIcon('ico\\Add.svg'))
+        self.tab3.button2.setIcon(QIcon('ico\\down.svg'))
+        self.tab3.button3.setIcon(QIcon('ico\\settings.svg'))
+        self.tab3.button4.setIcon(QIcon('ico\\color.svg'))
+        self.tab3.button5.setIcon(QIcon('ico\\view.svg'))
         self.tab3.button6.setText('...')
         self.tab3.button1.setStyleSheet(BUTTON_STYLE2)
         self.tab3.button2.setStyleSheet(BUTTON_STYLE2)
@@ -336,8 +339,8 @@ class MainR(QTabWidget):
         self.tab4.setStyleSheet(BGC_STYLE2)
         self.tab4.button1 = QPushButton(self.tab4)
         self.tab4.button2 = QPushButton(self.tab4)
-        self.tab4.button1.setIcon(QIcon('ico\\new.png'))
-        self.tab4.button2.setIcon(QIcon('ico\\disk.png'))
+        self.tab4.button1.setIcon(QIcon('ico\\Add.svg'))
+        self.tab4.button2.setIcon(QIcon('ico\\down.svg'))
         self.tab4.button1.setStyleSheet(BUTTON_STYLE2)
         self.tab4.button2.setStyleSheet(BUTTON_STYLE2)
         self.tab4.button1.setIconSize(QtCore.QSize(40, 40))
@@ -348,6 +351,7 @@ class MainR(QTabWidget):
         self.tab4.table.setShowGrid(False)
         self.tab4.table.verticalHeader().setVisible(True)
         self.tab4.table.horizontalHeader().setVisible(False)
+        self.tab4.table.setFocusPolicy(QtCore.Qt.NoFocus)
         self.tab4.table.setHorizontalScrollBarPolicy(
             QtCore.Qt.ScrollBarAlwaysOff,
         )
@@ -458,7 +462,7 @@ class SettingR(QWidget):
         self.setFixedSize(600, 400)
         self.setWindowTitle('Setting')
         self.setWindowIcon(
-            QIcon('ico\\settings.png'),
+            QIcon('ico\\settings.svg'),
         )
         self.setStyleSheet(BGC_STYLE2)
         self.label1 = QLabel(self)
@@ -477,7 +481,6 @@ class SettingR(QWidget):
         self.combobox = QComboBox(self)
         self.button1.setText('view')
         self.button2.setText('view')
-        self.button3.setText('Apply')
         self.button4.setText('view')
         self.button5.setText('view')
         self.label1.setText('START DIR')
@@ -519,6 +522,7 @@ class SettingR(QWidget):
         self.button4.setGeometry(QtCore.QRect(510, 140, 50, 40))
         self.button5.setGeometry(QtCore.QRect(510, 200, 50, 40))
         self.combobox.setGeometry(QtCore.QRect(370, 260, 180, 40))
+        self.button3.setIcon(QIcon('ico\\checkmark.svg'))
 
 
 class PDFViewR(QtWebEngineWidgets.QWebEngineView):
@@ -530,7 +534,7 @@ class PDFViewR(QtWebEngineWidgets.QWebEngineView):
         self.resize(800, 600)
         self.setWindowTitle('PDF viewer')
         self.setWindowIcon(
-            QIcon('ico\\pdf icon.ico'),
+            QIcon('ico\\pdf icon.svg'),
         )
 
     def view(self, pdf_address, pdf_js_address):
@@ -547,7 +551,7 @@ class AboutR(QWidget):
         super(AboutR, self).__init__()
         self.setFixedSize(350, 200)
         self.setWindowTitle(' ')
-        self.setWindowIcon(QIcon('ico\\about.png'))
+        self.setWindowIcon(QIcon('ico\\info.svg'))
         self.setStyleSheet(BGC_STYLE2)
         self.label = QLabel(self)
         self.label.setText(
@@ -573,7 +577,7 @@ class PermMenuR(QWidget):
         super(PermMenuR, self).__init__()
         self.setFixedSize(400, 240)
         self.setWindowTitle(' ')
-        self.setWindowIcon(QIcon('ico\\tab3.png'))
+        self.setWindowIcon(QIcon('ico\\lock.svg'))
         self.setStyleSheet(BGC_STYLE2)
         self.check1 = QCheckBox(self)
         self.check2 = QCheckBox(self)
@@ -592,7 +596,6 @@ class PermMenuR(QWidget):
         self.label7 = QLabel(self)
         self.label8 = QLabel(self)
         self.button = QPushButton(self)
-        self.button.setText('Apply')
         self.label1.setText('permit print')
         self.label2.setText('allow modify')
         self.label3.setText('allow copy')
@@ -639,3 +642,4 @@ class PermMenuR(QWidget):
         self.check5.setChecked(True)
         self.check6.setChecked(True)
         self.check8.setChecked(True)
+        self.button.setIcon(QIcon('ico\\checkmark.svg'))

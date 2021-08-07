@@ -20,22 +20,22 @@ def set_language(widget: QtWidgets.QWidget):
     """
     widget.addTab(
         widget.tab1,
-        QtGui.QIcon('ico\\tab1.png'),
+        QtGui.QIcon('ico\\merge.svg'),
         TAB_L[widget.language][0],
     )
     widget.addTab(
         widget.tab2,
-        QtGui.QIcon('ico\\tab2.png'),
+        QtGui.QIcon('ico\\edit.svg'),
         TAB_L[widget.language][1],
     )
     widget.addTab(
         widget.tab3,
-        QtGui.QIcon('ico\\tab3.png'),
+        QtGui.QIcon('ico\\lock.svg'),
         TAB_L[widget.language][2],
     )
     widget.addTab(
         widget.tab4,
-        QtGui.QIcon('ico\\tab4.png'),
+        QtGui.QIcon('ico\\metadata.svg'),
         TAB_L[widget.language][3],
     )
     widget.setStyleSheet(

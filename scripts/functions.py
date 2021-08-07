@@ -47,7 +47,7 @@ def open_pdf(file_name: str):
         return None, False
 
 
-def render_pdf_page(page_data):
+def render_pdf_page(page_data) -> QtGui.QPixmap:
     """
     render PDF page
 
@@ -198,7 +198,7 @@ def set_icon(doc: fitz.fitz,
     """
     add image of first page into table element
 
-    :param doc: from open_pdf(.)
+    :param doc: from open_pdf(.) or fitz.open(.)
     :param widget: widget
     :param _page: page index
     :return: None
@@ -333,22 +333,22 @@ def generate_menu(pos,
     if 0 <= index < len(widget.book_list):
         menu = QtWidgets.QMenu()
         item1 = menu.addAction(
-            QtGui.QIcon('ico\\clean.png'),
+            QtGui.QIcon('ico\\delete.svg'),
             'delete',
         )
         item2, item3, item4 = None, None, None
         if select == 0:
             item3 = menu.addAction(
-                QtGui.QIcon('ico\\view.png'),
+                QtGui.QIcon('ico\\view.svg'),
                 'view',
             )
         if select == 1:
             item2 = menu.addAction(
-                QtGui.QIcon('ico\\disk.png'),
+                QtGui.QIcon('ico\\down.svg'),
                 'save as',
             )
             item4 = menu.addAction(
-                QtGui.QIcon('ico\\img.png'),
+                QtGui.QIcon('ico\\Photo.svg'),
                 'extract images',
             )
         action = menu.exec_(

@@ -9,7 +9,7 @@ TAB_L = {
     "日本語": ['ファイル結合', 'ページオルガナイズ', '電子透かし', 'メタデータ']
 }
 FONT_F = {
-    "English": [10, 'calibri'],
-    "中文": [9, 'Microsoft YaHei'],
-    "日本語": [9, 'Microsoft YaHei']
+    "English": [10, 'calibri'],  # calibri
+    "中文": [9, 'Microsoft YaHei'],  # Microsoft YaHei
+    "日本語": [9, 'Microsoft YaHei']  # Microsoft YaHei
 }
