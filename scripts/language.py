@@ -11,7 +11,7 @@ from .basics import (
 )
 
 
-def set_language(widget: QtWidgets.QWidget):
+def set_language(widget: QtWidgets.QWidget) -> None:
     """
     set language
 

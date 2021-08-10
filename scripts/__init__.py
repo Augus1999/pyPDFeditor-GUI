@@ -3,13 +3,9 @@
 from .styleSheets import TAB_STYLE
 from .language import set_language
 from .basics import COLUMN_COUNTER
-from .windows import (
-    MainR,
-    AboutR,
-    SettingR,
-    PDFViewR,
-    PermMenuR,
-)
+from .windows import (MainR, PermMenuR,
+                      AboutR, SettingR,
+                      FontDialogR,)
 from .functions import (
     setting_warning,
     toc2plaintext,
@@ -19,18 +15,23 @@ from .functions import (
     generate_menu,
     reset_table,
     pdf_split,
+    find_font,
     open_pdf,
     set_icon,
     security,
     choose,
     clean,
+    save,
     add,
 )
 __all__ = [
     'MainR',
     'SettingR',
+    'FontDialogR',
     'setting_warning',
     'add',
+    'save',
+    'find_font',
     'reset_table',
     'clean',
     'open_pdf',
@@ -44,7 +45,6 @@ __all__ = [
     'security',
     'COLUMN_COUNTER',
     'set_language',
-    "PDFViewR",
     "choose",
     "AboutR",
     "PermMenuR",

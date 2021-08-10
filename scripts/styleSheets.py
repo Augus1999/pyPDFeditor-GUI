@@ -33,27 +33,21 @@ COMBO_BOX_STYLE = '''
         font-size:12pt;
         font-family:calibri;
         border-radius:2px;
-         background-color:rgba(245,233,190,100)
+        background-color:#daeaef;
+        color:#3c3c3c
         '''
 TEXTEDIT_STYlE = '''
         font-size:{}pt;
         border-radius:5px;
-        background-color:rgba(245,233,190,80);
-        color:#174c4f;
+        background-color:#DAEAEF;
+        color:#3c3c3c;
         font-family:calibri
         '''
-LINE_EDIT_STYLE1 = '''
+LINE_EDIT_STYLE = '''
         font-size:12pt;
         border-radius:15px;
-        background-color:{};
-        color:#212121;
-        font-family:calibri
-        '''
-LINE_EDIT_STYLE2 = '''
-        font-size:12pt;
-        border-radius:15px;
-        color:#363942;
-        background-color:{};
+        background-color:#DAEAEF;
+        color:#3c3c3c;
         font-family:calibri
         '''
 BUTTON_STYLE1 = '''
@@ -75,16 +69,10 @@ BUTTON_STYLE4 = '''
         font-weight:bold;
         font-family:calibri
         '''
-BUTTON_STYLE5 = '''
-        font-size:9t;
-        background-color:rgba(255,255,255,80);
-        color:#A77E5E;
-        font-weight:bold;
-        font-family:calibri
-        '''
 BUTTON_STYLE6 = 'border-radius:10px'
 TABLE_STYLE1 = 'QTableWidget{border:0px;background-color:#FFFFFF}'
-TABLE_STYLE2 = 'QTableWidget{border:0px;background-color:#DAEAEF}'
-LABEL_STYLE = 'font-size:9pt;font-family:calibri'
+TABLE_STYLE2 = 'QTableWidget{border:0px;background-color:#daeaef}'
+LABEL_STYLE1 = 'font-size:10pt;font-family:consolas;color:#3c3c3c'
+LABEL_STYLE2 = 'font-size:10pt;font-family:calibri;color:#3c3c3c'
 BGC_STYLE1 = 'background-color:#DAEAEF'
 BGC_STYLE2 = 'background-color:#FFFFFF'

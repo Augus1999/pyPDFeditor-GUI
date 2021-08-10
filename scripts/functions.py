@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
 # Attention: ignore all warnings in fitz.open(.)
 
 
-def open_pdf(file_name: str):
+def open_pdf(file_name: str) -> (any, bool):
     """
     :param file_name: pdf file name
     :return (doc, bool)
@@ -30,7 +30,7 @@ def open_pdf(file_name: str):
                 None,
                 'Error',
                 'Cannot open an encrypted file.',
-                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes,
             )
             doc.close()
             del doc
@@ -42,12 +42,12 @@ def open_pdf(file_name: str):
             None,
             'Error',
             ' Format error:\n cannot open this file',
-            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes,
         )
         return None, False
 
 
-def render_pdf_page(page_data) -> QtGui.QPixmap:
+def render_pdf_page(page_data: fitz.Document.load_page) -> QtGui.QPixmap:
     """
     render PDF page
 
@@ -75,7 +75,7 @@ def render_pdf_page(page_data) -> QtGui.QPixmap:
     return pixmap
 
 
-def pdf_split(doc: fitz.fitz):
+def pdf_split(doc: fitz.fitz) -> list:
     """
     split the selected PDF file into pages;
 
@@ -99,8 +99,8 @@ def security(input_pdf: str,
              opacity=0.5,
              owner_pass='',
              user_pass='',
-             save=True,
-             select=None):
+             is_save=True,
+             select=None) -> any:
     """
     add password and/or watermark
 
@@ -115,7 +115,7 @@ def security(input_pdf: str,
     :param opacity: opacity of the watermark; range from 0 to 100
     :param owner_pass: owner password
     :param user_pass: user password
-    :param save: bool, whether save or return doc
+    :param is_save: bool, whether save or return doc
     :param select: None or int;
     :return: None if save==True; fitz.doc if save==False
     """
@@ -145,16 +145,16 @@ def security(input_pdf: str,
             fill_opacity=opacity,
             align=1,
             fontfile=font_file,
-            fontname="EXT_0",
+            fontname=os.path.basename(font_file),
             morph=(
                 pos0,
                 fitz.Matrix(rotate)
             ),
         )
         shape.commit()
-    if not save:
+    if not is_save:
         return doc
-    if save:
+    if is_save:
         doc.save(
             output_pdf,
             garbage=1,  # remove unused objects
@@ -167,7 +167,7 @@ def security(input_pdf: str,
         del doc
 
 
-def setting_warning(set_file_name: str):
+def setting_warning(set_file_name: str) -> dict:
     """
     import settings in JSON file
 
@@ -183,18 +183,30 @@ def setting_warning(set_file_name: str):
             content = json.load(f)
         return content
     except FileNotFoundError:
-        QMessageBox.warning(
+        reply = QMessageBox.warning(
             None,
             'Error',
-            'Cannot find '+set_file_name.split('\\')[-1],
+            'Cannot find {}\n\nCreate an empty setting file?'.format(
+                set_file_name.split('\\')[-1],
+            ),
             QMessageBox.Yes | QMessageBox.No,
         )
-        sys.exit(0)
+        if reply == QMessageBox.No:
+            sys.exit(0)
+        if reply == QMessageBox.Yes:
+            content = {
+                "start dir": "",
+                "save dir": "",
+                "language": "English",
+                "font dir": "",
+                "dir store": False
+            }
+            return content
 
 
 def set_icon(doc: fitz.fitz,
              widget: QWidget.window,
-             _page: int = 0):
+             _page: int = 0) -> None:
     """
     add image of first page into table element
 
@@ -245,37 +257,45 @@ def set_icon(doc: fitz.fitz,
 
 
 def add(main: QWidget,
-        widget: QWidget):
+        _format: str) -> (str, bool):
     """
     add a file
 
     :param main: main widget
-    :param widget: widget
-    :return: None
+    :param _format: file format filter, e.g., '(*.pdf)'
+    :return: [f_name, state]
     """
-    f_name, _ = QFileDialog.getOpenFileName(
+    f_name, state = QFileDialog.getOpenFileName(
         None,
         'Open files',
         main.s_dir,
-        '(*.pdf)',
+        _format,
     )
-    if _ and (f_name not in widget.book_list):
-        doc, state = open_pdf(file_name=f_name)
-        if state:
-            set_icon(
-                doc=doc,
-                widget=widget,
-            )
-            widget.book_list.append(f_name)
-        else:
-            pass
-        del doc
-    else:
-        pass
+    main.s_dir = os.path.dirname(f_name.replace('/', '\\'))
+    return f_name.replace('/', '\\'), state
+
+
+def save(main: QWidget,
+         _format: str) -> (str, bool):
+    """
+    save a file
+
+    :param main: main widget
+    :param _format: file format filter, e.g., '.pdf'
+    :return: [f_name, state]
+    """
+    f_name, state = QFileDialog.getSaveFileName(
+        None,
+        "save",
+        main.o_dir + "new.pdf",
+        _format,
+    )
+    main.o_dir = os.path.dirname(f_name.replace('/', '\\'))
+    return f_name.replace('/', '\\'), state
 
 
 def delete(index: int,
-           widget: QWidget):
+           widget: QWidget) -> None:
     """
     delete select file/page
 
@@ -314,7 +334,7 @@ def delete(index: int,
 def generate_menu(pos,
                   widget: QWidget,
                   select: int = 0,
-                  main=None):
+                  main=None) -> None:
     """
     generate menu
 
@@ -382,7 +402,7 @@ def generate_menu(pos,
 
 
 def reset_table(book_len: int,
-                widget: QWidget):
+                widget: QWidget) -> None:
     """
     reset the table element
 
@@ -410,7 +430,7 @@ def reset_table(book_len: int,
 
 def save_as(index: int,
             widget: QWidget,
-            main: QWidget):
+            main: QWidget) -> None:
     """
     save the selected page as PDF file
 
@@ -444,7 +464,7 @@ def save_as(index: int,
     doc.close()
 
 
-def clean(widget: QWidget):
+def clean(widget: QWidget) -> None:
     """
 
     :param widget: widget
@@ -462,7 +482,7 @@ def clean(widget: QWidget):
 
 def extract_img(index: int,
                 widget: QWidget,
-                main: QWidget):
+                main: QWidget) -> None:
     """
     extract images from pdf page.
 
@@ -495,12 +515,12 @@ def extract_img(index: int,
             len(img_inf),
             main.s_dir,
         ),
-        QMessageBox.Yes | QMessageBox.No,
+        QMessageBox.Yes,
     )
 
 
 def choose(widget: QWidget,
-           c_dir: str):
+           c_dir: str) -> None:
     """
 
     :param widget: widget
@@ -519,7 +539,7 @@ def choose(widget: QWidget,
 
 
 def set_metadata0(doc: fitz.open,
-                  author: (str, None)):
+                  author: any) -> None:
     """
     set defeat metadata
 
@@ -547,10 +567,15 @@ def set_metadata1(metadata: dict,
                   title: str,
                   author: str,
                   subject: str,
-                  keywords: str):
+                  keywords: str) -> dict:
     """
     set metadata to pdf document
 
+    :param metadata: the metadata table from pdf file
+    :param title: title
+    :param author: author
+    :param subject: subject
+    :param keywords: keywords
     :return: a dict -> metadata
     """
     _time = time.localtime(time.time())
@@ -570,7 +595,7 @@ def set_metadata1(metadata: dict,
     return metadata
 
 
-def toc2plaintext(toc: list):
+def toc2plaintext(toc: list) -> str:
     """
     :param toc: table of content <- DOCUMENT.get_toc()
     :return: plaintext
@@ -586,7 +611,7 @@ def toc2plaintext(toc: list):
     return plaintext
 
 
-def plaintext2toc(plaintext: str):
+def plaintext2toc(plaintext: str) -> list:
     """
     :param plaintext: plaintext
     :return: table of content -> DOCUMENT.get_toc()
@@ -602,3 +627,26 @@ def plaintext2toc(plaintext: str):
             t.append(int(c[2]))
             toc.append(t)
     return toc
+
+
+def find_font(font_dirs: list) -> (dict, dict):
+    """
+    find all TrueType font files (.ttf): all their font name and file addresses
+
+    :param font_dirs: the directions where font files locate
+    :return: two dictionaries => {font name: font file address} &
+                                 {font file address: font name}
+    """
+    name_dict = dict()
+    dir_dict = dict()
+    for font_dir in font_dirs:
+        for file_name in os.listdir(font_dir):
+            full_name = os.path.join(
+                font_dir.replace('/', '\\'),
+                file_name,
+            )
+            if file_name.endswith('.ttf'):
+                font_name = fitz.Font(fontfile=full_name).name
+                name_dict[font_name] = full_name
+                dir_dict[full_name] = font_name
+    return name_dict, dir_dict
