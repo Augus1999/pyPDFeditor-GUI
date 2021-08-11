@@ -7,7 +7,7 @@ import fitz
 import subprocess as sp
 from scripts import *
 from PyQt5 import QtCore
-from PyQt5.QtGui import QFont, QColor, QRawFont
+from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtWidgets import QApplication, QColorDialog
 # Attention: ignore all warnings in fitz.open(.)
 
@@ -20,6 +20,7 @@ class Main(MainR):
         super(Main, self).__init__()
         content = setting_warning(
             'settings\\settings.json',
+            self,
             )
         if os.path.exists(
                 'settings\\metadata.json',
@@ -46,9 +47,9 @@ class Main(MainR):
         self.language = content["language"]
         self.dir_store_state = content["dir store"]
         self.FontDialogCD = None
-        self.PermMenuCD = PermMenu()
+        self.PermMenuCD = None
         self.SettingCD = None
-        self.About = AboutR()
+        self.About = None
         self.tab1.book_list = list()
         self.tab2.book_list = list()
         self.tab3.book_list = list()
@@ -173,6 +174,7 @@ class Main(MainR):
             self.perm_int = 4028
 
     def _about(self) -> None:
+        self.About = AboutR()
         self.About.show()
 
     @staticmethod
@@ -197,12 +199,19 @@ class Main(MainR):
                     doc = fitz.open('pdf', pdf_bites)
                 doc0.insertPDF(doc)
                 doc.close()
+                del doc
             set_metadata0(doc=doc0, author=self.Author)
             file_name, ok = save(self, '.pdf')
             if ok:
-                doc0.save(file_name, garbage=1)
-                doc0.close()
-                self._view(f_name=file_name)
+                try:
+                    doc0.save(file_name, garbage=1)
+                    doc0.close()
+                    del doc0
+                    self._view(f_name=file_name)
+                except RuntimeError:
+                    _warning(self)
+                except ValueError:
+                    _warning(self)
 
     def save2(self) -> None:
         if len(self.tab2.book_list) != 0:
@@ -211,9 +220,15 @@ class Main(MainR):
             file_name, ok = save(self, '.pdf')
             set_metadata0(doc=doc0, author=self.Author)
             if ok:
-                doc0.save(file_name, garbage=1)
-                doc0.close()
-                self._view(f_name=file_name)
+                try:
+                    doc0.save(file_name, garbage=1)
+                    doc0.close()
+                    del doc0
+                    self._view(f_name=file_name)
+                except RuntimeError:
+                    _warning(self)
+                except ValueError:
+                    _warning(self)
 
     def save3(self) -> None:
         u_password = self.tab3.line1.text()
@@ -225,23 +240,28 @@ class Main(MainR):
         if len(self.tab3.book_list) != 0:
             file_name, ok = save(self, '.pdf')
             if ok:
-                security(
-                    input_pdf=self.tab3.book_list[0],
-                    output_pdf=file_name,
-                    text=watermark,
-                    rotate=rotation,
-                    colour=(self.colour_r,
-                            self.colour_g,
-                            self.colour_b,),
-                    font_size=font_size,
-                    opacity=opacity,
-                    owner_pass=o_password,
-                    user_pass=u_password,
-                    font_file=self.font_dir,
-                    perm=self.perm_int,
-                )
-                if self.tab3.check.isChecked():
-                    self._view(f_name=file_name)
+                try:
+                    security(
+                        input_pdf=self.tab3.book_list[0],
+                        output_pdf=file_name,
+                        text=watermark,
+                        rotate=rotation,
+                        colour=(self.colour_r,
+                                self.colour_g,
+                                self.colour_b,),
+                        font_size=font_size,
+                        opacity=opacity,
+                        owner_pass=o_password,
+                        user_pass=u_password,
+                        font_file=self.font_dir,
+                        perm=self.perm_int,
+                    )
+                    if self.tab3.check.isChecked():
+                        self._view(f_name=file_name)
+                except RuntimeError:
+                    _warning(self)
+                except ValueError:
+                    _warning(self)
 
     def save4(self) -> None:
         title = self.tab4.line1.text()
@@ -262,12 +282,18 @@ class Main(MainR):
             doc.set_metadata(metadata)
             if doc.can_save_incrementally():
                 doc.saveIncr()
+                del doc
             else:
                 file_name, ok = save(self, '.pdf')
                 if ok:
-                    doc.save(file_name, garbage=1)
-                    doc.close()
-                    del doc
+                    try:
+                        doc.save(file_name, garbage=1)
+                        doc.close()
+                        del doc
+                    except RuntimeError:
+                        _warning(self)
+                    except ValueError:
+                        _warning(self)
                 else:
                     doc.close()
                     del doc
@@ -308,12 +334,13 @@ class Main(MainR):
             self.tab1.table.clear()
             self.tab1.x, self.tab1.y = 0, 0
             for item in self.tab1.book_list:
-                doc, state = open_pdf(item)
+                doc, state = open_pdf(item, self)
                 if not state:
                     self.tab1.book_list.remove(item)
                 else:
                     set_icon(doc=doc, widget=self.tab1)
-                del doc
+                    doc.close()
+                del doc, state
         else:
             pass
 
@@ -322,7 +349,7 @@ class Main(MainR):
             f_name, _ = add(self, '(*.pdf)')
             if _:
                 self.tab2.book_name = f_name
-                doc, state = open_pdf(self.tab2.book_name)
+                doc, state = open_pdf(self.tab2.book_name, self)
                 if state:
                     b_l = pdf_split(doc)
                     self.tab2.book_list = b_l
@@ -330,9 +357,10 @@ class Main(MainR):
                     reset_table(book_len, self.tab2)
                     for item in self.tab2.book_list:
                         set_icon(doc=doc, widget=self.tab2, _page=item)
+                    doc.close()
                 else:
                     self.tab2.book_name = str()
-                del doc
+                del doc, state
             else:
                 pass
 
@@ -340,13 +368,14 @@ class Main(MainR):
         if len(self.tab3.book_list) == 0:
             f_name, _ = add(self, '(*.pdf)')
             if _ and (f_name not in self.tab3.book_list):
-                doc, state = open_pdf(file_name=f_name)
+                doc, state = open_pdf(f_name, self)
                 if state:
                     set_icon(doc=doc, widget=self.tab3)
                     self.tab3.book_list.append(f_name)
+                    doc.close()
                 else:
                     pass
-                del doc
+                del doc, state
             else:
                 pass
 
@@ -357,7 +386,7 @@ class Main(MainR):
             self.tab4.table.clear()
             self.tab4.x, self.tab4.y = 0, 0
             self.tab4.book_name = f_name
-            doc, state = open_pdf(self.tab4.book_name)
+            doc, state = open_pdf(self.tab4.book_name, self)
             if state:
                 b_l = pdf_split(doc)
                 self.tab4.book_list = b_l
@@ -375,6 +404,7 @@ class Main(MainR):
                 doc.close()
             else:
                 self.tab4.book_name = str()
+            del doc, state
         else:
             pass
 
@@ -424,6 +454,7 @@ class Main(MainR):
             self.tab3.line4.setText('%.f' % (100*_colour.getRgbF()[3]))
             if self.tab3.check1.isChecked():
                 self.preview()
+        del _colour
 
     def get_font(self) -> None:
         font_paths = QtCore.QStandardPaths.standardLocations(
@@ -439,6 +470,7 @@ class Main(MainR):
         self.FontDialogCD.signal.connect(self.get_font_dir)
 
     def _perm_set(self) -> None:
+        self.PermMenuCD = PermMenu()
         self.PermMenuCD.show()
         self.PermMenuCD.signal.connect(self.get_perm_para)
 
@@ -469,6 +501,8 @@ class Main(MainR):
                         item,
                     )
             self.tab2.clicked = not self.tab2.clicked
+            doc.close()
+            del doc
 
     def preview(self) -> None:
         rotation = int(self.tab3.line5.text())
@@ -606,24 +640,37 @@ class FontDialog(FontDialogR):
         except KeyError:
             pass
         self.change_text_font()
-        self.combobox.currentIndexChanged.connect(self.change_text_font)
+        self.combobox.currentTextChanged.connect(self.change_text_font)
 
     def change_text_font(self) -> None:
-        _raw = QRawFont()
-        _raw.loadFromFile(
-            self.name_dict[self.combobox.currentText()],
-            90,
-            QFont.PreferFullHinting,
+        doc = fitz.open()
+        doc.new_page(-1, 380, 220)
+        r1 = fitz.Rect(10, 10, 370, 210)
+        page = doc.load_page(0)
+        shape = page.newShape()
+        shape.draw_rect(r1)
+        shape.finish()
+        shape.insertTextbox(
+            r1,
+            'Hello\nこんにちは\n你好\n3.14159',
+            color=(0.24, 0.24, 0.24),
+            align=1,
+            fontsize=25,
+            fontfile=self.name_dict[self.combobox.currentText()],
+            fontname='ext_0',
         )
-        if 'bold' in self.combobox.currentText().lower():
-            bold = QFont.Bold
-        else:
-            bold = -1
-        if 'italic' in self.combobox.currentText().lower():
-            italic = True
-        else:
-            italic = False
-        self.text.setFont(QFont(_raw.familyName(), 16, bold, italic))
+        shape.commit()
+        cover = render_pdf_page(page)
+        self.label.setPixmap(
+            QPixmap(cover).scaled(
+                380,
+                220,
+                QtCore.Qt.IgnoreAspectRatio,
+                QtCore.Qt.SmoothTransformation,
+            ),
+        )
+        doc.close()
+        del cover, shape, page, r1, doc
 
     def closeEvent(self, event) -> None:
         self.signal.emit(self.name_dict[self.combobox.currentText()])
@@ -632,6 +679,7 @@ class FontDialog(FontDialogR):
 
 if __name__ == '__main__':
     # 8964
+    fitz.TOOLS.mupdf_display_errors(False)
     arg = sys.argv
     app = QApplication(arg)
     main = Main()

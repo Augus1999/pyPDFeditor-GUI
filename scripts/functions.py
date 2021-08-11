@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
 import os
+import gc
 import sys
 import fitz
 import json
@@ -18,17 +19,19 @@ from PyQt5.QtWidgets import (
 # Attention: ignore all warnings in fitz.open(.)
 
 
-def open_pdf(file_name: str) -> (any, bool):
+def open_pdf(file_name: str,
+             parent: QWidget) -> (any, bool):
     """
     :param file_name: pdf file name
+    :param parent: parent
     :return (doc, bool)
     """
     try:
         doc = fitz.open(file_name)
         if doc.needsPass:
             QMessageBox.critical(
-                None,
-                'Error',
+                parent,
+                'Oops',
                 'Cannot open an encrypted file.',
                 QMessageBox.Yes,
             )
@@ -39,8 +42,8 @@ def open_pdf(file_name: str) -> (any, bool):
             return doc, True
     except RuntimeError:
         QMessageBox.critical(
-            None,
-            'Error',
+            parent,
+            'Oops',
             ' Format error:\n cannot open this file',
             QMessageBox.Yes,
         )
@@ -167,11 +170,13 @@ def security(input_pdf: str,
         del doc
 
 
-def setting_warning(set_file_name: str) -> dict:
+def setting_warning(set_file_name: str,
+                    parent: QWidget) -> dict:
     """
     import settings in JSON file
 
     :param set_file_name: JSON file name
+    :param parent: parent
     :return: a dict loaded from JSON file
     """
     try:
@@ -184,7 +189,7 @@ def setting_warning(set_file_name: str) -> dict:
         return content
     except FileNotFoundError:
         reply = QMessageBox.warning(
-            None,
+            parent,
             'Error',
             'Cannot find {}\n\nCreate an empty setting file?'.format(
                 set_file_name.split('\\')[-1],
@@ -236,7 +241,6 @@ def set_icon(doc: fitz.fitz,
     label.setAlignment(
         QtCore.Qt.AlignCenter,
     )
-    # print(widget.x, widget.y)
     widget.table.setCellWidget(
         widget.x,
         widget.y,
@@ -252,8 +256,6 @@ def set_icon(doc: fitz.fitz,
         widget.x += 1
         widget.y -= (widget.w_col-1)
     # --------------------------------------------------------------
-    # doc.close()
-    # del doc
 
 
 def add(main: QWidget,
@@ -266,7 +268,7 @@ def add(main: QWidget,
     :return: [f_name, state]
     """
     f_name, state = QFileDialog.getOpenFileName(
-        None,
+        main,
         'Open files',
         main.s_dir,
         _format,
@@ -285,7 +287,7 @@ def save(main: QWidget,
     :return: [f_name, state]
     """
     f_name, state = QFileDialog.getSaveFileName(
-        None,
+        main,
         "save",
         main.o_dir + "new.pdf",
         _format,
@@ -446,7 +448,7 @@ def save_as(index: int,
         widget.book_list[index]+1,
     )
     file_name, ok = QFileDialog.getSaveFileName(
-        None,
+        main,
         "save",
         main.o_dir + f_name,
         "PDF file (*.pdf);;images (*.png *.jpg)",
@@ -462,6 +464,7 @@ def save_as(index: int,
             )
             pix.writePNG(file_name.replace('/', '\\'))
     doc.close()
+    del doc
 
 
 def clean(widget: QWidget) -> None:
@@ -478,6 +481,7 @@ def clean(widget: QWidget) -> None:
         book_len=1,
         widget=widget,
     )
+    gc.collect(2)
 
 
 def extract_img(index: int,
@@ -509,7 +513,7 @@ def extract_img(index: int,
         # ignore the warning here
         img.writePNG(img_name)
     QMessageBox.information(
-        None,
+        main,
         'Saved',
         '{} images saved to {}'.format(
             len(img_inf),
@@ -519,7 +523,7 @@ def extract_img(index: int,
     )
 
 
-def choose(widget: QWidget,
+def choose(widget: QtWidgets.QLineEdit,
            c_dir: str) -> None:
     """
 
@@ -645,8 +649,23 @@ def find_font(font_dirs: list) -> (dict, dict):
                 font_dir.replace('/', '\\'),
                 file_name,
             )
-            if file_name.endswith('.ttf'):
+            try:
                 font_name = fitz.Font(fontfile=full_name).name
                 name_dict[font_name] = full_name
                 dir_dict[full_name] = font_name
+            except RuntimeError:
+                pass
     return name_dict, dir_dict
+
+
+def _warning(parent) -> None:
+    """
+    :param parent: parent
+    :return: None
+    """
+    QMessageBox.warning(
+        parent,
+        'Oops',
+        'Cannot save! Try a new file name...',
+        QMessageBox.Yes,
+    )
