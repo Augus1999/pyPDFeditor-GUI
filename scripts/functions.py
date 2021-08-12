@@ -12,34 +12,53 @@ from PyQt5 import (
     QtWidgets,
 )
 from PyQt5.QtWidgets import (
+    QInputDialog,
     QFileDialog,
     QMessageBox,
+    QLineEdit,
     QWidget,
 )
 # Attention: ignore all warnings in fitz.open(.)
 
 
 def open_pdf(file_name: str,
-             parent: QWidget) -> (any, bool):
+             parent: QWidget) -> (any, bool, any):
     """
     :param file_name: pdf file name
     :param parent: parent
-    :return (doc, bool)
+    :return (doc, bool, name)
     """
     try:
         doc = fitz.open(file_name)
         if doc.needsPass:
-            QMessageBox.critical(
-                parent,
-                'Oops',
-                'Cannot open an encrypted file.',
-                QMessageBox.Yes,
+            while doc.is_encrypted:
+                value, _ = QInputDialog.getText(
+                    parent,
+                    '',
+                    'Password:',
+                    QLineEdit.Password,
+                    '',
+                    QtCore.Qt.Dialog,
+                )
+                if not _:
+                    doc.close()
+                    del doc
+                    return None, False, None
+                else:
+                    doc.authenticate(value)
+            outfile = os.path.join(
+                os.path.dirname(file_name),
+                os.path.basename(file_name).split('.')[0] + '_d.pdf',
             )
-            doc.close()
-            del doc
-            return None, False
+            doc.save(
+                outfile,
+                garbage=4,
+                owner_pw=None,
+                user_pw=None,
+            )
+            return doc, True, outfile
         else:
-            return doc, True
+            return doc, True, file_name
     except RuntimeError:
         QMessageBox.critical(
             parent,
@@ -47,7 +66,7 @@ def open_pdf(file_name: str,
             ' Format error:\n cannot open this file',
             QMessageBox.Yes,
         )
-        return None, False
+        return None, False, None
 
 
 def render_pdf_page(page_data: fitz.Document.load_page) -> QtGui.QPixmap:
@@ -186,6 +205,16 @@ def setting_warning(set_file_name: str,
                 encoding='utf-8',
         ) as f:
             content = json.load(f)
+        if "start dir" not in content:
+            content["start dir"] = ""
+        if "save dir" not in content:
+            content["save dir"] = ""
+        if "font dir" not in content:
+            content["font dir"] = ""
+        if "language" not in content:
+            content["language"] = "English"
+        if "dir store" not in content:
+            content["dir store"] = False
         return content
     except FileNotFoundError:
         reply = QMessageBox.warning(

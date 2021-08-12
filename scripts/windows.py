@@ -2,24 +2,7 @@
 # Author: Nianze A. TAO
 from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap
 from .basics import MAX_WIDTH, MAX_HEIGHT
-from .styleSheets import (
-    SCROLL_BAR_STYLE_H,
-    SCROLL_BAR_STYLE_V,
-    COMBO_BOX_STYLE,
-    LINE_EDIT_STYLE,
-    TEXTEDIT_STYlE,
-    BUTTON_STYLE1,
-    BUTTON_STYLE2,
-    BUTTON_STYLE3,
-    BUTTON_STYLE4,
-    BUTTON_STYLE6,
-    TABLE_STYLE1,
-    TABLE_STYLE2,
-    LABEL_STYLE1,
-    LABEL_STYLE2,
-    BGC_STYLE1,
-    BGC_STYLE2,
-)
+from .styleSheets import *
 from PyQt5 import (
     QtCore,
     QtWidgets,
@@ -779,7 +762,6 @@ class FontDialogR(QWidget):
         self.combobox.setGeometry(QtCore.QRect(10, 10, 380, 40))
         self.combobox.setStyleSheet(COMBO_BOX_STYLE)
         self.label = QLabel(self)
-        # self.label.setText('Hello\nこんにちは\n你好\n3.14159')
         self.label.setAlignment(QtCore.Qt.AlignTop)
         self.label.setGeometry(QtCore.QRect(10, 60, 380, 220))
         self.setWindowOpacity(0.92)
