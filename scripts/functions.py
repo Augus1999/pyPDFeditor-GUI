@@ -24,6 +24,8 @@ from PyQt5.QtWidgets import (
 def open_pdf(file_name: str,
              parent: QWidget) -> (any, bool, any):
     """
+    open pdf file and return a fitz object if applied
+
     :param file_name: pdf file name
     :param parent: parent
     :return (doc, bool, name)
@@ -192,7 +194,7 @@ def security(input_pdf: str,
 def setting_warning(set_file_name: str,
                     parent: QWidget) -> dict:
     """
-    import settings in JSON file
+    import settings from the JSON file
 
     :param set_file_name: JSON file name
     :param parent: parent
@@ -213,6 +215,11 @@ def setting_warning(set_file_name: str,
             content["font dir"] = ""
         if "language" not in content:
             content["language"] = "English"
+        else:
+            if content["language"] not in ["English", "中文", "日本語"]:
+                content["language"] = "English"
+            else:
+                pass
         if "dir store" not in content:
             content["dir store"] = False
         return content
@@ -302,7 +309,8 @@ def add(main: QWidget,
         main.s_dir,
         _format,
     )
-    main.s_dir = os.path.dirname(f_name.replace('/', '\\'))
+    if state:
+        main.s_dir = os.path.dirname(f_name.replace('/', '\\'))
     return f_name.replace('/', '\\'), state
 
 
@@ -321,7 +329,8 @@ def save(main: QWidget,
         main.o_dir + "new.pdf",
         _format,
     )
-    main.o_dir = os.path.dirname(f_name.replace('/', '\\'))
+    if state:
+        main.o_dir = os.path.dirname(f_name.replace('/', '\\'))
     return f_name.replace('/', '\\'), state
 
 
@@ -498,6 +507,7 @@ def save_as(index: int,
 
 def clean(widget: QWidget) -> None:
     """
+    clear the table contents
 
     :param widget: widget
     :return: None
@@ -555,6 +565,7 @@ def extract_img(index: int,
 def choose(widget: QtWidgets.QLineEdit,
            c_dir: str) -> None:
     """
+    choose folder
 
     :param widget: widget
     :param c_dir: from where to choose

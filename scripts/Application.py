@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
-import os
 import sys
 import json
 import fitz
+import getpass
 import subprocess as sp
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
@@ -31,18 +31,7 @@ class Main(MainR):
             'settings\\settings.json',
             self,
             )
-        if os.path.exists(
-                'settings\\metadata.json',
-        ):
-            with open(
-                'settings\\metadata.json',
-                mode='r',
-                encoding='utf-8',
-            ) as m:
-                metadata = json.load(m)
-            self.Author = metadata["Author"]
-        else:
-            self.Author = None
+        self.Author = getpass.getuser()
         self.move(100, 20)
         self.colour_r = 0.24
         self.colour_g = 0.24
@@ -56,7 +45,7 @@ class Main(MainR):
         self.language = content["language"]
         self.dir_store_state = content["dir store"]
         self.FontDialogCD = None
-        self.PermMenuCD = None
+        self.PermMenuCD = PermMenu()
         self.SettingCD = None
         self.About = None
         self.tab1.book_list = list()
@@ -480,7 +469,6 @@ class Main(MainR):
         self.FontDialogCD.signal.connect(self.get_font_dir)
 
     def _perm_set(self) -> None:
-        self.PermMenuCD = PermMenu()
         self.PermMenuCD.show()
         self.PermMenuCD.signal.connect(self.get_perm_para)
 

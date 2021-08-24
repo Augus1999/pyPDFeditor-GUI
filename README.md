@@ -1,6 +1,6 @@
 # pyPDFeditor-GUI
 
-This project is based on PyQt5 and PyMuPDF and tested on Python 3.8.6 on Win10.
+This project is based on PyQt5 and PyMuPDF and tested on Python 3.8.6 & 3.9.6 on Windows 10.
 
 ## Welcome
 
@@ -17,12 +17,12 @@ Run `$ python pdfEditor.py` to open the application window.
 
 
 
-If you are working on Windows platform and having no Python3 installed, download pyinstaller-prepackaged executable files [here](https://github.com/Augus1999/pyPDFeditor-GUI/releases).
+If you are working on Windows platform and having no Python 3 installed, download pyinstaller-prepackaged executable files [here](https://github.com/Augus1999/pyPDFeditor-GUI/releases).
 
 ## Screenshot
 <img src="./ico/workspace.jpg" width="600" alt="whole windows"/>
 
 ## Others
 
-I wrote this scripts as robust as possible. If you encountered any crash and could not see any error from PyQt, open the python file `pdfEditor.py` in IDE, find line 8, change the state `debug=False` into `debug=True`, and run the application again. Then you will see all pymupdf errors in terminal. Please report these errors to [Issues](https://github.com/Augus1999/pyPDFeditor-GUI/issues). Thank you!
+I wrote this scripts as robust as possible. If you encountered any crash and could not see any error from PyQt and python itself, open the python file `pdfEditor.py` in IDE, find line 8, change the state `debug=False` into `debug=True`, and run the application again. Then you will see all mupdf errors in terminal. Please report these errors to [Issues](https://github.com/Augus1999/pyPDFeditor-GUI/issues). Thank you!
 
