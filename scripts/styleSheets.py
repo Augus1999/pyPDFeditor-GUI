@@ -16,16 +16,16 @@ TAB_STYLE = '''
         border-right:1px solid #E5E5E5}}
         '''
 SCROLL_BAR_STYLE_V = '''
-        QScrollBar:vertical{width:15px}
+        QScrollBar:vertical{width:10px}
         QScrollBar::handle:vertical{
-        background-color:#F1F1FF;
+        background-color:#c3c3c3;
         border-radius:1px;
         min-height:45px}
         '''
 SCROLL_BAR_STYLE_H = '''
         QScrollBar:horizontal{width:15px}
         QScrollBar::handle:horizontal{
-        background-color:#F1F1FF;
+        background-color:#c3c3c3;
         border-radius:1px;
         min-height:45px}
         '''

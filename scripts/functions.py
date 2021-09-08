@@ -261,10 +261,10 @@ def set_icon(doc: fitz.fitz,
     label = QtWidgets.QLabel(None)
     scaled_width, scaled_height = int, int
     if _cover.height()/_cover.width() > 4/3:
-        scaled_height = (widget.table.width()-15)//widget.w_col*4/3-5
+        scaled_height = widget.table.width()//widget.w_col*4/3*0.95
         scaled_width = scaled_height*(_cover.width()/_cover.height())
     if _cover.height()/_cover.width() <= 4/3:
-        scaled_width = (widget.table.width()-15)//widget.w_col-5
+        scaled_width = widget.table.width()//widget.w_col*0.95
         scaled_height = scaled_width*(_cover.height()/_cover.width())
     label.setPixmap(
         QtGui.QPixmap(_cover).scaled(
@@ -459,12 +459,12 @@ def reset_table(book_len: int,
     for i in range(widget.w_col):
         widget.table.setColumnWidth(
             i,
-            (widget.table.width()-15)//widget.w_col,
+            widget.table.width()//widget.w_col,
         )
     for i in range(widget.w_row):
         widget.table.setRowHeight(
             i,
-            ((widget.table.width()-15)//widget.w_col)*4//3,
+            (widget.table.width()//widget.w_col)*4//3,
         )
 
 

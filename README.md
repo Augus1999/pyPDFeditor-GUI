@@ -4,7 +4,7 @@ This project is based on PyQt5 and PyMuPDF and tested on Python 3.8.6 & 3.9.6 on
 
 ## Welcome
 
-<img src=".\ico\pdf icon.svg" style="zoom: 33%;" />
+<img src=".\ico\pdf icon.svg" style="zoom: 20%;" />
 
 Welcome to use pyPDFeditor-GUI. pyPDFeditor-GUI is a simple cross-platform application, thanks to [Python](https://www.python.org/), [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) and [PyMuPDF](https://github.com/pymupdf/PyMuPDF), designed to work on simple PDF handling including merging files, organising pages, saving page as image, extracting images from page, setting passwords (user or/and owner password), and adding watermarks.
 

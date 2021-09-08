@@ -9,7 +9,6 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtWidgets import QApplication, QColorDialog
 from .language import set_language
-from .basics import COLUMN_COUNTER
 from .windows import (MainR, PermMenuR,
                       AboutR, SettingR,
                       FontDialogR,)
@@ -60,8 +59,8 @@ class Main(MainR):
         self.tab2.x, self.tab2.y = 0, 0
         self.tab3.x, self.tab3.y = 0, 0
         self.tab4.x, self.tab4.y = 0, 0
-        self.tab1.w_col, self.tab1.w_row = COLUMN_COUNTER, 1
-        self.tab2.w_row, self.tab2.w_col = 2, COLUMN_COUNTER
+        self.tab1.w_col, self.tab1.w_row = 4, 1
+        self.tab2.w_row, self.tab2.w_col = 2, 4
         self.tab3.w_row, self.tab3.w_col = 1, 1
         self.tab4.w_row, self.tab4.w_col = 2, 1
         self.tab1.table.setRowCount(self.tab1.w_row)
@@ -72,8 +71,8 @@ class Main(MainR):
         self.tab2.table.setColumnCount(self.tab2.w_col)
         self.tab3.table.setColumnCount(self.tab3.w_col)
         self.tab4.table.setColumnCount(self.tab4.w_col)
-        tab1_width = (self.tab1.table.width()-15)//self.tab1.w_col
-        tab2_width = (self.tab2.table.width()-15)//self.tab2.w_col
+        tab1_width = self.tab1.table.width()//self.tab1.w_col
+        tab2_width = self.tab2.table.width()//self.tab2.w_col
         for i in range(self.tab1.w_col):
             self.tab1.table.setColumnWidth(i, tab1_width)
         for i in range(self.tab1.w_row):
@@ -490,7 +489,7 @@ class Main(MainR):
                     )
             if self.tab2.clicked:
                 self.tab2.button5.setToolTip('dual columns')
-                self.tab2.w_col = COLUMN_COUNTER
+                self.tab2.w_col = 4
                 reset_table(book_len, self.tab2)
                 for item in self.tab2.book_list:
                     set_icon(
