@@ -187,6 +187,7 @@ class MainR(QTabWidget):
             QIcon('ico\\pdf icon.svg'),
         )
         self.setTabShape(QTabWidget.Rounded)
+        self.setTabPosition(QTabWidget.North)
         self.setIconSize(
             QtCore.QSize(self.icon_size, self.icon_size),
         )

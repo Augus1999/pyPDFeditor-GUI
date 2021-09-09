@@ -438,7 +438,7 @@ def generate_menu(pos,
                 main=main,
             )
         if action == item3 and select == 0 and main is not None:
-            main.view(index, widget)
+            main._view(index, widget)
 
 
 def reset_table(book_len: int,
@@ -455,6 +455,7 @@ def reset_table(book_len: int,
     else:
         w_row = book_len//widget.w_col + 1
     widget.w_row = w_row
+    widget.table.setColumnCount(widget.w_col)
     widget.table.setRowCount(widget.w_row)
     for i in range(widget.w_col):
         widget.table.setColumnWidth(

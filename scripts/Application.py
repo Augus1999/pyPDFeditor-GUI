@@ -421,7 +421,9 @@ class Main(MainR):
         self.o_dir = par2
         self.dir_store_state = par3
         self.language = par5
+        i = self.currentIndex()
         set_language(self)
+        self.setCurrentIndex(i)
 
     def get_perm_para(self,
                       par) -> None:
@@ -473,6 +475,7 @@ class Main(MainR):
 
     def table_flip(self) -> None:
         if len(self.tab2.book_list) != 0:
+            print('?')
             doc = fitz.open(self.tab2.book_name)
             self.tab2.table.clearContents()
             self.tab2.x, self.tab2.y = 0, 0
