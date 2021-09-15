@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
-from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap
+from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, QTransform
 from .styleSheets import *
 from PyQt5 import (
     QtCore,
@@ -8,6 +8,7 @@ from PyQt5 import (
 )
 from PyQt5.QtWidgets import (
     QWidget,
+    QGridLayout,
     QTabWidget,
     QLabel,
     QTextEdit,
@@ -84,12 +85,12 @@ class SwitchBtn(QWidget):
         painter = QPainter()
         painter.begin(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        self.draw_bg(evt, painter)
-        self.draw_text(evt, painter)
-        self.draw_slider(evt, painter)
+        self.draw_bg(painter)
+        self.draw_text(painter)
+        self.draw_slider(painter)
         painter.end()
 
-    def draw_text(self, event, painter) -> None:
+    def draw_text(self, painter) -> None:
         painter.save()
         if self.checked:
             painter.setPen(self.textColorOn)
@@ -113,7 +114,7 @@ class SwitchBtn(QWidget):
             )
         painter.restore()
 
-    def draw_bg(self, event, painter) -> None:
+    def draw_bg(self, painter) -> None:
         painter.save()
         painter.setPen(QtCore.Qt.NoPen)
         if self.checked:
@@ -150,7 +151,7 @@ class SwitchBtn(QWidget):
         painter.drawPath(path)
         painter.restore()
 
-    def draw_slider(self, event, painter) -> None:
+    def draw_slider(self, painter) -> None:
         painter.save()
         painter.setPen(QtCore.Qt.NoPen)
         if self.checked:
@@ -179,18 +180,16 @@ class MainR(QTabWidget):
         screen_rect = desktop.screenGeometry()
         height = screen_rect.height()*0.88  # 950
         width = height*1.36  # 1290
-        self.icon_size = height*0.04
-        self.icon_size_2 = height*0.03
-        self.setFixedSize(width, height)
+        self.size1 = height * 0.04
+        self.size2 = height * 0.03
+        self.resize(width, height)
+        self.setMinimumSize(width * 0.9, height * 0.9)
         self.setWindowTitle('PDF Editor')
-        self.setWindowIcon(
-            QIcon('ico\\pdf icon.svg'),
-        )
+        self.setWindowIcon(QIcon('ico\\pdf icon.svg'))
         self.setTabShape(QTabWidget.Rounded)
-        self.setTabPosition(QTabWidget.North)
-        self.setIconSize(
-            QtCore.QSize(self.icon_size, self.icon_size),
-        )
+        self.setTabPosition(QTabWidget.West)
+        self.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.setStyleSheet(TAB_STYLE)
         self.tab1 = QWidget()
         self.tab2 = QWidget()
         self.tab3 = QWidget()
@@ -199,11 +198,34 @@ class MainR(QTabWidget):
         self.tab2_init()
         self.tab3_init()
         self.tab4_init()
+        matrix = QTransform()
+        matrix.rotate(90)
+        self.addTab(
+            self.tab1,
+            QIcon(QPixmap('ico\\merge.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
+            '',
+        )
+        self.addTab(
+            self.tab2,
+            QIcon(QPixmap('ico\\edit.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
+            '',
+        )
+        self.addTab(
+            self.tab3,
+            QIcon(QPixmap('ico\\lock.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
+            '',
+        )
+        self.addTab(
+            self.tab4,
+            QIcon(QPixmap('ico\\metadata.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
+            '',
+        )
 
     def tab1_init(self) -> None:
+        grid = QGridLayout(self.tab1)
         self.tab1.table = QTableWidget(self.tab1)
         self.tab1.scroll_bar = QtWidgets.QScrollBar(self.tab1)
-        self.tab1.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE_V)
+        self.tab1.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE)
         self.tab1.button1 = QPushButton(self.tab1)
         self.tab1.button2 = QPushButton(self.tab1)
         self.tab1.button3 = QPushButton(self.tab1)
@@ -214,39 +236,22 @@ class MainR(QTabWidget):
         self.tab1.button3.setIcon(QIcon('ico\\settings.svg'))
         self.tab1.button4.setIcon(QIcon('ico\\delete.svg'))
         self.tab1.button5.setIcon(QIcon('ico\\info.svg'))
-        self.tab1.button1.setStyleSheet(BUTTON_STYLE1)
-        self.tab1.button2.setStyleSheet(BUTTON_STYLE1)
-        self.tab1.button3.setStyleSheet(BUTTON_STYLE6)
-        self.tab1.button4.setStyleSheet(BUTTON_STYLE1)
-        self.tab1.button5.setStyleSheet(BUTTON_STYLE6)
-        self.tab1.button1.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab1.button2.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab1.button3.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab1.button4.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab1.button5.setIconSize(QtCore.QSize(self.icon_size_2, self.icon_size_2))
-        self.tab1.table.setGeometry(
-            QtCore.QRect(0, int(self.height()*0.1), self.width(), int(self.height()*0.82)),
-        )
-        self.tab1.button1.setGeometry(
-            QtCore.QRect(int(self.width()*0.008), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab1.button2.setGeometry(
-            QtCore.QRect(int(self.width()*0.09), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab1.button3.setGeometry(
-            QtCore.QRect(int(self.width()*0.18), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab1.button4.setGeometry(
-            QtCore.QRect(int(self.width()*0.31), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab1.button5.setGeometry(
-            QtCore.QRect(int(self.width()*0.94), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab1.button3.setToolTip('Settings')
-        self.tab1.button5.setToolTip('about')
-        self.tab1.table.setVerticalScrollBar(
-            self.tab1.scroll_bar,
-        )
+        self.tab1.button1.setStyleSheet(BUTTON_STYLE)
+        self.tab1.button2.setStyleSheet(BUTTON_STYLE)
+        self.tab1.button3.setStyleSheet(BUTTON_STYLE)
+        self.tab1.button4.setStyleSheet(BUTTON_STYLE)
+        self.tab1.button5.setStyleSheet(BUTTON_STYLE)
+        self.tab1.button1.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab1.button2.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab1.button3.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab1.button4.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab1.button5.setIconSize(QtCore.QSize(self.size2, self.size2))
+        self.tab1.button1.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab1.button2.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab1.button3.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab1.button4.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab1.button5.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab1.table.setVerticalScrollBar(self.tab1.scroll_bar)
         self.tab1.table.setShowGrid(False)
         self.tab1.table.verticalHeader().setVisible(False)
         self.tab1.table.horizontalHeader().setVisible(False)
@@ -262,11 +267,18 @@ class MainR(QTabWidget):
             QtCore.Qt.CustomContextMenu,
         )
         self.tab1.setStyleSheet(BGC_STYLE1)
+        grid.addWidget(self.tab1.button1, 0, 0)
+        grid.addWidget(self.tab1.button2, 0, 1)
+        grid.addWidget(self.tab1.button3, 0, 2)
+        grid.addWidget(self.tab1.button4, 0, 3)
+        grid.addWidget(self.tab1.button5, 0, 8)
+        grid.addWidget(self.tab1.table, 1, 0, 10, 9)
 
     def tab2_init(self) -> None:
+        grid = QGridLayout(self.tab2)
         self.tab2.table = QTableWidget(self.tab2)
         self.tab2.scroll_bar = QtWidgets.QScrollBar(self.tab2)
-        self.tab2.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE_V)
+        self.tab2.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE)
         self.tab2.button1 = QPushButton(self.tab2)
         self.tab2.button2 = QPushButton(self.tab2)
         self.tab2.button3 = QPushButton(self.tab2)
@@ -277,36 +289,21 @@ class MainR(QTabWidget):
         self.tab2.button3.setIcon(QIcon('ico\\settings.svg'))
         self.tab2.button4.setIcon(QIcon('ico\\delete.svg'))
         self.tab2.button5.setIcon(QIcon('ico\\pane.svg'))
-        self.tab2.button1.setStyleSheet(BUTTON_STYLE1)
-        self.tab2.button2.setStyleSheet(BUTTON_STYLE1)
-        self.tab2.button3.setStyleSheet(BUTTON_STYLE6)
-        self.tab2.button4.setStyleSheet(BUTTON_STYLE1)
-        self.tab2.button5.setStyleSheet(BUTTON_STYLE6)
-        self.tab2.button1.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab2.button2.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab2.button3.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab2.button4.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab2.button5.setIconSize(QtCore.QSize(self.icon_size_2, self.icon_size_2))
-        self.tab2.table.setGeometry(
-            QtCore.QRect(0, int(self.height()*0.1), self.width(), int(self.height()*0.82)),
-        )
-        self.tab2.button1.setGeometry(
-            QtCore.QRect(int(self.width()*0.008), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab2.button2.setGeometry(
-            QtCore.QRect(int(self.width()*0.09), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab2.button3.setGeometry(
-            QtCore.QRect(int(self.width()*0.18), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab2.button4.setGeometry(
-            QtCore.QRect(int(self.width()*0.31), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab2.button5.setGeometry(
-            QtCore.QRect(int(self.width()*0.94), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab2.button3.setToolTip('Settings')
-        self.tab2.button5.setToolTip('dual columns')
+        self.tab2.button1.setStyleSheet(BUTTON_STYLE)
+        self.tab2.button2.setStyleSheet(BUTTON_STYLE)
+        self.tab2.button3.setStyleSheet(BUTTON_STYLE)
+        self.tab2.button4.setStyleSheet(BUTTON_STYLE)
+        self.tab2.button5.setStyleSheet(BUTTON_STYLE)
+        self.tab2.button1.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab2.button2.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab2.button3.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab2.button4.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab2.button5.setIconSize(QtCore.QSize(self.size2, self.size2))
+        self.tab2.button1.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab2.button2.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab2.button3.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab2.button4.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab2.button5.setFixedSize(self.size1 * 2, self.size1 * 2)
         self.tab2.table.setShowGrid(False)
         self.tab2.table.setVerticalScrollBar(self.tab2.scroll_bar)
         self.tab2.table.verticalHeader().setVisible(False)
@@ -326,16 +323,20 @@ class MainR(QTabWidget):
             QtCore.Qt.CustomContextMenu,
         )
         self.tab2.setStyleSheet(BGC_STYLE1)
+        grid.addWidget(self.tab2.button1, 0, 0)
+        grid.addWidget(self.tab2.button2, 0, 1)
+        grid.addWidget(self.tab2.button3, 0, 2)
+        grid.addWidget(self.tab2.button4, 0, 3)
+        grid.addWidget(self.tab2.button5, 0, 8)
+        grid.addWidget(self.tab2.table, 1, 0, 10, 9)
 
     def tab3_init(self) -> None:
+        grid = QGridLayout(self.tab3)
         self.tab3.setStyleSheet(BGC_STYLE2)
         self.tab3.table = QTableWidget(self.tab3)
-        self.tab3.table.setShowGrid(False)
+        self.tab3.table.setShowGrid(True)
         self.tab3.table.verticalHeader().setVisible(False)
         self.tab3.table.horizontalHeader().setVisible(False)
-        self.tab3.table.setGeometry(
-            QtCore.QRect(self.icon_size_2, int(self.height()*0.11), int(self.height()*0.6), int(self.height()*0.8)),
-        )
         self.tab3.table.setFocusPolicy(QtCore.Qt.NoFocus)
         self.tab3.table.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarAlwaysOff,
@@ -362,48 +363,30 @@ class MainR(QTabWidget):
         self.tab3.button5.setIcon(QIcon('ico\\view.svg'))
         self.tab3.button6.setIcon(QIcon('ico\\row.svg'))
         self.tab3.button7.setIcon(QIcon('ico\\font.svg'))
-        self.tab3.button1.setStyleSheet(BUTTON_STYLE2)
-        self.tab3.button2.setStyleSheet(BUTTON_STYLE2)
-        self.tab3.button3.setStyleSheet(BUTTON_STYLE6)
-        self.tab3.button4.setStyleSheet(BUTTON_STYLE3)
-        self.tab3.button5.setStyleSheet(BUTTON_STYLE3)
-        self.tab3.button6.setStyleSheet(BUTTON_STYLE3)
-        self.tab3.button7.setStyleSheet(BUTTON_STYLE3)
+        self.tab3.button1.setStyleSheet(BUTTON_STYLE)
+        self.tab3.button2.setStyleSheet(BUTTON_STYLE)
+        self.tab3.button3.setStyleSheet(BUTTON_STYLE)
+        self.tab3.button4.setStyleSheet(BUTTON_STYLE)
+        self.tab3.button5.setStyleSheet(BUTTON_STYLE)
+        self.tab3.button6.setStyleSheet(BUTTON_STYLE)
+        self.tab3.button7.setStyleSheet(BUTTON_STYLE)
         self.tab3.scroll_bar = QtWidgets.QScrollBar(self.tab3)
-        self.tab3.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE_V)
-        self.tab3.button1.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab3.button2.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab3.button3.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab3.button4.setIconSize(QtCore.QSize(self.icon_size_2, self.icon_size_2))
-        self.tab3.button5.setIconSize(QtCore.QSize(self.icon_size_2, self.icon_size_2))
-        self.tab3.button6.setIconSize(QtCore.QSize(self.icon_size_2, self.icon_size_2))
-        self.tab3.button7.setIconSize(QtCore.QSize(self.icon_size_2, self.icon_size_2))
-        self.tab3.button3.setToolTip('Settings')
-        self.tab3.button4.setToolTip('colours')
-        self.tab3.button5.setToolTip('preview')
-        self.tab3.button6.setToolTip('more')
-        self.tab3.button7.setToolTip('font')
-        self.tab3.button1.setGeometry(
-            QtCore.QRect(int(self.width()*0.008), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab3.button2.setGeometry(
-            QtCore.QRect(int(self.width()*0.09), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab3.button3.setGeometry(
-            QtCore.QRect(int(self.width()*0.18), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab3.button4.setGeometry(
-            QtCore.QRect(int(self.width()*0.81), int(self.width()*0.426), self.icon_size, self.icon_size),
-        )
-        self.tab3.button5.setGeometry(
-            QtCore.QRect(int(self.width()*0.81), int(self.width()*0.465), self.icon_size, self.icon_size),
-        )
-        self.tab3.button6.setGeometry(
-            QtCore.QRect(int(self.width()*0.81), int(self.width()*0.545), self.icon_size, self.icon_size),
-        )
-        self.tab3.button7.setGeometry(
-            QtCore.QRect(int(self.width()*0.81), int(self.width()*0.388), self.icon_size, self.icon_size),
-        )
+        self.tab3.scroll_bar.setStyleSheet(SCROLL_BAR_STYLE)
+        self.tab3.button1.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab3.button2.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab3.button3.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab3.button4.setIconSize(QtCore.QSize(self.size2, self.size2))
+        self.tab3.button5.setIconSize(QtCore.QSize(self.size2, self.size2))
+        self.tab3.button6.setIconSize(QtCore.QSize(self.size2, self.size2))
+        self.tab3.button7.setIconSize(QtCore.QSize(self.size2, self.size2))
+        self.tab3.table.setFixedSize(self.height() * 0.6, self.height() * 0.8)
+        self.tab3.button1.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab3.button2.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab3.button3.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab3.button4.setFixedSize(self.size1, self.size1)
+        self.tab3.button5.setFixedSize(self.size1, self.size1)
+        self.tab3.button6.setFixedSize(self.size1, self.size1)
+        self.tab3.button7.setFixedSize(self.size1, self.size1)
         self.tab3.text = QTextEdit(self.tab3)
         self.tab3.line1 = QLineEdit(self.tab3)
         self.tab3.line2 = QLineEdit(self.tab3)
@@ -422,96 +405,41 @@ class MainR(QTabWidget):
         self.tab3.label10 = QLabel(self.tab3)
         self.tab3.label11 = QLabel(self.tab3)
         self.tab3.label12 = QLabel(self.tab3)
-        self.tab3.text.setGeometry(
-            QtCore.QRect(int(self.width()*0.57), int(self.width()*0.279), self.icon_size_2*10, self.icon_size*3),
-        )
-        self.tab3.line1.setGeometry(
-            QtCore.QRect(int(self.width()*0.57), int(self.width()*0.124), self.icon_size_2*10, self.icon_size),
-        )
-        self.tab3.line2.setGeometry(
-            QtCore.QRect(int(self.width()*0.57), int(self.width()*0.186), self.icon_size_2*10, self.icon_size),
-        )
-        self.tab3.line3.setGeometry(
-            QtCore.QRect(int(self.width()*0.74), int(self.width()*0.388), self.icon_size, self.icon_size),
-        )
-        self.tab3.line4.setGeometry(
-            QtCore.QRect(int(self.width()*0.74), int(self.width()*0.426), self.icon_size, self.icon_size),
-        )
-        self.tab3.line5.setGeometry(
-            QtCore.QRect(int(self.width()*0.74), int(self.width()*0.465), self.icon_size, self.icon_size),
-        )
-        self.tab3.line1.setPlaceholderText('  user password here')
-        self.tab3.line2.setPlaceholderText('  owner password here')
+        self.tab3.text.setFixedWidth(self.size2 * 10)
+        self.tab3.line1.setFixedSize(self.size2 * 10, self.size1)
+        self.tab3.line2.setFixedSize(self.size2 * 10, self.size1)
+        self.tab3.line3.setFixedSize(self.size1, self.size1)
+        self.tab3.line4.setFixedSize(self.size1, self.size1)
+        self.tab3.line5.setFixedSize(self.size1, self.size1)
         self.tab3.line3.setText('90')
         self.tab3.line4.setText('40')
         self.tab3.line5.setText(' 0')
-        self.tab3.text.setStyleSheet(TEXTEDIT_STYlE.format('14'))
+        self.tab3.text.setStyleSheet(TEXTEDIT_STYlE)
         self.tab3.line1.setStyleSheet(LINE_EDIT_STYLE)
         self.tab3.line2.setStyleSheet(LINE_EDIT_STYLE)
         self.tab3.line3.setStyleSheet(LINE_EDIT_STYLE)
         self.tab3.line4.setStyleSheet(LINE_EDIT_STYLE)
         self.tab3.line5.setStyleSheet(LINE_EDIT_STYLE)
-        self.tab3.label1.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label2.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label3.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label4.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label5.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label6.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label7.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label8.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label9.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label10.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label11.setStyleSheet(LABEL_STYLE1)
-        self.tab3.label12.setStyleSheet(LABEL_STYLE1)
+        self.tab3.label1.setStyleSheet(LABEL_STYLE)
+        self.tab3.label2.setStyleSheet(LABEL_STYLE)
+        self.tab3.label3.setStyleSheet(LABEL_STYLE)
+        self.tab3.label4.setStyleSheet(LABEL_STYLE)
+        self.tab3.label5.setStyleSheet(LABEL_STYLE)
+        self.tab3.label6.setStyleSheet(LABEL_STYLE)
+        self.tab3.label7.setStyleSheet(LABEL_STYLE)
+        self.tab3.label8.setStyleSheet(LABEL_STYLE)
+        self.tab3.label9.setStyleSheet(LABEL_STYLE)
+        self.tab3.label10.setStyleSheet(LABEL_STYLE)
+        self.tab3.label11.setStyleSheet(LABEL_STYLE)
+        self.tab3.label12.setStyleSheet(LABEL_STYLE)
         self.tab3.text.setVerticalScrollBar(self.tab3.scroll_bar)
-        self.tab3.label1.setGeometry(
-            QtCore.QRect(int(self.width()*0.57), int(self.width()*0.078), self.icon_size_2*10, self.icon_size),
-        )
-        self.tab3.label2.setGeometry(
-            QtCore.QRect(int(self.width()*0.57), int(self.width()*0.233), self.icon_size_2*10, self.icon_size),
-        )
-        self.tab3.label3.setGeometry(
-            QtCore.QRect(int(self.width()*0.77), int(self.width()*0.388), self.icon_size, self.icon_size),
-        )
-        self.tab3.label4.setGeometry(
-            QtCore.QRect(int(self.width()*0.64), int(self.width()*0.388), self.icon_size*3, self.icon_size),
-        )
-        self.tab3.label5.setGeometry(
-            QtCore.QRect(int(self.height()*0.77), int(self.width()*0.605), int(self.width()*0.17), self.icon_size),
-        )
-        self.tab3.label6.setGeometry(
-            QtCore.QRect(int(self.width()*0.77), int(self.width()*0.426), self.icon_size, self.icon_size),
-        )
-        self.tab3.label7.setGeometry(
-            QtCore.QRect(int(self.width()*0.66), int(self.width()*0.426), self.icon_size*2.5, self.icon_size),
-        )
-        self.tab3.label8.setGeometry(
-            QtCore.QRect(int(self.width()*0.57), int(self.width()*0.496), self.icon_size_2*10, self.icon_size),
-        )
-        self.tab3.label9.setGeometry(
-            QtCore.QRect(int(self.width()*0.66), int(self.width()*0.465), self.icon_size*2.5, self.icon_size),
-        )
-        self.tab3.label10.setGeometry(
-            QtCore.QRect(int(self.width()*0.77), int(self.width()*0.465), self.icon_size, self.icon_size),
-        )
-        self.tab3.label11.setGeometry(
-            QtCore.QRect(int(self.height()*0.77), int(self.width()*0.575), int(self.width()*0.17), self.icon_size),
-        )
-        self.tab3.label12.setGeometry(
-            QtCore.QRect(int(self.height()*0.77), int(self.width()*0.545), int(self.width()*0.17), self.icon_size),
-        )
-        self.tab3.label1.setText('.'*9+'PASSWORD'+'.'*9)
-        self.tab3.label2.setText('.'*8+'WATERMARK'+'.'*8)
+        self.tab3.label3.setFixedSize(self.size1, self.size1)
+        self.tab3.label6.setFixedSize(self.size1, self.size1)
+        self.tab3.label10.setFixedSize(self.size1, self.size1)
         self.tab3.label3.setText('pt')
-        self.tab3.label4.setText('Font Size:')
-        self.tab3.label5.setText('Open after saving')
         self.tab3.label6.setText('%')
-        self.tab3.label7.setText('Opacity:')
-        self.tab3.label8.setText('.'*26)
-        self.tab3.label9.setText('Rotation:')
+        self.tab3.label8.setText('* '*26)
         self.tab3.label10.setText('°')
-        self.tab3.label11.setText('Preview Mode')
-        self.tab3.label12.setText('Edit Restriction')
         self.tab3.label1.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label2.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label3.setAlignment(QtCore.Qt.AlignCenter)
@@ -527,35 +455,55 @@ class MainR(QTabWidget):
         self.tab3.check = SwitchBtn(self.tab3)
         self.tab3.check1 = SwitchBtn(self.tab3)
         self.tab3.check2 = SwitchBtn(self.tab3)
-        self.tab3.check.setGeometry(
-            QtCore.QRect(self.height(), int(self.width()*0.61), self.icon_size*2.1, self.icon_size_2),
-        )
-        self.tab3.check1.setGeometry(
-            QtCore.QRect(self.height(), int(self.width()*0.58), self.icon_size*2.1, self.icon_size_2),
-        )
-        self.tab3.check2.setGeometry(
-            QtCore.QRect(self.height(), int(self.width()*0.55), self.icon_size*2.1, self.icon_size_2),
-        )
+        self.tab3.check.setFixedSize(self.size1 * 2.1, self.size2)
+        self.tab3.check1.setFixedSize(self.size1 * 2.1, self.size2)
+        self.tab3.check2.setFixedSize(self.size1 * 2.1, self.size2)
         self.tab3.check.setChecked(True)
         self.tab3.check1.setChecked(False)
         self.tab3.check2.setChecked(False)
+        grid.addWidget(self.tab3.button1, 0, 0)
+        grid.addWidget(self.tab3.button2, 0, 1)
+        grid.addWidget(self.tab3.button3, 0, 2)
+        grid.addWidget(self.tab3.table, 1, 0, 14, 4, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.label1, 1, 5, 1, 4, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.line1, 2, 5, 1, 4, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.line2, 3, 5, 1, 4, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.label2, 4, 5, 1, 4, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.text, 5, 5, 2, 4, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.label4, 7, 5, 1, 2, QtCore.Qt.AlignRight)
+        grid.addWidget(self.tab3.label7, 8, 5, 1, 2, QtCore.Qt.AlignRight)
+        grid.addWidget(self.tab3.label9, 9, 5, 1, 2, QtCore.Qt.AlignRight)
+        grid.addWidget(self.tab3.line3, 7, 7, 1, 1, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.line4, 8, 7, 1, 1, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.line5, 9, 7, 1, 1, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.label3, 7, 7, 1, 1, QtCore.Qt.AlignRight)
+        grid.addWidget(self.tab3.label6, 8, 7, 1, 1, QtCore.Qt.AlignRight)
+        grid.addWidget(self.tab3.label10, 9, 7, 1, 1, QtCore.Qt.AlignRight)
+        grid.addWidget(self.tab3.button7, 7, 8, 1, 1, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.tab3.button4, 8, 8, 1, 1, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.tab3.button5, 9, 8, 1, 1, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.tab3.label8, 10, 5, 1, 4, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.label12, 11, 5, 1, 2, QtCore.Qt.AlignRight)
+        grid.addWidget(self.tab3.label11, 12, 5, 1, 2, QtCore.Qt.AlignRight)
+        grid.addWidget(self.tab3.label5, 13, 5, 1, 2, QtCore.Qt.AlignRight)
+        grid.addWidget(self.tab3.check2, 11, 7, 1, 1, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.check1, 12, 7, 1, 1, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.check, 13, 7, 1, 1, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab3.button6, 11, 8, 1, 1, QtCore.Qt.AlignLeft)
 
     def tab4_init(self) -> None:
+        grid = QGridLayout(self.tab4)
         self.tab4.setStyleSheet(BGC_STYLE2)
         self.tab4.button1 = QPushButton(self.tab4)
         self.tab4.button2 = QPushButton(self.tab4)
         self.tab4.button1.setIcon(QIcon('ico\\Add.svg'))
         self.tab4.button2.setIcon(QIcon('ico\\down.svg'))
-        self.tab4.button1.setStyleSheet(BUTTON_STYLE2)
-        self.tab4.button2.setStyleSheet(BUTTON_STYLE2)
-        self.tab4.button1.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab4.button2.setIconSize(QtCore.QSize(self.icon_size, self.icon_size))
-        self.tab4.button1.setGeometry(
-            QtCore.QRect(int(self.width()*0.008), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
-        self.tab4.button2.setGeometry(
-            QtCore.QRect(int(self.width()*0.09), self.icon_size/4, self.icon_size*2, self.icon_size*2),
-        )
+        self.tab4.button1.setStyleSheet(BUTTON_STYLE)
+        self.tab4.button2.setStyleSheet(BUTTON_STYLE)
+        self.tab4.button1.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab4.button2.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.tab4.button1.setFixedSize(self.size1 * 2, self.size1 * 2)
+        self.tab4.button2.setFixedSize(self.size1 * 2, self.size1 * 2)
         self.tab4.table = QTableWidget(self.tab4)
         self.tab4.table.setShowGrid(False)
         self.tab4.table.verticalHeader().setVisible(True)
@@ -570,47 +518,30 @@ class MainR(QTabWidget):
         self.tab4.table.setEditTriggers(
             QtWidgets.QAbstractItemView.NoEditTriggers,
         )
-        self.tab4.table.setGeometry(
-            QtCore.QRect(self.width()//3, int(self.height()*0.1), self.width()//3, int(self.height()*0.82)),
-        )
         self.tab4.table.setStyleSheet(TABLE_STYLE2)
         self.tab4.scroll_bar0 = QtWidgets.QScrollBar(self.tab4)
         self.tab4.scroll_bar1 = QtWidgets.QScrollBar(self.tab4)
         self.tab4.scroll_bar2 = QtWidgets.QScrollBar(self.tab4)
-        self.tab4.scroll_bar0.setStyleSheet(SCROLL_BAR_STYLE_V)
-        self.tab4.scroll_bar1.setStyleSheet(SCROLL_BAR_STYLE_V)
-        self.tab4.scroll_bar2.setStyleSheet(SCROLL_BAR_STYLE_H)
+        self.tab4.scroll_bar0.setStyleSheet(SCROLL_BAR_STYLE)
+        self.tab4.scroll_bar1.setStyleSheet(SCROLL_BAR_STYLE)
+        self.tab4.scroll_bar2.setStyleSheet(SCROLL_BAR_STYLE_0)
         self.tab4.table.setVerticalScrollBar(self.tab4.scroll_bar0)
         self.tab4.text = QTextEdit(self.tab4)
-        self.tab4.text.setStyleSheet(TEXTEDIT_STYlE.format('12'))
+        self.tab4.text.setStyleSheet(TEXTEDIT_STYlE)
         self.tab4.text.setVerticalScrollBar(self.tab4.scroll_bar1)
         self.tab4.text.setHorizontalScrollBar(self.tab4.scroll_bar2)
-        self.tab4.text.setGeometry(
-            QtCore.QRect(self.height()//25, int(self.width()*0.275), int(self.width()*0.27), int(self.height()*0.47)),
-        )
         self.tab4.text.setLineWrapColumnOrWidth(2000)
         self.tab4.text.setLineWrapMode(QTextEdit.FixedPixelWidth)
-        self.tab4.text.setPlaceholderText(
-            '''
-            Catalogue edit here
-            e.g.
-        
-            *-->chapter 1-->1
-            **-->section 1-->1
-            **-->section 2-->5
-            *-->chapter 2-->17
-            '''
-        )
         self.tab4.label1 = QLabel(self.tab4)
         self.tab4.label2 = QLabel(self.tab4)
         self.tab4.label3 = QLabel(self.tab4)
         self.tab4.label4 = QLabel(self.tab4)
         self.tab4.label5 = QLabel(self.tab4)
-        self.tab4.label1.setStyleSheet(LABEL_STYLE2)
-        self.tab4.label2.setStyleSheet(LABEL_STYLE2)
-        self.tab4.label3.setStyleSheet(LABEL_STYLE2)
-        self.tab4.label4.setStyleSheet(LABEL_STYLE2)
-        self.tab4.label5.setStyleSheet(LABEL_STYLE2)
+        self.tab4.label1.setStyleSheet(LABEL_STYLE)
+        self.tab4.label2.setStyleSheet(LABEL_STYLE)
+        self.tab4.label3.setStyleSheet(LABEL_STYLE)
+        self.tab4.label4.setStyleSheet(LABEL_STYLE)
+        self.tab4.label5.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setPixmap(
             QPixmap('ico\\book2.svg').scaled(
                 self.height()*0.2,
@@ -619,29 +550,6 @@ class MainR(QTabWidget):
                 QtCore.Qt.SmoothTransformation,
             ),
         )
-        self.tab4.label2.setText('.'*10+'Title'+'.'*10)
-        self.tab4.label3.setText('.'*10+'Author'+'.'*10)
-        self.tab4.label4.setText('.'*10+'Subject'+'.'*10)
-        self.tab4.label5.setText('.'*10+'Keywords'+'.'*10)
-        self.tab4.label1.setGeometry(
-            QtCore.QRect(int(self.width()*0.06), int(self.width()*0.078), self.icon_size*6.25, self.icon_size*6.25),
-        )
-        self.tab4.label2.setGeometry(
-            QtCore.QRect(int(self.width()*0.68), int(self.width()*0.078), int(self.width()*0.3), self.icon_size),
-        )
-        self.tab4.label3.setGeometry(
-            QtCore.QRect(int(self.width()*0.68), int(self.width()*0.155), int(self.width()*0.3), self.icon_size),
-        )
-        self.tab4.label4.setGeometry(
-            QtCore.QRect(int(self.width()*0.68), int(self.width()*0.233), int(self.width()*0.3), self.icon_size),
-        )
-        self.tab4.label5.setGeometry(
-            QtCore.QRect(int(self.width()*0.68), int(self.width()*0.310), int(self.width()*0.3), self.icon_size),
-        )
-        self.tab4.label2.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab4.label3.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab4.label4.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab4.label5.setAlignment(QtCore.Qt.AlignCenter)
         self.tab4.line1 = QLineEdit(self.tab4)
         self.tab4.line2 = QLineEdit(self.tab4)
         self.tab4.line3 = QLineEdit(self.tab4)
@@ -650,22 +558,28 @@ class MainR(QTabWidget):
         self.tab4.line2.setStyleSheet(LINE_EDIT_STYLE)
         self.tab4.line3.setStyleSheet(LINE_EDIT_STYLE)
         self.tab4.line4.setStyleSheet(LINE_EDIT_STYLE)
-        self.tab4.line1.setGeometry(
-            QtCore.QRect(int(self.width()*0.698), int(self.width()*0.116), int(self.width()*0.27), self.icon_size),
-        )
-        self.tab4.line2.setGeometry(
-            QtCore.QRect(int(self.width()*0.698), int(self.width()*0.194), int(self.width()*0.27), self.icon_size),
-        )
-        self.tab4.line3.setGeometry(
-            QtCore.QRect(int(self.width()*0.698), int(self.width()*0.271), int(self.width()*0.27), self.icon_size),
-        )
-        self.tab4.line4.setGeometry(
-            QtCore.QRect(int(self.width()*0.698), int(self.width()*0.349), int(self.width()*0.27), self.icon_size),
-        )
+        self.tab4.line1.setFixedSize(self.width() * 0.27, self.size1)
+        self.tab4.line2.setFixedSize(self.width() * 0.27, self.size1)
+        self.tab4.line3.setFixedSize(self.width() * 0.27, self.size1)
+        self.tab4.line4.setFixedSize(self.width() * 0.27, self.size1)
+        self.tab4.text.setFixedSize(self.width() * 0.25, self.height() * 0.47)
         self.tab4.line1.setAlignment(QtCore.Qt.AlignCenter)
         self.tab4.line2.setAlignment(QtCore.Qt.AlignCenter)
         self.tab4.line3.setAlignment(QtCore.Qt.AlignCenter)
         self.tab4.line4.setAlignment(QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab4.button1, 0, 0)
+        grid.addWidget(self.tab4.button2, 0, 1)
+        grid.addWidget(self.tab4.text, 5, 0, 8, 3, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab4.table, 1, 3, 20, 3)
+        grid.addWidget(self.tab4.label1, 2, 0, 3, 3, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab4.label2, 2, 7, 1, 2, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab4.label3, 4, 7, 1, 2, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab4.label4, 6, 7, 1, 2, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab4.label5, 8, 7, 1, 2, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab4.line1, 3, 7, 1, 2, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab4.line2, 5, 7, 1, 2, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab4.line3, 7, 7, 1, 2, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.tab4.line4, 9, 7, 1, 2, QtCore.Qt.AlignCenter)
 
 
 class SettingR(QWidget):
@@ -680,6 +594,7 @@ class SettingR(QWidget):
         height = screen_rect.height()*0.26  # 280
         width = height*2.14  # 600
         fixed_h = width*2//30
+        grid = QGridLayout(self)
         self.setFixedSize(width, height)
         self.setWindowTitle('Setting')
         self.setWindowIcon(
@@ -701,44 +616,32 @@ class SettingR(QWidget):
         self.combobox.addItem('English')
         self.combobox.addItem('中文')
         self.combobox.addItem('日本語')
-        self.label1.setStyleSheet(LABEL_STYLE2)
-        self.label2.setStyleSheet(LABEL_STYLE2)
-        self.label3.setStyleSheet(LABEL_STYLE2)
+        self.label1.setStyleSheet(LABEL_STYLE)
+        self.label2.setStyleSheet(LABEL_STYLE)
+        self.label3.setStyleSheet(LABEL_STYLE)
         self.combobox.setStyleSheet(COMBO_BOX_STYLE)
-        self.button1.setStyleSheet(BUTTON_STYLE4)
-        self.button2.setStyleSheet(BUTTON_STYLE4)
+        self.button1.setStyleSheet(BUTTON_STYLE)
+        self.button2.setStyleSheet(BUTTON_STYLE)
         self.line1.setStyleSheet(LINE_EDIT_STYLE)
         self.line2.setStyleSheet(LINE_EDIT_STYLE)
-        self.label1.setAlignment(QtCore.Qt.AlignLeft)
-        self.label2.setAlignment(QtCore.Qt.AlignLeft)
-        self.label3.setAlignment(QtCore.Qt.AlignLeft)
-        self.check.setGeometry(
-            QtCore.QRect(width*0.8, height/2, fixed_h*2, fixed_h*0.75),
-        )
-        self.line1.setGeometry(
-            QtCore.QRect(width*0.27, height//14, fixed_h*10, fixed_h),
-        )
-        self.line2.setGeometry(
-            QtCore.QRect(width*0.27, height*2//7, fixed_h*10, fixed_h),
-        )
-        self.label1.setGeometry(
-            QtCore.QRect(width*0.07, height*0.09, fixed_h*2.5, fixed_h),
-        )
-        self.label2.setGeometry(
-            QtCore.QRect(width*0.07, height*0.3, fixed_h*2.5, fixed_h),
-        )
-        self.label3.setGeometry(
-            QtCore.QRect(width*0.07, height/2, fixed_h*5, fixed_h),
-        )
-        self.button1.setGeometry(
-            QtCore.QRect(width*0.85, height//14, fixed_h*1.2, fixed_h),
-        )
-        self.button2.setGeometry(
-            QtCore.QRect(width*0.85, height*2//7, fixed_h*1.2, fixed_h),
-        )
-        self.combobox.setGeometry(
-            QtCore.QRect(width*0.06, width/3, fixed_h*17/4, fixed_h),
-        )
+        self.label1.setAlignment(QtCore.Qt.AlignVCenter)
+        self.label2.setAlignment(QtCore.Qt.AlignVCenter)
+        self.label3.setAlignment(QtCore.Qt.AlignVCenter)
+        self.check.setFixedSize(fixed_h*2, fixed_h*0.75)
+        self.line1.setFixedSize(fixed_h*10, fixed_h)
+        self.line2.setFixedSize(fixed_h * 10, fixed_h)
+        self.button1.setFixedSize(fixed_h, fixed_h)
+        self.button2.setFixedSize(fixed_h, fixed_h)
+        self.combobox.setFixedSize(fixed_h*17/4, fixed_h)
+        grid.addWidget(self.label1, 0, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label2, 1, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label3, 2, 0, 1, 4, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.combobox, 3, 0)
+        grid.addWidget(self.line1, 0, 1, 1, 5)
+        grid.addWidget(self.line2, 1, 1, 1, 5)
+        grid.addWidget(self.button1, 0, 4, 1, 2, QtCore.Qt.AlignRight)
+        grid.addWidget(self.button2, 1, 4, 1, 2, QtCore.Qt.AlignRight)
+        grid.addWidget(self.check, 2, 5)
         self.button1.setIcon(QIcon('ico\\folder.svg'))
         self.button2.setIcon(QIcon('ico\\folder.svg'))
         self.setWindowOpacity(0.92)
@@ -753,9 +656,10 @@ class AboutR(QWidget):
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
         height = screen_rect.height()*0.19
-        width = height*2.2
+        width = height*1.8
+        grid = QGridLayout(self)
         self.setFixedSize(width, height)
-        self.setWindowTitle('version 1.5')
+        self.setWindowTitle('version 1.6')
         self.setWindowIcon(QIcon('ico\\info.svg'))
         self.setStyleSheet(BGC_STYLE2)
         self.label = QLabel(self)
@@ -766,12 +670,9 @@ class AboutR(QWidget):
             "<a href='https://github.com/Augus1999/pyPDFeditor-GUI'>"
             "<small>https://github.com/Augus1999/pyPDFeditor-GUI</small></a>"
         )
-        self.label.setStyleSheet(LABEL_STYLE1)
-        self.label.setAlignment(QtCore.Qt.AlignTop)
-        self.label.setGeometry(
-            QtCore.QRect(height//10, height//10, int(width*0.91), int(height*0.9)),
-        )
+        self.label.setStyleSheet(LABEL_STYLE)
         self.label.setOpenExternalLinks(True)
+        grid.addWidget(self.label, 0, 0, QtCore.Qt.AlignCenter)
         self.setWindowOpacity(0.92)
 
 
@@ -784,9 +685,10 @@ class PermMenuR(QWidget):
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
         height = screen_rect.height()*0.37  # 400
-        width = height*1.5  # 600
-        icon_size_1 = height//10
-        icon_size_2 = width//20
+        width = height*1.2  # 480
+        x = height/5
+        y = width/16
+        grid = QGridLayout(self)
         self.setFixedSize(width, height)
         self.setWindowTitle(' ')
         self.setWindowIcon(QIcon('ico\\lock.svg'))
@@ -815,70 +717,38 @@ class PermMenuR(QWidget):
         self.label6.setText('Enable Accessing Contents')
         self.label7.setText('Enable Page Editing')
         self.label8.setText('Enable HD Print')
-        self.label1.setAlignment(QtCore.Qt.AlignLeft)
-        self.label2.setAlignment(QtCore.Qt.AlignLeft)
-        self.label3.setAlignment(QtCore.Qt.AlignLeft)
-        self.label4.setAlignment(QtCore.Qt.AlignLeft)
-        self.label5.setAlignment(QtCore.Qt.AlignLeft)
-        self.label6.setAlignment(QtCore.Qt.AlignLeft)
-        self.label7.setAlignment(QtCore.Qt.AlignLeft)
-        self.label8.setAlignment(QtCore.Qt.AlignLeft)
-        self.check1.setGeometry(
-            QtCore.QRect(width*0.7, height/16, icon_size_1*2, icon_size_2),
-        )
-        self.check2.setGeometry(
-            QtCore.QRect(width*0.7, height*13/80, icon_size_1*2, icon_size_2),
-        )
-        self.check3.setGeometry(
-            QtCore.QRect(width*0.7, height*21/80, icon_size_1*2, icon_size_2),
-        )
-        self.check4.setGeometry(
-            QtCore.QRect(width*0.7, height*29/80, icon_size_1*2, icon_size_2),
-        )
-        self.check5.setGeometry(
-            QtCore.QRect(width*0.7, height*37/80, icon_size_1*2, icon_size_2),
-        )
-        self.check6.setGeometry(
-            QtCore.QRect(width*0.7, height*9/16, icon_size_1*2, icon_size_2),
-        )
-        self.check7.setGeometry(
-            QtCore.QRect(width*0.7, height*53/80, icon_size_1*2, icon_size_2),
-        )
-        self.check8.setGeometry(
-            QtCore.QRect(width*0.7, height*61/80, icon_size_1*2, icon_size_2),
-        )
-        self.label1.setGeometry(
-            QtCore.QRect(height/8, height/16, icon_size_2*10, icon_size_1),
-        )
-        self.label2.setGeometry(
-            QtCore.QRect(height/8, height*13/80, icon_size_2*10, icon_size_1),
-        )
-        self.label3.setGeometry(
-            QtCore.QRect(height/8, height*21/80, icon_size_2*10, icon_size_1),
-        )
-        self.label4.setGeometry(
-            QtCore.QRect(height/8, height*29/80, icon_size_2*10, icon_size_1),
-        )
-        self.label5.setGeometry(
-            QtCore.QRect(height/8, height*37/80, icon_size_2*10, icon_size_1),
-        )
-        self.label6.setGeometry(
-            QtCore.QRect(height/8, height*9/16, icon_size_2*10, icon_size_1),
-        )
-        self.label7.setGeometry(
-            QtCore.QRect(height/8, height*53/80, icon_size_2*10, icon_size_1),
-        )
-        self.label8.setGeometry(
-            QtCore.QRect(height/8, height*61/80, icon_size_2*10, icon_size_1),
-        )
-        self.label1.setStyleSheet(LABEL_STYLE1)
-        self.label2.setStyleSheet(LABEL_STYLE1)
-        self.label3.setStyleSheet(LABEL_STYLE1)
-        self.label4.setStyleSheet(LABEL_STYLE1)
-        self.label5.setStyleSheet(LABEL_STYLE1)
-        self.label6.setStyleSheet(LABEL_STYLE1)
-        self.label7.setStyleSheet(LABEL_STYLE1)
-        self.label8.setStyleSheet(LABEL_STYLE1)
+        self.check1.setFixedSize(x, y)
+        self.check2.setFixedSize(x, y)
+        self.check3.setFixedSize(x, y)
+        self.check4.setFixedSize(x, y)
+        self.check5.setFixedSize(x, y)
+        self.check6.setFixedSize(x, y)
+        self.check7.setFixedSize(x, y)
+        self.check8.setFixedSize(x, y)
+        grid.addWidget(self.label1, 0, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label2, 1, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label3, 2, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label4, 3, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label5, 4, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label6, 5, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label7, 6, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label8, 7, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.check1, 0, 1)
+        grid.addWidget(self.check2, 1, 1)
+        grid.addWidget(self.check3, 2, 1)
+        grid.addWidget(self.check4, 3, 1)
+        grid.addWidget(self.check5, 4, 1)
+        grid.addWidget(self.check6, 5, 1)
+        grid.addWidget(self.check7, 6, 1)
+        grid.addWidget(self.check8, 7, 1)
+        self.label1.setStyleSheet(LABEL_STYLE)
+        self.label2.setStyleSheet(LABEL_STYLE)
+        self.label3.setStyleSheet(LABEL_STYLE)
+        self.label4.setStyleSheet(LABEL_STYLE)
+        self.label5.setStyleSheet(LABEL_STYLE)
+        self.label6.setStyleSheet(LABEL_STYLE)
+        self.label7.setStyleSheet(LABEL_STYLE)
+        self.label8.setStyleSheet(LABEL_STYLE)
         self.check1.setChecked(True)
         self.check5.setChecked(True)
         self.check6.setChecked(True)
@@ -893,17 +763,14 @@ class FontDialogR(QWidget):
         screen_rect = desktop.screenGeometry()
         height = screen_rect.height()*0.27
         width = height*1.38
-        self.setFixedSize(width, height)
+        grid = QGridLayout(self)
+        self.resize(width, height)
         self.setWindowTitle('Select Font')
         self.setWindowIcon(QIcon('ico\\font.svg'))
         self.combobox = QComboBox(self)
-        self.combobox.setGeometry(
-            QtCore.QRect(width//40, width//40, int(width*0.95), width//10),
-        )
         self.combobox.setStyleSheet(COMBO_BOX_STYLE)
         self.label = QLabel(self)
         self.label.setAlignment(QtCore.Qt.AlignTop)
-        self.label.setGeometry(
-            QtCore.QRect(width//40, int(width*0.15), int(width*0.95), int(width*0.55)),
-        )
+        grid.addWidget(self.combobox, 0, 0, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.label, 1, 0, QtCore.Qt.AlignCenter)
         self.setWindowOpacity(0.92)

@@ -63,29 +63,6 @@ class Main(MainR):
         self.tab2.w_row, self.tab2.w_col = 2, 4
         self.tab3.w_row, self.tab3.w_col = 1, 1
         self.tab4.w_row, self.tab4.w_col = 2, 1
-        self.tab1.table.setRowCount(self.tab1.w_row)
-        self.tab2.table.setRowCount(self.tab2.w_row)
-        self.tab3.table.setRowCount(self.tab3.w_row)
-        self.tab4.table.setRowCount(self.tab4.w_row)
-        self.tab1.table.setColumnCount(self.tab1.w_col)
-        self.tab2.table.setColumnCount(self.tab2.w_col)
-        self.tab3.table.setColumnCount(self.tab3.w_col)
-        self.tab4.table.setColumnCount(self.tab4.w_col)
-        tab1_width = self.tab1.table.width()//self.tab1.w_col
-        tab2_width = self.tab2.table.width()//self.tab2.w_col
-        for i in range(self.tab1.w_col):
-            self.tab1.table.setColumnWidth(i, tab1_width)
-        for i in range(self.tab1.w_row):
-            self.tab1.table.setRowHeight(i, tab1_width*4//3)
-        for i in range(self.tab2.w_col):
-            self.tab2.table.setColumnWidth(i, tab2_width)
-        for i in range(self.tab2.w_row):
-            self.tab2.table.setRowHeight(i, tab2_width*4//3)
-        for i in range(self.tab4.w_row):
-            self.tab4.table.setRowHeight(i, self.tab4.table.width()*4//3)
-        self.tab3.table.setColumnWidth(0, self.tab3.table.width())
-        self.tab3.table.setRowHeight(0, self.tab3.table.height())
-        self.tab4.table.setColumnWidth(0, self.tab4.table.width())
         self.tab1.table.customContextMenuRequested.connect(self.gen1)
         self.tab2.table.customContextMenuRequested.connect(self.gen2)
         self.tab3.table.customContextMenuRequested.connect(self.gen3)
@@ -213,6 +190,9 @@ class Main(MainR):
     def save2(self) -> None:
         if len(self.tab2.book_list) != 0:
             doc0 = fitz.open(self.tab2.book_name)
+            if not self.tab2.book_name.endswith('.pdf'):
+                pdf_bites0 = doc0.convert_to_pdf()
+                doc0 = fitz.open('pdf', pdf_bites0)
             doc0.select(self.tab2.book_list)
             file_name, ok = save(self, '.pdf')
             set_metadata0(doc=doc0, author=self.Author)
@@ -322,7 +302,7 @@ class Main(MainR):
     def add1(self) -> None:
         f_name, _ = add(
             self,
-            'PDF files (*.pdf);;images (*.png *.jpg *.jpeg *.bmp)',
+            'PDF files (*.pdf);;images (*.png *.jpg *.jpeg *.bmp *.tiff *.svg);;ebooks (*.epub *.xps *.fb2 *.cbz)',
         )
         if _:
             self.tab1.book_list.append(f_name)
@@ -344,7 +324,7 @@ class Main(MainR):
 
     def add2(self) -> None:
         if len(self.tab2.book_list) == 0:
-            f_name, _ = add(self, '(*.pdf)')
+            f_name, _ = add(self, '(*.pdf);;ebooks (*.epub *.xps *.fb2 *.cbz)')
             if _:
                 doc, state, name = open_pdf(f_name, self)
                 if state:
@@ -368,6 +348,7 @@ class Main(MainR):
             if _:
                 doc, state, name = open_pdf(f_name, self)
                 if state:
+                    reset_table(1, self.tab3)
                     set_icon(doc=doc, widget=self.tab3)
                     self.tab3.book_list.append(name)
                     doc.close()
@@ -475,13 +456,11 @@ class Main(MainR):
 
     def table_flip(self) -> None:
         if len(self.tab2.book_list) != 0:
-            print('?')
             doc = fitz.open(self.tab2.book_name)
             self.tab2.table.clearContents()
             self.tab2.x, self.tab2.y = 0, 0
             book_len = len(self.tab2.book_list)
             if not self.tab2.clicked:
-                self.tab2.button5.setToolTip('multi-columns')
                 self.tab2.w_col = 2
                 reset_table(book_len, self.tab2)
                 for item in self.tab2.book_list:
@@ -491,7 +470,6 @@ class Main(MainR):
                         item,
                     )
             if self.tab2.clicked:
-                self.tab2.button5.setToolTip('dual columns')
                 self.tab2.w_col = 4
                 reset_table(book_len, self.tab2)
                 for item in self.tab2.book_list:
