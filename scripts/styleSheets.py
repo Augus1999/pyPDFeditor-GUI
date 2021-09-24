@@ -3,69 +3,142 @@
 TAB_STYLE = '''
         QTabBar::tab{
         border:none;
-        padding:3ex;}
+        padding:2ex;
+        margin:0px}
         QTabBar::tab:selected{
-        border-left:8px solid #daeaef}
+        border-left:4px solid #b7cbc9;
+        background-color:#4f5c84}
+        QTabBar::tab:hover{
+        background-color:#ca8fc0}
         QToolTip{
         border:none;
         color:#3c3c3c;
         background-color:#ffffff;
         font-size:9pt;
         font-family:Microsoft YaHei UI}
+        QTabWidget{
+        background-color:#6272a4}
         '''
-SCROLL_BAR_STYLE_0 = '''
-        QScrollBar:horizontal{width:10px}
-        QScrollBar::handle:horizontal{
-        background-color:#c3c3c3;
-        border-radius:1px;
-        min-height:45px}
-'''
-SCROLL_BAR_STYLE = '''
+COMBO_BOX_STYLE = '''
+        QComboBox{font-size:11pt;
+        font-family:Microsoft YaHei UI;
+        border-radius:5px;
+        background-color:#6272a4;
+        color:#f8f8f2}
+        QComboBox:hover{
+        border: 2px solid #7284b9}
+        QComboBox::drop-down{
+        subcontrol-origin:padding;
+        subcontrol-position:top right;
+        width:25px; 
+        border-left-width:3px;
+        border-left-color:#6272a4;
+        border-left-style:solid;
+        border-top-right-radius:3px;
+        border-bottom-right-radius:3px;	
+        background-image:url(./ico/chevron_down.svg);
+        background-position:center;
+        background-repeat:no-reperat}
         QScrollBar:vertical{width:10px}
         QScrollBar::handle:vertical{
         background-color:#c3c3c3;
         border-radius:1px;
         min-height:45px}
         '''
-COMBO_BOX_STYLE = '''
-        font-size:11pt;
-        font-family:Microsoft YaHei UI;
-        border-radius:2px;
-        background-color:#daeaef;
-        color:#3c3c3c
-        '''
 TEXTEDIT_STYlE = '''
-        font-size:11pt;
+        QTextEdit{font-size:11pt;
         border-radius:5px;
-        background-color:#DAEAEF;
+        background-color:#daeaef;
         color:#3c3c3c;
-        font-family:Microsoft YaHei UI
+        font-family:Microsoft YaHei UI}
+        QScrollBar:vertical{width:5px}
+        QScrollBar::handle:vertical{
+        background-color:#939393;
+        border-radius:1px;
+        min-height:45px}
+        QScrollBar:horizontal{width:10px}
+        QScrollBar::handle:horizontal{
+        background-color:#daeaef;
+        border-radius:1px;
+        min-height:45px}
         '''
 LINE_EDIT_STYLE = '''
         font-size:10pt;
-        border-radius:15px;
-        background-color:#DAEAEF;
+        border-radius:10px;
+        background-color:#daeaef;
         color:#3c3c3c;
         font-family:Microsoft YaHei UI
         '''
 BUTTON_STYLE = '''
-        QPushButton{border-radius:10px;background-color:rgba(255,255,255,0)}
-        QPushButton:hover{background-color:rgba(0,0,0,30)}
+        QPushButton{{
+        border-radius:0px;
+        background-color:rgba(255,255,255,0);
+        image:url(./ico/{})}}
+        QPushButton:hover{{
+        image:url(./ico/{})}}
+        QPushButton:pressed{{
+        image:url(./ico/{})}}
         '''
-TABLE_STYLE1 = 'QTableWidget{border:0px;background-color:#FFFFFF}'
-TABLE_STYLE2 = 'QTableWidget{border:0px;background-color:#daeaef}'
-LABEL_STYLE = 'font-size:9pt;font-family:Microsoft YaHei UI;color:#3c3c3c'
-BGC_STYLE1 = '''
-        QWidget{background-color:#DAEAEF}
-        QToolTip{
+BUTTON_STYLE0 = '''
+        QPushButton{{
+        border-radius:10px;
+        background-color:rgba(255,255,255,0);
+        image:url(./ico/{})}}
+        QPushButton:hover{{
+        background-color:#e2e2dd}}
+        '''
+BUTTON_STYLE1 = '''
+        QPushButton{{
+        border-radius:10px;
+        background-color:rgba(255,255,255,0);
+        image:url(./ico/{})}}
+        QPushButton:hover{{
+        background-color:#f25355;
+        image:url(./ico/{})}}
+        '''
+TABLE_STYLE1 = '''
+        QTableWidget{
+        border:none;
+        background-color:#f8f8f2}
+        QTableWidget::item:selected{
+        background-color:#f8f8f2}
+        QHeaderView::section{
+        padding:0px;
         border:none;
         color:#3c3c3c;
-        background-color:#ffffff;
-        font-size:9pt;
-        font-family:Microsoft YaHei UI}
+        background-color:#ffffff}
+        QScrollBar:vertical{width:5px}
+        QScrollBar::handle:vertical{
+        background-color:#939393;
+        border-radius:1px;
+        min-height:45px}
         '''
-BGC_STYLE2 = '''
-        QWidget{background-color:#FFFFFF}
+TABLE_STYLE2 = '''
+        QTableWidget{
+        border-radius:5px;
+        border:none;
+        background-color:#daeaef}
+        QTableWidget::item:selected{
+        background-color:#daeaef}
+        QHeaderView::section{
+        padding:0px;
+        border:none;
+        color:#3c3c3c;
+        background-color:#ffffff}
+        QScrollBar:vertical{width:5px}
+        QScrollBar::handle:vertical{
+        background-color:#939393;
+        border-radius:1px;
+        min-height:45px}
+        '''
+LABEL_STYLE = '''
+        font-size:9pt;
+        font-family:Microsoft YaHei UI;
+        color:#3c3c3c;
+        background-color:rgba(255,255,255,0)
+        '''
+BGC_STYLE = '''
+        QWidget{background-color:#f8f8f2}
         QToolTip{
         border:none;
         color:#3c3c3c;

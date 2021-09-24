@@ -6,6 +6,7 @@ import sys
 import fitz
 import json
 import time
+from .language import MENU_L, MESSAGE
 from PyQt5 import (
     QtGui,
     QtCore,
@@ -13,62 +14,61 @@ from PyQt5 import (
 )
 from PyQt5.QtWidgets import (
     QInputDialog,
+    QHBoxLayout,
     QFileDialog,
     QMessageBox,
     QLineEdit,
     QWidget,
 )
-# Attention: ignore all warnings in fitz.open(.)
+
+
+def copy(doc: fitz.Document) -> fitz.Document:
+    """
+    copy the doc
+    """
+    _doc = fitz.Document(doc.name)
+    return _doc
 
 
 def open_pdf(file_name: str,
-             parent: QWidget) -> (any, bool, any):
+             parent: QWidget) -> (any, bool):
     """
     open pdf file and return a fitz object if applied
 
     :param file_name: pdf file name
     :param parent: parent
-    :return (doc, bool, name)
+    :return (doc, bool)
     """
     try:
-        doc = fitz.open(file_name)
-        if doc.needsPass:
-            while doc.is_encrypted:
-                value, _ = QInputDialog.getText(
-                    parent,
-                    '',
-                    'Password:',
-                    QLineEdit.Password,
-                    '',
-                    QtCore.Qt.Dialog,
-                )
-                if not _:
-                    doc.close()
-                    del doc
-                    return None, False, None
-                else:
-                    doc.authenticate(value)
-            outfile = os.path.join(
-                os.path.dirname(file_name),
-                os.path.basename(file_name).split('.')[0] + '_d.pdf',
-            )
-            doc.save(
-                outfile,
-                garbage=4,
-                owner_pw=None,
-                user_pw=None,
-            )
-            return doc, True, outfile
-        else:
-            return doc, True, file_name
+        doc = fitz.Document(file_name)
     except RuntimeError:
         QMessageBox.critical(
             parent,
             'Oops',
-            ' Format error:\n cannot open this file',
+            MESSAGE[parent.language][0],
             QMessageBox.Yes,
         )
-        return None, False, None
+        return None, False
+    if doc.needs_pass:
+        while doc.is_encrypted:
+            value, _ = QInputDialog.getText(
+                parent,
+                '',
+                'Password:',
+                QLineEdit.Password,
+                '',
+                QtCore.Qt.Dialog,
+            )
+            if not _:
+                doc.close()
+                del doc
+                return None, False
+            else:
+                doc.authenticate(value)
+    if not doc.is_pdf:
+        pdf_bites = doc.convert_to_pdf()
+        doc = fitz.Document('pdf', pdf_bites)
+    return doc, True
 
 
 def render_pdf_page(page_data: fitz.Document.load_page) -> QtGui.QPixmap:
@@ -78,7 +78,8 @@ def render_pdf_page(page_data: fitz.Document.load_page) -> QtGui.QPixmap:
     :param page_data: page data
     :return: a QPixmap
     """
-    page_pixmap = page_data.get_pixmap(
+    page_pixmap = fitz.utils.get_pixmap(
+        page_data,
         matrix=fitz.Matrix(1.0, 1.0),
         clip=True,
     )
@@ -88,8 +89,8 @@ def render_pdf_page(page_data: fitz.Document.load_page) -> QtGui.QPixmap:
         image_format = QtGui.QImage.Format_RGB888
     page_image = QtGui.QImage(
         page_pixmap.samples,
-        page_pixmap.width,
-        page_pixmap.height,
+        page_pixmap.w,
+        page_pixmap.h,
         page_pixmap.stride,
         image_format,
     )
@@ -99,7 +100,7 @@ def render_pdf_page(page_data: fitz.Document.load_page) -> QtGui.QPixmap:
     return pixmap
 
 
-def pdf_split(doc: fitz.fitz) -> list:
+def pdf_split(doc: fitz.Document) -> list:
     """
     split the selected PDF file into pages;
 
@@ -107,44 +108,32 @@ def pdf_split(doc: fitz.fitz) -> list:
     :return: book_list
     """
     book_list = list()
-    for page in range(doc.pageCount):
+    for page in range(doc.page_count):
         book_list.append(page)
     return book_list
 
 
-def security(input_pdf: str,
-             output_pdf: (str, None,),
-             text: str,
-             rotate: int,
-             colour: tuple,
-             font_size: int,
-             font_file: str,
-             perm: int = 0,
-             opacity=0.5,
-             owner_pass='',
-             user_pass='',
-             is_save=True,
-             select=None) -> any:
+def add_watermark(doc: fitz.Document,
+                  text: str,
+                  rotate: int,
+                  colour: tuple,
+                  font_size: int,
+                  font_file: str,
+                  opacity=0.5,
+                  select=None) -> fitz.Document:
     """
-    add password and/or watermark
+    add watermark
 
-    :param input_pdf: import file name
-    :param output_pdf: export file name
+    :param doc: import file
     :param text: content of watermark
     :param rotate: rotation angle of watermark
     :param colour: colour of watermark; in form of (a, b, c,)
     :param font_size: font size of letter in watermark
     :param font_file: font file location
-    :param perm: int; set permissions
     :param opacity: opacity of the watermark; range from 0 to 100
-    :param owner_pass: owner password
-    :param user_pass: user password
-    :param is_save: bool, whether save or return doc
     :param select: None or int;
     :return: None if save==True; fitz.doc if save==False
     """
-    encrypt_meth = fitz.PDF_ENCRYPT_AES_256  # strongest algorithm
-    doc = fitz.open(input_pdf)
     if select is not None:
         doc.select([select])
     for page in doc:
@@ -158,7 +147,7 @@ def security(input_pdf: str,
             page.rect.width//2,
             page.rect.height//2,
         )
-        shape = page.newShape()
+        shape = fitz.utils.Shape(page)
         shape.insertTextbox(
             r1,
             text,
@@ -176,19 +165,7 @@ def security(input_pdf: str,
             ),
         )
         shape.commit()
-    if not is_save:
-        return doc
-    if is_save:
-        doc.save(
-            output_pdf,
-            garbage=1,  # remove unused objects
-            encryption=encrypt_meth,  # set the encryption method
-            owner_pw=owner_pass,  # set the owner password
-            user_pw=user_pass,  # set the user password
-            permissions=perm,  # set permissions
-        )
-        doc.close()
-        del doc
+    return doc
 
 
 def setting_warning(set_file_name: str,
@@ -245,31 +222,56 @@ def setting_warning(set_file_name: str,
             return content
 
 
-def set_icon(doc: fitz.fitz,
-             widget: QWidget.window,
-             _page: int = 0) -> None:
+def shadow(widget,
+           colour: QtGui.QColor,
+           radius: int) -> None:
     """
-    add image of first page into table element
+    add shadow
 
-    :param doc: from open_pdf(.) or fitz.open(.)
     :param widget: widget
-    :param _page: page index
+    :param colour: colour of shadow, e.g. QColor(10, 10, 10, 100)
+    :param radius: radius of the shadow
     :return: None
     """
-    page = doc.loadPage(_page)
+    _shadow = QtWidgets.QGraphicsDropShadowEffect()
+    _shadow.setBlurRadius(radius)
+    _shadow.setColor(colour)
+    _shadow.setOffset(0, 0)
+    widget.setGraphicsEffect(_shadow)
+
+
+def page_icon(page: fitz.Page,
+              width: int,
+              w_col: int,
+              _scaled: float,
+              _scaled_=1) -> QWidget:
+    """
+    insert image to a QLabel
+
+    :param page: file page
+    :param width: width of the table cell
+    :param w_col: collum count of the table
+    :param _scaled: scaled coefficient of label
+    :param _scaled_: scaled coefficient of image in label
+    :return: QWidget()
+    """
     _cover = render_pdf_page(page)
     label = QtWidgets.QLabel(None)
-    scaled_width, scaled_height = int, int
-    if _cover.height()/_cover.width() > 4/3:
-        scaled_height = widget.table.width()//widget.w_col*4/3*0.95
-        scaled_width = scaled_height*(_cover.width()/_cover.height())
-    if _cover.height()/_cover.width() <= 4/3:
-        scaled_width = widget.table.width()//widget.w_col*0.95
-        scaled_height = scaled_width*(_cover.height()/_cover.width())
+    layout = QHBoxLayout(None)
+    widget = QWidget(None)
+    layout.addWidget(label, alignment=QtCore.Qt.AlignCenter)
+    widget.setLayout(layout)
+    scaled_width, scaled_height = int(), int()
+    if _cover.height() / _cover.width() > 4 / 3:
+        scaled_height = width // w_col * 4 / 3 * _scaled
+        scaled_width = scaled_height * (_cover.width() / _cover.height())
+    if _cover.height() / _cover.width() <= 4 / 3:
+        scaled_width = width // w_col * _scaled
+        scaled_height = scaled_width * (_cover.height() / _cover.width())
     label.setPixmap(
         QtGui.QPixmap(_cover).scaled(
-            scaled_width,
-            scaled_height,
+            scaled_width * _scaled_,
+            scaled_height * _scaled_,
             QtCore.Qt.IgnoreAspectRatio,
             QtCore.Qt.SmoothTransformation,
         ),
@@ -277,21 +279,44 @@ def set_icon(doc: fitz.fitz,
     label.setAlignment(
         QtCore.Qt.AlignCenter,
     )
-    widget.table.setCellWidget(
-        widget.x,
-        widget.y,
-        label,
-    )
-    del label  # delete label (important)
-    del _cover, scaled_width, scaled_height
-    # do not change the following codes
-    # --------------------------------------------------------------
-    if ((widget.x+1)*(widget.y+1))//((widget.x+1)*widget.w_col) == 0:
-        widget.y += 1
-    else:
-        widget.x += 1
-        widget.y -= (widget.w_col-1)
-    # --------------------------------------------------------------
+    label.setFixedSize(scaled_width, scaled_height)
+    shadow(label, QtGui.QColor(0, 0, 0, 100), 20)
+    del _cover, label, layout
+    return widget
+
+
+def set_icon(widget: QWidget,
+             doc: any = None,
+             _scaled: float = 0.95,
+             _scaled_=1) -> None:
+    """
+    add image of first page into table element
+
+    :param widget: widget
+    :param doc: doc
+    :param _scaled: scaled coefficient of label
+    :param _scaled_: scaled coefficient of image in label
+    :return: None
+    """
+    x, y = 0, 0
+    for i in widget.book_list:
+        label = page_icon(
+            widget.book[i] if type(widget.book_list[0]) == int else (i[0] if doc is None else doc[0]),
+            widget.table.width(),
+            widget.w_col,
+            _scaled,
+            _scaled_
+        )
+        widget.table.setCellWidget(x, y, label)
+        del label  # delete label (important)
+        # do not change the following codes
+        # --------------------------------------------------------------
+        if ((x + 1) * (y + 1)) // ((x + 1) * widget.w_col) == 0:
+            y += 1
+        else:
+            x += 1
+            y -= (widget.w_col - 1)
+        # --------------------------------------------------------------
 
 
 def add(main: QWidget,
@@ -309,7 +334,7 @@ def add(main: QWidget,
         main.s_dir,
         _format,
     )
-    if state:
+    if state and main.dir_store_state:
         main.s_dir = os.path.dirname(f_name.replace('/', '\\'))
     return f_name.replace('/', '\\'), state
 
@@ -329,7 +354,7 @@ def save(main: QWidget,
         main.o_dir + "new.pdf",
         _format,
     )
-    if state:
+    if state and main.dir_store_state:
         main.o_dir = os.path.dirname(f_name.replace('/', '\\'))
     return f_name.replace('/', '\\'), state
 
@@ -346,35 +371,19 @@ def delete(index: int,
     if index >= 0:
         widget.book_list.pop(index)
     widget.table.clearContents()
-    widget.x, widget.y = 0, 0
     if len(widget.book_list) != 0:
         reset_table(
             book_len=len(widget.book_list),
             widget=widget,
         )
         # reset images
-        if type(widget.book_list[0]) == int:
-            doc = fitz.open(widget.book_name)
-            for page in widget.book_list:
-                set_icon(
-                    doc=doc,
-                    widget=widget,
-                    _page=page,
-                )
-            doc.close()
-            del doc
-        else:
-            for f_name in widget.book_list:
-                doc = fitz.open(f_name)
-                set_icon(doc, widget)
-                doc.close()
-                del doc
+        set_icon(widget)
 
 
 def generate_menu(pos,
                   widget: QWidget,
-                  select: int = 0,
-                  main=None) -> None:
+                  main: QWidget,
+                  select: int = 0) -> None:
     """
     generate menu
 
@@ -394,50 +403,44 @@ def generate_menu(pos,
         menu = QtWidgets.QMenu()
         item1 = menu.addAction(
             QtGui.QIcon('ico\\delete.svg'),
-            'delete',
+            MENU_L[main.language][0],
         )
         item2, item3, item4 = None, None, None
         if select == 0:
             item3 = menu.addAction(
                 QtGui.QIcon('ico\\view.svg'),
-                'view',
+                MENU_L[main.language][1],
             )
         if select == 1:
             item2 = menu.addAction(
                 QtGui.QIcon('ico\\down.svg'),
-                'save as',
+                MENU_L[main.language][2],
             )
             item4 = menu.addAction(
                 QtGui.QIcon('ico\\Photo.svg'),
-                'extract images',
+                MENU_L[main.language][3],
             )
         action = menu.exec_(
             widget.table.mapToGlobal(pos),
         )
         if action == item1:
-            try:
-                delete(
-                    index=index,
-                    widget=widget,
-                )
-            except IndexError:
-                pass
+            delete(
+                index=index,
+                widget=widget,
+             )
         if action == item2 and select == 1:
-            try:
-                save_as(
-                    index=index,
-                    widget=widget,
-                    main=main,
-                )
-            except IndexError:
-                pass
+            save_as(
+                index=index,
+                widget=widget,
+                main=main,
+            )
         if action == item4 and select == 1:
             extract_img(
                 index=index,
                 widget=widget,
                 main=main,
             )
-        if action == item3 and select == 0 and main is not None:
+        if action == item3 and select == 0:
             main._view(index, widget)
 
 
@@ -480,9 +483,9 @@ def save_as(index: int,
     :param main: main
     :return: None
     """
-    doc = fitz.open(widget.book_name)
+    doc = copy(widget.book)
     f_name = os.path.splitext(
-        os.path.basename(widget.book_name),
+        os.path.basename(widget.book.name),
     )[0]+'-{}.pdf'.format(
         widget.book_list[index]+1,
     )
@@ -497,11 +500,12 @@ def save_as(index: int,
             doc.select([widget.book_list[index]])
             doc.save(file_name.replace('/', '\\'))
         if file_name.endswith('.jpg') or file_name.endswith('.png'):
-            pix = doc[index].get_pixmap(
+            pix = fitz.utils.get_pixmap(
+                doc[widget.book_list[index]],
                 matrix=fitz.Matrix(1.0, 1.0),
-                alpha=False,
+                alpha=True,
             )
-            pix.writePNG(file_name.replace('/', '\\'))
+            pix.save(file_name.replace('/', '\\'))
     doc.close()
     del doc
 
@@ -513,14 +517,17 @@ def clean(widget: QWidget) -> None:
     :param widget: widget
     :return: None
     """
-    widget.book_list = list()
-    widget.x, widget.y = 0, 0
-    widget.col, widget.crow = -1, -1
-    widget.table.clearContents()
-    reset_table(
-        book_len=1,
-        widget=widget,
-    )
+    if len(widget.book_list) != 0:
+        widget.book_list = list()
+        try:
+            widget.book = None
+        except AttributeError:
+            pass
+        widget.table.clearContents()
+        reset_table(
+            book_len=1,
+            widget=widget,
+        )
     gc.collect(2)
 
 
@@ -535,12 +542,12 @@ def extract_img(index: int,
     :param main: main
     :return: None
     """
-    doc = fitz.open(widget.book_name)
+    doc = widget.book
     img_inf = doc[index].get_images()
     for key, inf in enumerate(img_inf):
         f_name = os.path.splitext(
-            os.path.basename(widget.book_name),
-        )[0] + '-{}-{}.png'.format(
+            os.path.basename(widget.book.name),
+        )[0] + '-{}-image-{}.png'.format(
             widget.book_list[index] + 1,
             key + 1,
         )
@@ -550,12 +557,11 @@ def extract_img(index: int,
             doc,
             inf[0],
         )
-        # ignore the warning here
-        img.writePNG(img_name)
+        img.save(img_name)
     QMessageBox.information(
         main,
         'Saved',
-        '{} images saved to {}'.format(
+        MESSAGE[main.language][1].format(
             len(img_inf),
             main.s_dir,
         ),
@@ -583,7 +589,7 @@ def choose(widget: QtWidgets.QLineEdit,
         )
 
 
-def set_metadata0(doc: fitz.open,
+def set_metadata0(doc: fitz.fitz,
                   author: any) -> None:
     """
     set defeat metadata
@@ -707,6 +713,6 @@ def _warning(parent) -> None:
     QMessageBox.warning(
         parent,
         'Oops',
-        'Cannot save! Try a new file name...',
+        MESSAGE[parent.language][2],
         QMessageBox.Yes,
     )
