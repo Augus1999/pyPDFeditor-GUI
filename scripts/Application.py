@@ -24,14 +24,14 @@ class Main(MainR):
     """
     def __init__(self, system: str, version: str):
         super(Main, self).__init__()
+        self.__system__ = system
+        self.__version__ = version
         content = setting_warning(
             'settings\\settings.json',
             self,
             )
         self.BORDER_WIDTH = 5
         self.monitor_info = None
-        self.__system__ = system
-        self.__version__ = version
         self.Author = getpass.getuser()
         self.move(100, 20)
         self.colour_r = 0.24
