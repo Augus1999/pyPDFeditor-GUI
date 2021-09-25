@@ -4,33 +4,34 @@ import sys
 import json
 import fitz
 import getpass
-import platform
 import subprocess as sp
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
-from PyQt5.QtWidgets import QApplication, QColorDialog
+from PyQt5.QtWidgets import QApplication, QColorDialog, QWidget
 from .language import set_language, lag_s, lag_p
-from .windows import (MainR, PermMenuR,
+from .windows import (MainR, PermMenuR, BUTTON_STYLE,
                       SettingR, FontDialogR,)
 from .functions import (setting_warning, toc2plaintext, plaintext2toc,
                         set_metadata0, set_metadata1, generate_menu,
                         reset_table, pdf_split, find_font, _warning,
                         open_pdf, set_icon, add_watermark, choose, clean,
                         add, render_pdf_page, save, copy,)
-_system = platform.system()
-# _system = 'unix'  # test code
 
 
 class Main(MainR):
     """
     main widow
     """
-    def __init__(self):
+    def __init__(self, system: str, version: str):
         super(Main, self).__init__()
         content = setting_warning(
             'settings\\settings.json',
             self,
             )
+        self.BORDER_WIDTH = 5
+        self.monitor_info = None
+        self.__system__ = system
+        self.__version__ = version
         self.Author = getpass.getuser()
         self.move(100, 20)
         self.colour_r = 0.24
@@ -80,7 +81,12 @@ class Main(MainR):
         self.tab3.button4.clicked.connect(self.get_colour)
         self.tab3.button5.clicked.connect(self.preview)
         self.tab3.button7.clicked.connect(self.get_font)
-        self.tab3.button8.clicked.connect(lambda: clean(self.tab3))
+        self.tab3.button8.clicked.connect(lambda: (
+            clean(self.tab3),
+            self.tab3.text.clear(),
+            self.tab3.line1.clear(),
+            self.tab3.line2.clear(),
+        ))
         self.tab3.line3.returnPressed.connect(self.preview)
         self.tab3.line4.returnPressed.connect(self.preview)
         self.tab3.line5.returnPressed.connect(self.preview)
@@ -112,8 +118,8 @@ class Main(MainR):
         self.btn_ext_2.clicked.connect(self.close)
         self.btn_ext_3.clicked.connect(self.close)
         self.btn_ext_4.clicked.connect(self.close)
-        global _system
-        if _system == 'Windows':
+        self.customise_status_bar(self.__system__)  # important! call this method first!!!
+        if self.__system__ == 'Windows':
             from .window_effect import WindowEffect
             self.windowEffect = WindowEffect()
             self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
@@ -127,22 +133,114 @@ class Main(MainR):
             self.btn_min_2.close(), self.btn_max_2.close(), self.btn_ext_2.close()
             self.btn_min_3.close(), self.btn_max_3.close(), self.btn_ext_3.close()
             self.btn_min_4.close(), self.btn_max_4.close(), self.btn_ext_4.close()
-        self.customise_status_bar(_system)
+        self.tab0.label_v.setText(f'version {self.__version__}')
         set_language(self)
 
-    global _system
-    if _system == 'Windows':
-        def mousePressEvent(self, event) -> None:
+    # -------well, why do the following ugly codes exist?-------
+    # -------they are used to re-enable, correctly, the window animations under Windows platform-------
+    def mousePressEvent(self, event) -> None:
+        if self.__system__ == 'Windows':
             if event.pos() in self._status_bar_pos:
                 self.windowEffect.move_window(int(self.winId()))
+        else:
+            QWidget.mousePressEvent(self, event)
 
-        def mouseDoubleClickEvent(self, event) -> None:
+    def mouseDoubleClickEvent(self, event) -> None:
+        if self.__system__ == 'Windows':
             if event.button() == QtCore.Qt.LeftButton and event.pos() in self._status_bar_pos:
                 self.windowChange()
+        else:
+            QWidget.mouseDoubleClickEvent(self, event)
+
+    def nativeEvent(self, event_type, message) -> QWidget.nativeEvent:
+        if self.__system__ == 'Windows':
+            import win32api
+            import win32con
+            import win32gui
+            from ctypes import cast, POINTER
+            from ctypes.wintypes import MSG
+            from .window_effect import NCCalcSizePARAMS, MINMAXINFO
+            msg = MSG.from_address(message.__int__())
+
+            def __isWindowMaximized(h_wnd) -> bool:
+                """ whether is maximised """
+                window_placement = win32gui.GetWindowPlacement(h_wnd)
+                if not window_placement:
+                    return False
+                return window_placement[1] == win32con.SW_MAXIMIZE
+
+            def __monitorNCCALCSIZE(_self, _msg: MSG) -> any:
+                _monitor = win32api.MonitorFromWindow(_msg.hWnd)
+                if _monitor is None and not self.monitor_info:
+                    return _monitor
+                elif _monitor is not None:
+                    _self.monitor_info = win32api.GetMonitorInfo(_monitor)
+                # resize window
+                params = cast(_msg.lParam, POINTER(NCCalcSizePARAMS)).contents
+                params.rgrc[0].left = _self.monitor_info['Work'][0]
+                params.rgrc[0].top = _self.monitor_info['Work'][1]
+                params.rgrc[0].right = _self.monitor_info['Work'][2]
+                params.rgrc[0].bottom = _self.monitor_info['Work'][3]
+
+            if msg.message == win32con.WM_NCHITTEST:
+                x_pos = (win32api.LOWORD(msg.lParam)-self.frameGeometry().x()) % 65536
+                y_pos = win32api.HIWORD(msg.lParam)-self.frameGeometry().y()
+                w, h = self.width(), self.height()
+                lx = x_pos < self.BORDER_WIDTH
+                rx = x_pos + 9 > w - self.BORDER_WIDTH
+                ty = y_pos < self.BORDER_WIDTH
+                by = y_pos > h - self.BORDER_WIDTH
+                if lx and ty:
+                    return True, win32con.HTTOPLEFT
+                elif rx and by:
+                    return True, win32con.HTBOTTOMRIGHT
+                elif rx and ty:
+                    return True, win32con.HTTOPRIGHT
+                elif lx and by:
+                    return True, win32con.HTBOTTOMLEFT
+                elif ty:
+                    return True, win32con.HTTOP
+                elif by:
+                    return True, win32con.HTBOTTOM
+                elif lx:
+                    return True, win32con.HTLEFT
+                elif rx:
+                    return True, win32con.HTRIGHT
+            elif msg.message == win32con.WM_NCCALCSIZE:
+                if __isWindowMaximized(msg.hWnd):
+                    __monitorNCCALCSIZE(self, msg)
+                return True, 0
+            elif msg.message == win32con.WM_GETMINMAXINFO:
+                if __isWindowMaximized(msg.hWnd):
+                    window_rect = win32gui.GetWindowRect(msg.hWnd)
+                    if not window_rect:
+                        return False, 0
+                    # obtain monitor api
+                    monitor = win32api.MonitorFromRect(window_rect)
+                    if not monitor:
+                        return False, 0
+                    # obtain monitor information
+                    monitor_info = win32api.GetMonitorInfo(monitor)
+                    monitor_rect = monitor_info['Monitor']
+                    work_area = monitor_info['Work']
+                    # transform lParam into MINMAXINFO pointer
+                    info = cast(msg.lParam, POINTER(MINMAXINFO)).contents
+                    # resize window
+                    info.ptMaxSize.x = work_area[2] - work_area[0]
+                    info.ptMaxSize.y = work_area[3] - work_area[1]
+                    info.ptMaxTrackSize.x = info.ptMaxSize.x
+                    info.ptMaxTrackSize.y = info.ptMaxSize.y
+                    info.ptMaxPosition.x = abs(window_rect[0] - monitor_rect[0])
+                    info.ptMaxPosition.y = abs(window_rect[1] - monitor_rect[1])
+                    return True, 1
+            return QWidget.nativeEvent(self, event_type, message)
+        else:
+            return QWidget.nativeEvent(self, event_type, message)
+    # -------here ends the ugly code-------
 
     def closeEvent(self, event) -> None:
         """
-        close all child windows
+        close all child windows and write settings to settings.json
         """
         _settings = {
             "start dir": self.s_dir,
@@ -176,8 +274,10 @@ class Main(MainR):
         if self.tab3.check2.isChecked():
             self.perm_int = 2820
             self.tab3.button6.clicked.connect(self._perm_set)
+            self.tab3.button6.setStyleSheet(BUTTON_STYLE.format('more.svg', 'more_h.svg', 'more_p.svg'))
         else:
-            self.tab3.button6.clicked.disconnect(self._perm_set)
+            self.tab3.button6.setStyleSheet(BUTTON_STYLE.format('more_d.svg', 'more_d.svg', 'more_d.svg'))
+            self.tab3.button6.clicked.disconnect()
             self.perm_int = 4028
 
     @staticmethod
@@ -502,6 +602,8 @@ class Setting(SettingR):
 
     def _enable_select(self):
         if self.check.isChecked():
+            self.button1.setStyleSheet(BUTTON_STYLE.format('folder_d.svg', 'folder_d.svg', 'folder_d.svg'))
+            self.button2.setStyleSheet(BUTTON_STYLE.format('folder_d.svg', 'folder_d.svg', 'folder_d.svg'))
             try:
                 self.button1.clicked.disconnect()
                 self.button2.clicked.disconnect()
@@ -510,6 +612,8 @@ class Setting(SettingR):
             self.line1.setReadOnly(True)
             self.line2.setReadOnly(True)
         else:
+            self.button1.setStyleSheet(BUTTON_STYLE.format('folder.svg', 'folder_h.svg', 'folder_p.svg'))
+            self.button2.setStyleSheet(BUTTON_STYLE.format('folder.svg', 'folder_h.svg', 'folder_p.svg'))
             self.button1.clicked.connect(lambda: choose(self.line1, self.s_dir))
             self.button2.clicked.connect(lambda: choose(self.line2, self.o_dir))
             self.line1.setReadOnly(False)
@@ -616,7 +720,9 @@ class FontDialog(FontDialogR):
         del self
 
 
-def __main__(debug: bool = True) -> None:
+def __main__(system: str,
+             version: str,
+             debug: bool = True) -> None:
     """
     main function
 
@@ -626,6 +732,6 @@ def __main__(debug: bool = True) -> None:
     fitz.TOOLS.mupdf_display_errors(debug)
     arg = sys.argv
     app = QApplication(arg)
-    main = Main()
+    main = Main(system, version)
     main.show()
     sys.exit(app.exec_())

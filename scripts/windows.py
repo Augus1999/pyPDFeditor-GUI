@@ -1,20 +1,10 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
 from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, QTransform
-from .styleSheets import *
+from .styleSheets import *  # change here if thee want to change theme!
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import (
-    QWidget,
-    QGridLayout,
-    QTabWidget,
-    QLabel,
-    QTextEdit,
-    QComboBox,
-    QLineEdit,
-    QPushButton,
-    QTableWidget,
-    QApplication,
-)
+from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit,
+                             QComboBox, QLineEdit, QPushButton, QTableWidget, QApplication)
 
 
 class SwitchBtn(QWidget):
@@ -23,12 +13,12 @@ class SwitchBtn(QWidget):
     def __init__(self, parent=None):
         super(QWidget, self).__init__(parent)
         self.checked = False
-        self.bgColorOff = QColor("#ffffff")
-        self.bgColorOn = QColor("#b7cbc9")
-        self.sliderColorOff = QColor(60, 60, 60)
-        self.sliderColorOn = QColor(255, 255, 255)
-        self.textColorOff = QColor(60, 60, 60)
-        self.textColorOn = QColor(255, 255, 255)
+        self.bgColorOff = QColor("#e2e2dd")
+        self.bgColorOn = QColor("#6272a4")
+        self.sliderColorOff = QColor("#8d90a4")
+        self.sliderColorOn = QColor("#f8f8f2")
+        self.textColorOff = QColor("#8d90a4")
+        self.textColorOn = QColor("#f8f8f2")
         self.textOff = "OFF"
         self.textOn = "ON"
         self.space = 6
@@ -39,6 +29,31 @@ class SwitchBtn(QWidget):
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_value)
         self.setFont(QFont("calibri", 11))
+
+    def setStyleSheet(self, style_sheet: str) -> None:
+        style_sheet = style_sheet.replace(' ', '').replace('\n', '').replace('\t', '')
+        li = style_sheet.split('}')
+        for i in li:
+            if 'SwitchBtn:on' in i:
+                lines = i.split('{')
+                line1 = lines[1]
+                styles = line1.split(';')
+                for style in styles:
+                    if 'background-color:' in style:
+                        self.bgColorOn = QColor(style[17:])
+                    if 'color:' in style and 'background-color:' not in style:
+                        self.sliderColorOn = QColor(style[6:])
+                        self.textColorOn = QColor(style[6:])
+            if 'SwitchBtn:off' in i:
+                lines = i.split('{')
+                line1 = lines[1]
+                styles = line1.split(';')
+                for style in styles:
+                    if 'background-color:' in style:
+                        self.bgColorOff = QColor(style[17:])
+                    if 'color:' in style and 'background-color:' not in style:
+                        self.sliderColorOff = QColor(style[6:])
+                        self.textColorOff = QColor(style[6:])
 
     def update_value(self) -> None:
         if self.checked:
@@ -180,7 +195,7 @@ class MainR(QTabWidget):
         self.size1 = height * 0.04
         self.size2 = height * 0.03
         self.resize(width, height)
-        self.setMinimumSize(width * 0.9, height * 0.9)
+        self.setMinimumWidth(width * 0.9)
         self.setWindowTitle('PDF Editor')
         self.setWindowIcon(QIcon('ico\\pdf icon.svg'))
         self.setTabShape(QTabWidget.Rounded)
@@ -329,7 +344,18 @@ class MainR(QTabWidget):
         self.tab0.setStyleSheet(BGC_STYLE)
         self.tab0.grid = QGridLayout(self.tab0)
         label = QLabel(self.tab0)
-        self.tab0.grid.addWidget(label, 1, 0, 10, 21)
+        label.setStyleSheet(f'image:url(./{WELCOME_PAGE})')
+        self._shadow(label, QColor(0, 0, 0, 90), 10)
+        label_w = QLabel(self.tab0)
+        label_w.setStyleSheet(LABEL_STYLE)
+        label_w.setText("<a href='https://github.com/Augus1999/pyPDFeditor-GUI' style='color:#a3b5b3'>"
+                        "<small>https://github.com/Augus1999/pyPDFeditor-GUI</small></a>")
+        label_w.setOpenExternalLinks(True)
+        self.tab0.label_v = QLabel(self.tab0)
+        self.tab0.label_v.setStyleSheet(LABEL_STYLE)
+        self.tab0.grid.addWidget(label, 1, 0, 30, 21)
+        self.tab0.grid.addWidget(self.tab0.label_v, 31, 0, 1, 5, QtCore.Qt.AlignBottom)
+        self.tab0.grid.addWidget(label_w, 31, 17, 1, 4, QtCore.Qt.AlignBottom)
 
     def tab1_init(self) -> None:
         self.tab1.grid = QGridLayout(self.tab1)
@@ -433,10 +459,10 @@ class MainR(QTabWidget):
         self.tab3.button3.setStyleSheet(BUTTON_STYLE.format('settings.svg', 'settings_h.svg', 'settings_p.svg'))
         self.tab3.button4.setStyleSheet(BUTTON_STYLE.format('color.svg', 'color_h.svg', 'color_p.svg'))
         self.tab3.button5.setStyleSheet(BUTTON_STYLE.format('view.svg', 'view_h.svg', 'view_p.svg'))
-        self.tab3.button6.setStyleSheet(BUTTON_STYLE.format('more.svg', 'more_h.svg', 'more_p.svg'))
+        self.tab3.button6.setStyleSheet(BUTTON_STYLE.format('more_d.svg', 'more_d.svg', 'more_d.svg'))
         self.tab3.button7.setStyleSheet(BUTTON_STYLE.format('font.svg', 'font_h.svg', 'font_p.svg'))
         self.tab3.button8.setStyleSheet(BUTTON_STYLE.format('delete.svg', 'delete_h.svg', 'delete_p.svg'))
-        self.tab3.table.setFixedSize(self.height() * 0.6, self.height() * 0.8)
+        self.tab3.table.setFixedSize(self.size2 * 20, self.size2 * 27)
         self.tab3.button1.setFixedSize(self.size2 * 2, self.size2)
         self.tab3.button2.setFixedSize(self.size2 * 2, self.size2)
         self.tab3.button3.setFixedSize(self.size2 * 2, self.size2)
@@ -495,7 +521,7 @@ class MainR(QTabWidget):
         self.tab3.label10.setFixedSize(self.size1, self.size1)
         self.tab3.label3.setText('pt')
         self.tab3.label6.setText('%')
-        self.tab3.label8.setText('* '*26)
+        self.tab3.label8.setText('* '*20)
         self.tab3.label10.setText('°')
         self.tab3.label1.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label2.setAlignment(QtCore.Qt.AlignCenter)
@@ -518,35 +544,38 @@ class MainR(QTabWidget):
         self.tab3.check.setChecked(True)
         self.tab3.check1.setChecked(False)
         self.tab3.check2.setChecked(False)
+        self.tab3.check.setStyleSheet(SWITCH_STYLE)
+        self.tab3.check1.setStyleSheet(SWITCH_STYLE)
+        self.tab3.check2.setStyleSheet(SWITCH_STYLE)
         self.tab3.grid.addWidget(self.tab3.button1, 0, 0)
         self.tab3.grid.addWidget(self.tab3.button2, 0, 1)
         self.tab3.grid.addWidget(self.tab3.button8, 0, 2)
-        self.tab3.grid.addWidget(self.tab3.table, 1, 0, 14, 4, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.label1, 1, 5, 1, 4, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.line1, 2, 5, 1, 4, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.line2, 3, 5, 1, 4, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.label2, 4, 5, 1, 4, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.text, 5, 5, 2, 4, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.label4, 7, 5, 1, 2, QtCore.Qt.AlignRight)
-        self.tab3.grid.addWidget(self.tab3.label7, 8, 5, 1, 2, QtCore.Qt.AlignRight)
-        self.tab3.grid.addWidget(self.tab3.label9, 9, 5, 1, 2, QtCore.Qt.AlignRight)
-        self.tab3.grid.addWidget(self.tab3.line3, 7, 7, 1, 1, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.line4, 8, 7, 1, 1, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.line5, 9, 7, 1, 1, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.label3, 7, 7, 1, 1, QtCore.Qt.AlignRight)
-        self.tab3.grid.addWidget(self.tab3.label6, 8, 7, 1, 1, QtCore.Qt.AlignRight)
-        self.tab3.grid.addWidget(self.tab3.label10, 9, 7, 1, 1, QtCore.Qt.AlignRight)
-        self.tab3.grid.addWidget(self.tab3.button7, 7, 8, 1, 1, QtCore.Qt.AlignLeft)
-        self.tab3.grid.addWidget(self.tab3.button4, 8, 8, 1, 1, QtCore.Qt.AlignLeft)
-        self.tab3.grid.addWidget(self.tab3.button5, 9, 8, 1, 1, QtCore.Qt.AlignLeft)
-        self.tab3.grid.addWidget(self.tab3.label8, 10, 5, 1, 4, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.label12, 11, 5, 1, 2, QtCore.Qt.AlignRight)
-        self.tab3.grid.addWidget(self.tab3.label11, 12, 5, 1, 2, QtCore.Qt.AlignRight)
-        self.tab3.grid.addWidget(self.tab3.label5, 13, 5, 1, 2, QtCore.Qt.AlignRight)
-        self.tab3.grid.addWidget(self.tab3.check2, 11, 7, 1, 1, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.check1, 12, 7, 1, 1, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.check, 13, 7, 1, 1, QtCore.Qt.AlignCenter)
-        self.tab3.grid.addWidget(self.tab3.button6, 11, 8, 1, 1, QtCore.Qt.AlignLeft)
+        self.tab3.grid.addWidget(self.tab3.table, 1, 0, 14, 10, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.label1, 1, 14, 1, 5, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.line1, 2, 14, 1, 5, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.line2, 3, 14, 1, 5, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.label2, 4, 14, 1, 5, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.text, 5, 14, 2, 5, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.label4, 7, 14, 1, 2, QtCore.Qt.AlignRight)
+        self.tab3.grid.addWidget(self.tab3.label7, 8, 14, 1, 2, QtCore.Qt.AlignRight)
+        self.tab3.grid.addWidget(self.tab3.label9, 9, 14, 1, 2, QtCore.Qt.AlignRight)
+        self.tab3.grid.addWidget(self.tab3.line3, 7, 16, 1, 1, QtCore.Qt.AlignRight)
+        self.tab3.grid.addWidget(self.tab3.line4, 8, 16, 1, 1, QtCore.Qt.AlignRight)
+        self.tab3.grid.addWidget(self.tab3.line5, 9, 16, 1, 1, QtCore.Qt.AlignRight)
+        self.tab3.grid.addWidget(self.tab3.label3, 7, 17, 1, 1, QtCore.Qt.AlignLeft)
+        self.tab3.grid.addWidget(self.tab3.label6, 8, 17, 1, 1, QtCore.Qt.AlignLeft)
+        self.tab3.grid.addWidget(self.tab3.label10, 9, 17, 1, 1, QtCore.Qt.AlignLeft)
+        self.tab3.grid.addWidget(self.tab3.button7, 7, 18, 1, 1, QtCore.Qt.AlignLeft)
+        self.tab3.grid.addWidget(self.tab3.button4, 8, 18, 1, 1, QtCore.Qt.AlignLeft)
+        self.tab3.grid.addWidget(self.tab3.button5, 9, 18, 1, 1, QtCore.Qt.AlignLeft)
+        self.tab3.grid.addWidget(self.tab3.label8, 10, 14, 1, 5, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.label12, 11, 14, 1, 2, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.label11, 12, 14, 1, 2, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.label5, 13, 14, 1, 2, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.check2, 11, 16, 1, 2, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.check1, 12, 16, 1, 2, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.check, 13, 16, 1, 2, QtCore.Qt.AlignCenter)
+        self.tab3.grid.addWidget(self.tab3.button6, 11, 18, 1, 1, QtCore.Qt.AlignLeft)
 
     def tab4_init(self) -> None:
         self.tab4.grid = QGridLayout(self.tab4)
@@ -668,9 +697,8 @@ class SettingR(QWidget):
         self.label1.setStyleSheet(LABEL_STYLE)
         self.label2.setStyleSheet(LABEL_STYLE)
         self.label3.setStyleSheet(LABEL_STYLE)
+        self.check.setStyleSheet(SWITCH_STYLE)
         self.combobox.setStyleSheet(COMBO_BOX_STYLE)
-        self.button1.setStyleSheet(BUTTON_STYLE.format('folder.svg', 'folder_h.svg', 'folder_p.svg'))
-        self.button2.setStyleSheet(BUTTON_STYLE.format('folder.svg', 'folder_h.svg', 'folder_p.svg'))
         self.line1.setStyleSheet(LINE_EDIT_STYLE)
         self.line2.setStyleSheet(LINE_EDIT_STYLE)
         self.label1.setAlignment(QtCore.Qt.AlignVCenter)
@@ -682,44 +710,15 @@ class SettingR(QWidget):
         self.button1.setFixedSize(fixed_h * 0.7, fixed_h * 0.7)
         self.button2.setFixedSize(fixed_h * 0.7, fixed_h * 0.7)
         self.combobox.setFixedSize(fixed_h*17/4, fixed_h)
-        grid.addWidget(self.label1, 0, 0, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label2, 1, 0, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label3, 2, 0, 1, 4, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label1, 0, 0, 1, 5, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label2, 1, 0, 1, 5, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label3, 2, 0, 1, 7, QtCore.Qt.AlignLeft)
         grid.addWidget(self.combobox, 3, 0)
-        grid.addWidget(self.line1, 0, 1, 1, 5)
-        grid.addWidget(self.line2, 1, 1, 1, 5)
-        grid.addWidget(self.button1, 0, 4, 1, 2, QtCore.Qt.AlignRight)
-        grid.addWidget(self.button2, 1, 4, 1, 2, QtCore.Qt.AlignRight)
-        grid.addWidget(self.check, 2, 5, 1, 1, QtCore.Qt.AlignHCenter)
-        self.setWindowOpacity(0.92)
-
-
-class AboutR(QWidget):
-    """
-    about window
-    """
-    def __init__(self):
-        super(AboutR, self).__init__()
-        desktop = QApplication.desktop()
-        screen_rect = desktop.screenGeometry()
-        height = screen_rect.height()*0.19
-        width = height*1.8
-        grid = QGridLayout(self)
-        self.setFixedSize(width, height)
-        self.setWindowTitle('version 1.6')
-        self.setWindowIcon(QIcon('ico\\info.svg'))
-        self.setStyleSheet(BGC_STYLE)
-        self.label = QLabel(self)
-        self.label.setText(
-            "<p>Author: Nianze A. Tao</p>"
-            "<p>MIT licence</p>"
-            "<p>Github page:</p>"
-            "<a href='https://github.com/Augus1999/pyPDFeditor-GUI'>"
-            "<small>https://github.com/Augus1999/pyPDFeditor-GUI</small></a>"
-        )
-        self.label.setStyleSheet(LABEL_STYLE)
-        self.label.setOpenExternalLinks(True)
-        grid.addWidget(self.label, 0, 0, QtCore.Qt.AlignCenter)
+        grid.addWidget(self.line1, 0, 5, 1, 10)
+        grid.addWidget(self.line2, 1, 5, 1, 10)
+        grid.addWidget(self.button1, 0, 14, 1, 1, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.button2, 1, 14, 1, 1, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.check, 2, 13, 1, 2, QtCore.Qt.AlignHCenter)
         self.setWindowOpacity(0.92)
 
 
@@ -788,6 +787,14 @@ class PermMenuR(QWidget):
         self.label6.setStyleSheet(LABEL_STYLE)
         self.label7.setStyleSheet(LABEL_STYLE)
         self.label8.setStyleSheet(LABEL_STYLE)
+        self.check1.setStyleSheet(SWITCH_STYLE)
+        self.check2.setStyleSheet(SWITCH_STYLE)
+        self.check3.setStyleSheet(SWITCH_STYLE)
+        self.check4.setStyleSheet(SWITCH_STYLE)
+        self.check5.setStyleSheet(SWITCH_STYLE)
+        self.check6.setStyleSheet(SWITCH_STYLE)
+        self.check7.setStyleSheet(SWITCH_STYLE)
+        self.check8.setStyleSheet(SWITCH_STYLE)
         self.check1.setChecked(True)
         self.check5.setChecked(True)
         self.check6.setChecked(True)

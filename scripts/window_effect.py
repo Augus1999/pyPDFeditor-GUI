@@ -4,7 +4,7 @@ import win32api
 import win32gui
 from win32.lib import win32con
 from ctypes import POINTER, c_int, byref, WinDLL, Structure
-from ctypes.wintypes import LONG, LPCVOID, DWORD
+from ctypes.wintypes import RECT, UINT, HWND, POINT
 
 
 class MARGINS(Structure):
@@ -13,6 +13,35 @@ class MARGINS(Structure):
         ("cxRightWidth", c_int),
         ("cyTopHeight", c_int),
         ("cyBottomHeight", c_int),
+    ]
+
+
+class MINMAXINFO(Structure):
+    _fields_ = [
+        ("ptReserved", POINT),
+        ("ptMaxSize", POINT),
+        ("ptMaxPosition", POINT),
+        ("ptMinTrackSize", POINT),
+        ("ptMaxTrackSize", POINT),
+    ]
+
+
+class PWindowPOS(Structure):
+    _fields_ = [
+        ('hWnd', HWND),
+        ('hwndInsertAfter', HWND),
+        ('x', c_int),
+        ('y', c_int),
+        ('cx', c_int),
+        ('cy', c_int),
+        ('flags', UINT)
+    ]
+
+
+class NCCalcSizePARAMS(Structure):
+    _fields_ = [
+        ('rgrc', RECT*3),
+        ('lppos', POINTER(PWindowPOS))
     ]
 
 
@@ -25,10 +54,6 @@ class WindowEffect:
         self.dwm_api = WinDLL("dwmapi")
         self.DwmExtendFrameIntoClientArea = self.dwm_api.DwmExtendFrameIntoClientArea
         self.DwmSetWindowAttribute = self.dwm_api.DwmSetWindowAttribute
-        self.DwmExtendFrameIntoClientArea.restype = LONG
-        self.DwmSetWindowAttribute.restype = LONG
-        self.DwmSetWindowAttribute.argtypes = [c_int, DWORD, LPCVOID, DWORD]
-        self.DwmExtendFrameIntoClientArea.argtypes = [c_int, POINTER(MARGINS)]
         
     @staticmethod
     def move_window(h_wnd: int) -> None:

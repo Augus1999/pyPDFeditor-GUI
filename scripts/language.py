@@ -27,7 +27,7 @@ LAB_L4 = {
 LAB_LS = {
     "English": ['START DIR', 'SAVE DIR', 'OPEN AS PREVIOUS'],
     "中文": ['開啓路徑', '保存路徑', '記住先前的路徑'],
-    "日本語": ['開くルーチング', '保存するルーチング', '前使ったルーチングを覚える']
+    "日本語": ['開くルーチング', '保存する~', '前使ったルーチングを覚える']
 }
 LAB_LP = {
     "English": ['Enable Print', 'Enable Modifying File',
