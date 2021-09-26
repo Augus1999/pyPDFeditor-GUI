@@ -102,7 +102,9 @@ class Main(MainR):
             self.tab4.line2.clear(),
             self.tab4.line3.clear(),
             self.tab4.line4.clear(),
+            self.tab4.label0.clear(),
         ))
+        self.tab4.table.Index.connect(lambda par: self.showIndex(par, self.tab4))
         self.btn_min_0.clicked.connect(self.showMinimized)
         self.btn_min_1.clicked.connect(self.showMinimized)
         self.btn_min_2.clicked.connect(self.showMinimized)
@@ -478,7 +480,7 @@ class Main(MainR):
                 self.tab4.book_list = b_l
                 book_len = len(self.tab4.book_list)
                 reset_table(book_len, self.tab4)
-                set_icon(widget=self.tab4, _scaled=0.75, _scaled_=1)
+                set_icon(widget=self.tab4, _scaled=0.9, _scaled_=1)
                 self.tab4.metadata = doc.metadata
                 plaintext = toc2plaintext(doc.get_toc())
                 self.tab4.text.setPlainText(plaintext)
@@ -573,6 +575,12 @@ class Main(MainR):
             set_icon(widget=self.tab3, doc=doc)
             doc.close()
             del doc
+
+    @staticmethod
+    def showIndex(par, widget):
+        index = par[0] * widget.w_col + par[1]  # get position
+        if len(widget.book_list) != 0:
+            widget.label0.setText(f'page {index+1}')
 
 
 class Setting(SettingR):

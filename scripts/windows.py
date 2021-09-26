@@ -182,6 +182,19 @@ class SwitchBtn(QWidget):
         painter.restore()
 
 
+class TableWidget(QTableWidget):
+    Index = QtCore.pyqtSignal(tuple)
+
+    def mousePressEvent(self, event) -> None:
+        QTableWidget.mousePressEvent(self, event)
+        if event.button() == QtCore.Qt.LeftButton:
+            row_num = col_num = int()
+            for i in self.selectionModel().selection().indexes():
+                row_num = i.row()
+                col_num = i.column()
+            self.Index.emit((row_num, col_num))
+
+
 class MainR(QTabWidget):
     """
     main widow
@@ -434,8 +447,7 @@ class MainR(QTabWidget):
 
     def tab3_init(self) -> None:
         scroll_area = QScrollArea()
-        scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
         self.widget3.setMinimumSize(self.width()*0.8, self.height()*0.8)
         layout = QGridLayout(self.widget3)
         scroll_area.setWidget(self.widget3)
@@ -591,8 +603,7 @@ class MainR(QTabWidget):
 
     def tab4_init(self) -> None:
         scroll_area = QScrollArea()
-        scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
         self.widget4.setMinimumSize(self.width() * 0.8, self.height() * 0.8)
         layout = QGridLayout(self.widget4)
         scroll_area.setWidget(self.widget4)
@@ -610,9 +621,9 @@ class MainR(QTabWidget):
         self.tab4.button2.setFixedSize(self.size2 * 2, self.size2)
         self.tab4.button3.setFixedSize(self.size2 * 2, self.size2)
         self.tab4.button4.setFixedSize(self.size2 * 2, self.size2)
-        self.tab4.table = QTableWidget(self.tab4)
+        self.tab4.table = TableWidget(self.tab4)
         self.tab4.table.setShowGrid(False)
-        self.tab4.table.verticalHeader().setVisible(True)
+        self.tab4.table.verticalHeader().setVisible(False)
         self.tab4.table.horizontalHeader().setVisible(False)
         self.tab4.table.setFocusPolicy(QtCore.Qt.NoFocus)
         self.tab4.table.setHorizontalScrollBarPolicy(
@@ -626,11 +637,13 @@ class MainR(QTabWidget):
         self.tab4.text.setStyleSheet(TEXTEDIT_STYlE)
         self.tab4.text.setLineWrapColumnOrWidth(2000)
         self.tab4.text.setLineWrapMode(QTextEdit.FixedPixelWidth)
+        self.tab4.label0 = QLabel(self.tab4)
         self.tab4.label1 = QLabel(self.tab4)
         self.tab4.label2 = QLabel(self.tab4)
         self.tab4.label3 = QLabel(self.tab4)
         self.tab4.label4 = QLabel(self.tab4)
         self.tab4.label5 = QLabel(self.tab4)
+        self.tab4.label0.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setStyleSheet(LABEL_STYLE)
         self.tab4.label2.setStyleSheet(LABEL_STYLE)
         self.tab4.label3.setStyleSheet(LABEL_STYLE)
@@ -676,6 +689,7 @@ class MainR(QTabWidget):
         layout.addWidget(self.tab4.line2, 4, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab4.line3, 6, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab4.line4, 8, 14, 1, 7, QtCore.Qt.AlignCenter)
+        layout.addWidget(self.tab4.label0, 19, 0, 1, 3, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         self._shadow(self.tab4.line1, QColor('#e2e2dd'), 15)
         self._shadow(self.tab4.line2, QColor('#e2e2dd'), 15)
         self._shadow(self.tab4.line3, QColor('#e2e2dd'), 15)

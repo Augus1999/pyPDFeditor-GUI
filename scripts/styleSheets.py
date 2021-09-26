@@ -55,16 +55,28 @@ TEXTEDIT_STYlE = '''
         background-color:#6272a4;
         color:#f8f8f2;
         font-family:Verdana,Microsoft YaHei UI}
-        QScrollBar:vertical{width:5px}
+        QScrollBar:vertical{
+        border:none;
+        border-top-right-radius:4px;
+        border-bottom-right-radius:0px;
+        background-color:#6272a4;
+        margin:0 0 0 0;
+        width:8px}
         QScrollBar::handle:vertical{
-        background-color:#939393;
-        border-radius:2px;
+        background-color:#b7cbc9;
+        border-radius:4px;
         min-height:45px}
-        QScrollBar:horizontal{width:10px}
+        QScrollBar:horizontal{
+        border:none;
+        border-bottom-left-radius:4px;
+        border-bottom-right-radius:0px;
+        background-color:#6272a4;
+        margin:0 0 0 0;
+        width:5px}
         QScrollBar::handle:horizontal{
-        background-color:#daeaef;
-        border-radius:2px;
-        min-height:45px}
+        background-color:#b7cbc9;
+        border-radius:4px;
+        min-width:45px}
         '''
 LINE_EDIT_STYLE = '''
         QLineEdit{font-size:10pt;
@@ -137,6 +149,8 @@ TABLE_STYLE2 = '''
         QScrollBar:vertical{
         background-color:#f8f8f2;
         border:none;
+        border-radius:0px;
+        margin:0 0 0 0;
         width:5px}
         QScrollBar::handle:vertical{
         background-color:#939393;
@@ -167,5 +181,70 @@ SWITCH_STYLE = '''
         SwitchBtn:off{
         background-color:#e2e2dd;
         color:#8d90a4}
+        '''
+SCROLL_AREA_STYlE = '''
+        QScrollArea{
+        border:none;
+        background-color:rgba(255,255,255,0)}
+        QScrollBar:horizontal{
+        border:none;
+        background:#6272a4;
+        height:8px;
+        margin:0px 21px 0 21px;
+        border-radius:0px}
+        QScrollBar::handle:horizontal{
+        background:#b7cbc9;
+        min-width:25px;
+        border-radius:0px}
+        QScrollBar::add-line:horizontal{
+        border:none;
+        background:#6272a4;
+        width:20px;
+        border-top-right-radius:4px;
+        border-bottom-right-radius:4px;
+        subcontrol-position:right;
+        subcontrol-origin:margin}
+        QScrollBar::sub-line:horizontal{
+        border:none;
+        background:#6272a4;
+        width:20px;
+        border-top-left-radius:4px;
+        border-bottom-left-radius:4px;
+        subcontrol-position:left;
+        subcontrol-origin:margin}
+        QScrollBar::up-arrow:horizontal,QScrollBar::down-arrow:horizontal{
+        background:none}
+        QScrollBar::add-page:horizontal,QScrollBar::sub-page:horizontal{
+        background:none}
+        QScrollBar:vertical{
+        border:none;
+        background-color:#6272a4;
+        width:8px;
+        margin:21px 0 21px 0;
+        border-radius:0px}
+        QScrollBar::handle:vertical{	
+        background:#b7cbc9;
+        min-height:25px;
+        border-radius:0px}
+        QScrollBar::add-line:vertical{
+        border:none;
+        background:#6272a4;
+        height:20px;
+        border-bottom-left-radius:4px;
+        border-bottom-right-radius:4px;
+        subcontrol-position:bottom;
+        subcontrol-origin:margin}
+        QScrollBar::sub-line:vertical{
+        border:none;
+        background:#6272a4;
+        height:20px;
+        border-top-left-radius:4px;
+        border-top-right-radius:4px;
+        subcontrol-position:top;
+        subcontrol-origin:margin}
+        QScrollBar::up-arrow:vertical,QScrollBar::down-arrow:vertical{
+        background:none}
+        QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical{
+        background:none}
         '''
 WELCOME_PAGE = 'ico/bkg.svg'

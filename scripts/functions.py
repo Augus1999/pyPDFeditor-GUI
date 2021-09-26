@@ -394,7 +394,7 @@ def generate_menu(pos,
     :param main: main
     :return: None
     """
-    row_num = col_num = -1
+    row_num = col_num = int()
     for i in widget.table.selectionModel().selection().indexes():
         row_num = i.row()
         col_num = i.column()
