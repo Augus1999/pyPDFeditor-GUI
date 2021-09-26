@@ -7,7 +7,7 @@ import getpass
 import subprocess as sp
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
-from PyQt5.QtWidgets import QApplication, QColorDialog, QWidget
+from PyQt5.QtWidgets import QApplication, QColorDialog, QTabWidget
 from .language import set_language, lag_s, lag_p
 from .windows import (MainR, PermMenuR, BUTTON_STYLE,
                       SettingR, FontDialogR,)
@@ -30,7 +30,7 @@ class Main(MainR):
             'settings\\settings.json',
             self,
             )
-        self.BORDER_WIDTH = 5
+        self.BORDER_WIDTH = 8
         self.monitor_info = None
         self.Author = getpass.getuser()
         self.move(100, 20)
@@ -143,16 +143,16 @@ class Main(MainR):
             if event.pos() in self._status_bar_pos:
                 self.windowEffect.move_window(int(self.winId()))
         else:
-            QWidget.mousePressEvent(self, event)
+            QTabWidget.mousePressEvent(self, event)
 
     def mouseDoubleClickEvent(self, event) -> None:
         if self.__system__ == 'Windows':
             if event.button() == QtCore.Qt.LeftButton and event.pos() in self._status_bar_pos:
                 self.windowChange()
         else:
-            QWidget.mouseDoubleClickEvent(self, event)
+            QTabWidget.mouseDoubleClickEvent(self, event)
 
-    def nativeEvent(self, event_type, message) -> QWidget.nativeEvent:
+    def nativeEvent(self, event_type, message) -> any:
         if self.__system__ == 'Windows':
             import win32api
             import win32con
@@ -233,9 +233,7 @@ class Main(MainR):
                     info.ptMaxPosition.x = abs(window_rect[0] - monitor_rect[0])
                     info.ptMaxPosition.y = abs(window_rect[1] - monitor_rect[1])
                     return True, 1
-            return QWidget.nativeEvent(self, event_type, message)
-        else:
-            return QWidget.nativeEvent(self, event_type, message)
+        return QTabWidget.nativeEvent(self, event_type, message)
     # -------here ends the ugly code-------
 
     def closeEvent(self, event) -> None:
@@ -262,6 +260,11 @@ class Main(MainR):
                 separators=(",", ": "),
             )
         sys.exit(0)
+
+    def resizeEvent(self, event) -> None:
+        self.widget3.resize(self.width() * 0.9, self.height() * 0.9)
+        self.widget4.resize(self.width() * 0.9, self.height() * 0.9)
+        QTabWidget.resizeEvent(self, event)
 
     def enable_preview(self) -> None:
         if self.tab3.check1.isChecked():

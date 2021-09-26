@@ -40,10 +40,13 @@ COMBO_BOX_STYLE = '''
         background-image:url(./ico/chevron_down.svg);
         background-position:center;
         background-repeat:no-reperat}
-        QScrollBar:vertical{width:10px}
+        QScrollBar:vertical{
+        background-color:#ffffff;
+        border:none;
+        width:10px}
         QScrollBar::handle:vertical{
-        background-color:#c3c3c3;
-        border-radius:1px;
+        background-color:#6272a4;
+        border-radius:3px;
         min-height:45px}
         '''
 TEXTEDIT_STYlE = '''
@@ -55,12 +58,12 @@ TEXTEDIT_STYlE = '''
         QScrollBar:vertical{width:5px}
         QScrollBar::handle:vertical{
         background-color:#939393;
-        border-radius:1px;
+        border-radius:2px;
         min-height:45px}
         QScrollBar:horizontal{width:10px}
         QScrollBar::handle:horizontal{
         background-color:#daeaef;
-        border-radius:1px;
+        border-radius:2px;
         min-height:45px}
         '''
 LINE_EDIT_STYLE = '''
@@ -110,10 +113,13 @@ TABLE_STYLE1 = '''
         border:none;
         color:#1b124b;
         background-color:#ffffff}
-        QScrollBar:vertical{width:5px}
+        QScrollBar:vertical{
+        border:none;
+        width:5px;
+        background-color:#f7f7f1}
         QScrollBar::handle:vertical{
         background-color:#939393;
-        border-radius:1px;
+        border-radius:2px;
         min-height:45px}
         '''
 TABLE_STYLE2 = '''
@@ -128,10 +134,13 @@ TABLE_STYLE2 = '''
         border:none;
         color:#1b124b;
         background-color:#ffffff}
-        QScrollBar:vertical{width:5px}
+        QScrollBar:vertical{
+        background-color:#f8f8f2;
+        border:none;
+        width:5px}
         QScrollBar::handle:vertical{
         background-color:#939393;
-        border-radius:1px;
+        border-radius:2px;
         min-height:45px}
         '''
 LABEL_STYLE = '''
@@ -141,7 +150,9 @@ LABEL_STYLE = '''
         background-color:rgba(255,255,255,0)
         '''
 BGC_STYLE = '''
-        QWidget{background-color:#f8f8f2}
+        QWidget{
+        border:none;
+        background-color:#f8f8f2}
         QToolTip{
         border:none;
         color:#3c3c3c;
