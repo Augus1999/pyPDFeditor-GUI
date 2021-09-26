@@ -266,6 +266,9 @@ class Main(MainR):
     def resizeEvent(self, event) -> None:
         self.widget3.resize(self.width() * 0.9, self.height() * 0.9)
         self.widget4.resize(self.width() * 0.9, self.height() * 0.9)
+        if self.__system__ == 'Windows':
+            self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
+                                    for y in range(int(self.size2 * 2))]
         QTabWidget.resizeEvent(self, event)
 
     def enable_preview(self) -> None:
