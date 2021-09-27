@@ -2,7 +2,7 @@
 
 This project is based on PyQt5 and PyMuPDF and tested on Python 3.8.6 & 3.9.7 on Windows 10.
 
-Current version is v1.6
+Current version is v1.6.1
 
 ## Welcome
 
