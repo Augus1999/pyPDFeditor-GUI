@@ -27,6 +27,10 @@ def copy(doc: fitz.Document) -> fitz.Document:
     copy the doc
     """
     _doc = fitz.Document(doc.name)
+    if not _doc.is_pdf:
+        pdf_bites = _doc.convert_to_pdf()
+        _doc = fitz.Document('pdf', pdf_bites)
+        _doc.name = doc.name
     return _doc
 
 
@@ -68,6 +72,7 @@ def open_pdf(file_name: str,
     if not doc.is_pdf:
         pdf_bites = doc.convert_to_pdf()
         doc = fitz.Document('pdf', pdf_bites)
+        doc.name = file_name
     return doc, True
 
 
