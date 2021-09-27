@@ -197,16 +197,21 @@ class TableWidget(QTableWidget):
 
 class MainR(QTabWidget):
     """
-    main widow
+    main window
+    all window functions that define the appearance and behaviours are written here
     """
-    def __init__(self):
+    def __init__(self, system: str, version: str):
         super(MainR, self).__init__()
+        self.__system__ = system
+        self.__version__ = version
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
         height = screen_rect.height()*0.88  # 950
         width = height*1.36  # 1290
         self.size1 = height * 0.04
         self.size2 = height * 0.03
+        self.BORDER_WIDTH = 8
+        self.monitor_info = None
         self.resize(width, height)
         self.setMinimumSize(0.47 * width, 0.45 * height)
         self.setWindowTitle('PDF Editor')
@@ -224,51 +229,6 @@ class MainR(QTabWidget):
         self.widget4 = QWidget()
         self.widget3.setStyleSheet(BGC_STYLE)
         self.widget4.setStyleSheet(BGC_STYLE)
-        self.btn_min_0 = QPushButton(self.tab0)
-        self.btn_max_0 = QPushButton(self.tab0)
-        self.btn_ext_0 = QPushButton(self.tab0)
-        self.btn_min_1 = QPushButton(self.tab1)
-        self.btn_max_1 = QPushButton(self.tab1)
-        self.btn_ext_1 = QPushButton(self.tab1)
-        self.btn_min_2 = QPushButton(self.tab2)
-        self.btn_max_2 = QPushButton(self.tab2)
-        self.btn_ext_2 = QPushButton(self.tab2)
-        self.btn_min_3 = QPushButton(self.tab3)
-        self.btn_max_3 = QPushButton(self.tab3)
-        self.btn_ext_3 = QPushButton(self.tab3)
-        self.btn_min_4 = QPushButton(self.tab4)
-        self.btn_max_4 = QPushButton(self.tab4)
-        self.btn_ext_4 = QPushButton(self.tab4)
-        self.btn_min_0.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_max_0.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_ext_0.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_min_1.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_max_1.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_ext_1.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_min_2.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_max_2.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_ext_2.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_min_3.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_max_3.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_ext_3.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_min_4.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_max_4.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_ext_4.setFixedSize(self.size2 * 2, self.size2)
-        self.btn_min_0.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
-        self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
-        self.btn_ext_0.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
-        self.btn_min_1.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
-        self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
-        self.btn_ext_1.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
-        self.btn_min_2.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
-        self.btn_max_2.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
-        self.btn_ext_2.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
-        self.btn_min_3.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
-        self.btn_max_3.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
-        self.btn_ext_3.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
-        self.btn_min_4.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
-        self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
-        self.btn_ext_4.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
         self.tab0_init()
         self.tab1_init()
         self.tab2_init()
@@ -301,10 +261,212 @@ class MainR(QTabWidget):
             QIcon(QPixmap('ico\\metadata.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
-        # self.setWidget(self.tabWidget)
+        if self.__system__ == 'Windows':
+            self.btn_min_0 = QPushButton(self.tab0)
+            self.btn_max_0 = QPushButton(self.tab0)
+            self.btn_ext_0 = QPushButton(self.tab0)
+            self.btn_min_1 = QPushButton(self.tab1)
+            self.btn_max_1 = QPushButton(self.tab1)
+            self.btn_ext_1 = QPushButton(self.tab1)
+            self.btn_min_2 = QPushButton(self.tab2)
+            self.btn_max_2 = QPushButton(self.tab2)
+            self.btn_ext_2 = QPushButton(self.tab2)
+            self.btn_min_3 = QPushButton(self.tab3)
+            self.btn_max_3 = QPushButton(self.tab3)
+            self.btn_ext_3 = QPushButton(self.tab3)
+            self.btn_min_4 = QPushButton(self.tab4)
+            self.btn_max_4 = QPushButton(self.tab4)
+            self.btn_ext_4 = QPushButton(self.tab4)
+            self.btn_min_0.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_max_0.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_ext_0.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_min_1.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_max_1.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_ext_1.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_min_2.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_max_2.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_ext_2.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_min_3.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_max_3.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_ext_3.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_min_4.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_max_4.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_ext_4.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_min_0.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
+            self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
+            self.btn_ext_0.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
+            self.btn_min_1.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
+            self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
+            self.btn_ext_1.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
+            self.btn_min_2.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
+            self.btn_max_2.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
+            self.btn_ext_2.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
+            self.btn_min_3.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
+            self.btn_max_3.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
+            self.btn_ext_3.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
+            self.btn_min_4.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
+            self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
+            self.btn_ext_4.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
+            self.tab0.grid.addWidget(self.btn_min_0, 0, 18)
+            self.tab0.grid.addWidget(self.btn_max_0, 0, 19)
+            self.tab0.grid.addWidget(self.btn_ext_0, 0, 20)
+            self.tab1.grid.addWidget(self.btn_min_1, 0, 18)
+            self.tab1.grid.addWidget(self.btn_max_1, 0, 19)
+            self.tab1.grid.addWidget(self.btn_ext_1, 0, 20)
+            self.tab1.grid.addWidget(self.tab1.button3, 0, 17)
+            self.tab2.grid.addWidget(self.btn_min_2, 0, 18)
+            self.tab2.grid.addWidget(self.btn_max_2, 0, 19)
+            self.tab2.grid.addWidget(self.btn_ext_2, 0, 20)
+            self.tab2.grid.addWidget(self.tab2.button3, 0, 17)
+            self.tab3.grid.addWidget(self.btn_min_3, 0, 18)
+            self.tab3.grid.addWidget(self.btn_max_3, 0, 19)
+            self.tab3.grid.addWidget(self.btn_ext_3, 0, 20)
+            self.tab3.grid.addWidget(self.tab3.button3, 0, 17)
+            self.tab4.grid.addWidget(self.btn_min_4, 0, 18)
+            self.tab4.grid.addWidget(self.btn_max_4, 0, 19)
+            self.tab4.grid.addWidget(self.btn_ext_4, 0, 20)
+            self.tab4.grid.addWidget(self.tab4.button3, 0, 17)
+            self.btn_min_0.clicked.connect(self.showMinimized)
+            self.btn_min_1.clicked.connect(self.showMinimized)
+            self.btn_min_2.clicked.connect(self.showMinimized)
+            self.btn_min_3.clicked.connect(self.showMinimized)
+            self.btn_min_4.clicked.connect(self.showMinimized)
+            self.btn_max_0.clicked.connect(self.windowChange)
+            self.btn_max_1.clicked.connect(self.windowChange)
+            self.btn_max_2.clicked.connect(self.windowChange)
+            self.btn_max_3.clicked.connect(self.windowChange)
+            self.btn_max_4.clicked.connect(self.windowChange)
+            self.btn_ext_0.clicked.connect(self.close)
+            self.btn_ext_1.clicked.connect(self.close)
+            self.btn_ext_2.clicked.connect(self.close)
+            self.btn_ext_3.clicked.connect(self.close)
+            self.btn_ext_4.clicked.connect(self.close)
+            from .window_effect import WindowEffect
+            self.windowEffect = WindowEffect()
+            self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
+                                    for y in range(int(self.size2 * 2))]
+            self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # important! call this method first!
+            self.windowEffect.addWindowAnimation(int(self.winId()))
+            self.windowEffect.addShadowEffect(int(self.winId()))
+        else:
+            self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
+            self.tab2.grid.addWidget(self.tab2.button3, 0, 20)
+            self.tab3.grid.addWidget(self.tab3.button3, 0, 20)
+            self.tab4.grid.addWidget(self.tab4.button3, 0, 20)
+
+    def close(self) -> None:
+        QTabWidget.close(self)
 
     def paintEvent(self, event) -> None:
         pass
+
+    # -------well, why do the following ugly codes exist?-------
+    # -------they are used to re-enable, correctly, the window animations under Windows platform-------
+    def mousePressEvent(self, event) -> None:
+        if self.__system__ == 'Windows':
+            if event.pos() in self._status_bar_pos:
+                self.windowEffect.move_window(int(self.winId()))
+        else:
+            QTabWidget.mousePressEvent(self, event)
+
+    def mouseDoubleClickEvent(self, event) -> None:
+        if self.__system__ == 'Windows':
+            if event.button() == QtCore.Qt.LeftButton and event.pos() in self._status_bar_pos:
+                self.windowChange()
+        else:
+            QTabWidget.mouseDoubleClickEvent(self, event)
+
+    def nativeEvent(self, event_type, message) -> any:
+        if self.__system__ == 'Windows':
+            import win32api
+            import win32con
+            import win32gui
+            from ctypes import cast, POINTER
+            from ctypes.wintypes import MSG
+            from .window_effect import NCCalcSizePARAMS, MINMAXINFO
+            msg = MSG.from_address(message.__int__())
+
+            def __isWindowMaximized(h_wnd) -> bool:
+                """ whether is maximised """
+                window_placement = win32gui.GetWindowPlacement(h_wnd)
+                if not window_placement:
+                    return False
+                return window_placement[1] == win32con.SW_MAXIMIZE
+
+            def __monitorNCCALCSIZE(_self, _msg: MSG) -> any:
+                _monitor = win32api.MonitorFromWindow(_msg.hWnd)
+                if _monitor is None and not self.monitor_info:
+                    return _monitor
+                elif _monitor is not None:
+                    _self.monitor_info = win32api.GetMonitorInfo(_monitor)
+                # resize window
+                params = cast(_msg.lParam, POINTER(NCCalcSizePARAMS)).contents
+                params.rgrc[0].left = _self.monitor_info['Work'][0]
+                params.rgrc[0].top = _self.monitor_info['Work'][1]
+                params.rgrc[0].right = _self.monitor_info['Work'][2]
+                params.rgrc[0].bottom = _self.monitor_info['Work'][3]
+
+            if msg.message == win32con.WM_NCHITTEST:
+                x_pos = (win32api.LOWORD(msg.lParam)-self.frameGeometry().x()) % 65536
+                y_pos = win32api.HIWORD(msg.lParam)-self.frameGeometry().y()
+                w, h = self.width(), self.height()
+                lx = x_pos < self.BORDER_WIDTH
+                rx = x_pos + 9 > w - self.BORDER_WIDTH
+                ty = y_pos < self.BORDER_WIDTH
+                by = y_pos > h - self.BORDER_WIDTH
+                if lx and ty:
+                    return True, win32con.HTTOPLEFT
+                elif rx and by:
+                    return True, win32con.HTBOTTOMRIGHT
+                elif rx and ty:
+                    return True, win32con.HTTOPRIGHT
+                elif lx and by:
+                    return True, win32con.HTBOTTOMLEFT
+                elif ty:
+                    return True, win32con.HTTOP
+                elif by:
+                    return True, win32con.HTBOTTOM
+                elif lx:
+                    return True, win32con.HTLEFT
+                elif rx:
+                    return True, win32con.HTRIGHT
+            elif msg.message == win32con.WM_NCCALCSIZE:
+                if __isWindowMaximized(msg.hWnd):
+                    __monitorNCCALCSIZE(self, msg)
+                return True, 0
+            elif msg.message == win32con.WM_GETMINMAXINFO:
+                if __isWindowMaximized(msg.hWnd):
+                    window_rect = win32gui.GetWindowRect(msg.hWnd)
+                    if not window_rect:
+                        return False, 0
+                    # obtain monitor api
+                    monitor = win32api.MonitorFromRect(window_rect)
+                    if not monitor:
+                        return False, 0
+                    # obtain monitor information
+                    monitor_info = win32api.GetMonitorInfo(monitor)
+                    monitor_rect = monitor_info['Monitor']
+                    work_area = monitor_info['Work']
+                    # transform lParam into MINMAXINFO pointer
+                    info = cast(msg.lParam, POINTER(MINMAXINFO)).contents
+                    # resize window
+                    info.ptMaxSize.x = work_area[2] - work_area[0]
+                    info.ptMaxSize.y = work_area[3] - work_area[1]
+                    info.ptMaxTrackSize.x = info.ptMaxSize.x
+                    info.ptMaxTrackSize.y = info.ptMaxSize.y
+                    info.ptMaxPosition.x = abs(window_rect[0] - monitor_rect[0])
+                    info.ptMaxPosition.y = abs(window_rect[1] - monitor_rect[1])
+                    return True, 1
+        return QTabWidget.nativeEvent(self, event_type, message)
+    # -------here ends the ugly code-------
+
+    def resizeEvent(self, event) -> None:
+        QTabWidget.resizeEvent(self, event)
+        self.widget3.resize(self.width() * 0.9, self.height() * 0.9)
+        self.widget4.resize(self.width() * 0.9, self.height() * 0.9)
+        if self.__system__ == 'Windows':
+            self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
+                                    for y in range(int(self.size2 * 2))]
 
     def windowChange(self) -> None:
         if self.isMaximized():
@@ -330,34 +492,6 @@ class MainR(QTabWidget):
         shadow.setOffset(0, 0)
         widget.setGraphicsEffect(shadow)
 
-    def customise_status_bar(self, system: str) -> None:
-        if system == 'Windows':
-            self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
-            self.tab0.grid.addWidget(self.btn_min_0, 0, 18)
-            self.tab0.grid.addWidget(self.btn_max_0, 0, 19)
-            self.tab0.grid.addWidget(self.btn_ext_0, 0, 20)
-            self.tab1.grid.addWidget(self.btn_min_1, 0, 18)
-            self.tab1.grid.addWidget(self.btn_max_1, 0, 19)
-            self.tab1.grid.addWidget(self.btn_ext_1, 0, 20)
-            self.tab1.grid.addWidget(self.tab1.button3, 0, 17)
-            self.tab2.grid.addWidget(self.btn_min_2, 0, 18)
-            self.tab2.grid.addWidget(self.btn_max_2, 0, 19)
-            self.tab2.grid.addWidget(self.btn_ext_2, 0, 20)
-            self.tab2.grid.addWidget(self.tab2.button3, 0, 17)
-            self.tab3.grid.addWidget(self.btn_min_3, 0, 18)
-            self.tab3.grid.addWidget(self.btn_max_3, 0, 19)
-            self.tab3.grid.addWidget(self.btn_ext_3, 0, 20)
-            self.tab3.grid.addWidget(self.tab3.button3, 0, 17)
-            self.tab4.grid.addWidget(self.btn_min_4, 0, 18)
-            self.tab4.grid.addWidget(self.btn_max_4, 0, 19)
-            self.tab4.grid.addWidget(self.btn_ext_4, 0, 20)
-            self.tab4.grid.addWidget(self.tab4.button3, 0, 17)
-        else:
-            self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
-            self.tab2.grid.addWidget(self.tab2.button3, 0, 20)
-            self.tab3.grid.addWidget(self.tab3.button3, 0, 20)
-            self.tab4.grid.addWidget(self.tab4.button3, 0, 20)
-
     def tab0_init(self) -> None:
         self.tab0.setStyleSheet(BGC_STYLE)
         self.tab0.grid = QGridLayout(self.tab0)
@@ -371,6 +505,7 @@ class MainR(QTabWidget):
         label_w.setOpenExternalLinks(True)
         self.tab0.label_v = QLabel(self.tab0)
         self.tab0.label_v.setStyleSheet(LABEL_STYLE)
+        self.tab0.label_v.setText(f'version {self.__version__}')
         self.tab0.grid.addWidget(label, 1, 0, 30, 21)
         self.tab0.grid.addWidget(self.tab0.label_v, 31, 0, 1, 5, QtCore.Qt.AlignBottom)
         self.tab0.grid.addWidget(label_w, 31, 17, 1, 4, QtCore.Qt.AlignBottom)

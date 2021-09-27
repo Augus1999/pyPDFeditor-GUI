@@ -7,7 +7,7 @@ import getpass
 import subprocess as sp
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
-from PyQt5.QtWidgets import QApplication, QColorDialog, QTabWidget
+from PyQt5.QtWidgets import QApplication, QColorDialog
 from .language import set_language, lag_s, lag_p
 from .windows import (MainR, PermMenuR, BUTTON_STYLE,
                       SettingR, FontDialogR,)
@@ -20,18 +20,15 @@ from .functions import (setting_warning, toc2plaintext, plaintext2toc,
 
 class Main(MainR):
     """
-    main widow
+    main window
+    all app functions are written here
     """
     def __init__(self, system: str, version: str):
-        super(Main, self).__init__()
-        self.__system__ = system
-        self.__version__ = version
+        super(Main, self).__init__(system, version)
         content = setting_warning(
             'settings\\settings.json',
             self,
             )
-        self.BORDER_WIDTH = 8
-        self.monitor_info = None
         self.Author = getpass.getuser()
         self.move(100, 20)
         self.colour_r = 0.24
@@ -105,138 +102,7 @@ class Main(MainR):
             self.tab4.label0.clear(),
         ))
         self.tab4.table.Index.connect(lambda par: self.showIndex(par, self.tab4))
-        self.btn_min_0.clicked.connect(self.showMinimized)
-        self.btn_min_1.clicked.connect(self.showMinimized)
-        self.btn_min_2.clicked.connect(self.showMinimized)
-        self.btn_min_3.clicked.connect(self.showMinimized)
-        self.btn_min_4.clicked.connect(self.showMinimized)
-        self.btn_max_0.clicked.connect(self.windowChange)
-        self.btn_max_1.clicked.connect(self.windowChange)
-        self.btn_max_2.clicked.connect(self.windowChange)
-        self.btn_max_3.clicked.connect(self.windowChange)
-        self.btn_max_4.clicked.connect(self.windowChange)
-        self.btn_ext_0.clicked.connect(self.close)
-        self.btn_ext_1.clicked.connect(self.close)
-        self.btn_ext_2.clicked.connect(self.close)
-        self.btn_ext_3.clicked.connect(self.close)
-        self.btn_ext_4.clicked.connect(self.close)
-        self.customise_status_bar(self.__system__)  # important! call this method first!!!
-        if self.__system__ == 'Windows':
-            from .window_effect import WindowEffect
-            self.windowEffect = WindowEffect()
-            self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
-                                    for y in range(int(self.size2 * 2))]
-            self.windowEffect.addWindowAnimation(int(self.winId()))
-            self.windowEffect.addShadowEffect(int(self.winId()))
-        else:
-            # close all unwanted buttons
-            self.btn_min_0.close(), self.btn_max_0.close(), self.btn_ext_0.close()
-            self.btn_min_1.close(), self.btn_max_1.close(), self.btn_ext_1.close()
-            self.btn_min_2.close(), self.btn_max_2.close(), self.btn_ext_2.close()
-            self.btn_min_3.close(), self.btn_max_3.close(), self.btn_ext_3.close()
-            self.btn_min_4.close(), self.btn_max_4.close(), self.btn_ext_4.close()
-        self.tab0.label_v.setText(f'version {self.__version__}')
         set_language(self)
-
-    # -------well, why do the following ugly codes exist?-------
-    # -------they are used to re-enable, correctly, the window animations under Windows platform-------
-    def mousePressEvent(self, event) -> None:
-        if self.__system__ == 'Windows':
-            if event.pos() in self._status_bar_pos:
-                self.windowEffect.move_window(int(self.winId()))
-        else:
-            QTabWidget.mousePressEvent(self, event)
-
-    def mouseDoubleClickEvent(self, event) -> None:
-        if self.__system__ == 'Windows':
-            if event.button() == QtCore.Qt.LeftButton and event.pos() in self._status_bar_pos:
-                self.windowChange()
-        else:
-            QTabWidget.mouseDoubleClickEvent(self, event)
-
-    def nativeEvent(self, event_type, message) -> any:
-        if self.__system__ == 'Windows':
-            import win32api
-            import win32con
-            import win32gui
-            from ctypes import cast, POINTER
-            from ctypes.wintypes import MSG
-            from .window_effect import NCCalcSizePARAMS, MINMAXINFO
-            msg = MSG.from_address(message.__int__())
-
-            def __isWindowMaximized(h_wnd) -> bool:
-                """ whether is maximised """
-                window_placement = win32gui.GetWindowPlacement(h_wnd)
-                if not window_placement:
-                    return False
-                return window_placement[1] == win32con.SW_MAXIMIZE
-
-            def __monitorNCCALCSIZE(_self, _msg: MSG) -> any:
-                _monitor = win32api.MonitorFromWindow(_msg.hWnd)
-                if _monitor is None and not self.monitor_info:
-                    return _monitor
-                elif _monitor is not None:
-                    _self.monitor_info = win32api.GetMonitorInfo(_monitor)
-                # resize window
-                params = cast(_msg.lParam, POINTER(NCCalcSizePARAMS)).contents
-                params.rgrc[0].left = _self.monitor_info['Work'][0]
-                params.rgrc[0].top = _self.monitor_info['Work'][1]
-                params.rgrc[0].right = _self.monitor_info['Work'][2]
-                params.rgrc[0].bottom = _self.monitor_info['Work'][3]
-
-            if msg.message == win32con.WM_NCHITTEST:
-                x_pos = (win32api.LOWORD(msg.lParam)-self.frameGeometry().x()) % 65536
-                y_pos = win32api.HIWORD(msg.lParam)-self.frameGeometry().y()
-                w, h = self.width(), self.height()
-                lx = x_pos < self.BORDER_WIDTH
-                rx = x_pos + 9 > w - self.BORDER_WIDTH
-                ty = y_pos < self.BORDER_WIDTH
-                by = y_pos > h - self.BORDER_WIDTH
-                if lx and ty:
-                    return True, win32con.HTTOPLEFT
-                elif rx and by:
-                    return True, win32con.HTBOTTOMRIGHT
-                elif rx and ty:
-                    return True, win32con.HTTOPRIGHT
-                elif lx and by:
-                    return True, win32con.HTBOTTOMLEFT
-                elif ty:
-                    return True, win32con.HTTOP
-                elif by:
-                    return True, win32con.HTBOTTOM
-                elif lx:
-                    return True, win32con.HTLEFT
-                elif rx:
-                    return True, win32con.HTRIGHT
-            elif msg.message == win32con.WM_NCCALCSIZE:
-                if __isWindowMaximized(msg.hWnd):
-                    __monitorNCCALCSIZE(self, msg)
-                return True, 0
-            elif msg.message == win32con.WM_GETMINMAXINFO:
-                if __isWindowMaximized(msg.hWnd):
-                    window_rect = win32gui.GetWindowRect(msg.hWnd)
-                    if not window_rect:
-                        return False, 0
-                    # obtain monitor api
-                    monitor = win32api.MonitorFromRect(window_rect)
-                    if not monitor:
-                        return False, 0
-                    # obtain monitor information
-                    monitor_info = win32api.GetMonitorInfo(monitor)
-                    monitor_rect = monitor_info['Monitor']
-                    work_area = monitor_info['Work']
-                    # transform lParam into MINMAXINFO pointer
-                    info = cast(msg.lParam, POINTER(MINMAXINFO)).contents
-                    # resize window
-                    info.ptMaxSize.x = work_area[2] - work_area[0]
-                    info.ptMaxSize.y = work_area[3] - work_area[1]
-                    info.ptMaxTrackSize.x = info.ptMaxSize.x
-                    info.ptMaxTrackSize.y = info.ptMaxSize.y
-                    info.ptMaxPosition.x = abs(window_rect[0] - monitor_rect[0])
-                    info.ptMaxPosition.y = abs(window_rect[1] - monitor_rect[1])
-                    return True, 1
-        return QTabWidget.nativeEvent(self, event_type, message)
-    # -------here ends the ugly code-------
 
     def closeEvent(self, event) -> None:
         """
@@ -262,14 +128,6 @@ class Main(MainR):
                 separators=(",", ": "),
             )
         sys.exit(0)
-
-    def resizeEvent(self, event) -> None:
-        self.widget3.resize(self.width() * 0.9, self.height() * 0.9)
-        self.widget4.resize(self.width() * 0.9, self.height() * 0.9)
-        if self.__system__ == 'Windows':
-            self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
-                                    for y in range(int(self.size2 * 2))]
-        QTabWidget.resizeEvent(self, event)
 
     def enable_preview(self) -> None:
         if self.tab3.check1.isChecked():
