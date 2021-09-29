@@ -39,9 +39,11 @@ Run `$ python pdfEditor.py` to open the application window.
 If you are working on Windows platform and having no Python 3 installed, download pyinstaller-prepackaged executable files [here](https://github.com/Augus1999/pyPDFeditor-GUI/releases).
 
 ## Screenshot
-<img src="./ico/workspace.jpg" width="600" alt="tab2"/>
+<img src=".\screenshots\welcome.jpg" width=400 alt="welcome page">
 
-<img src=".\ico\workspace2.jpg" width=600 alt="tab3"/>
+<img src=".\screenshots\tab2.jpg" width=400 alt="tab2"/>
+
+<img src=".\screenshots\tab3.jpg" width=400 alt="tab3"/>
 
 ## If you want to change the theme
 
