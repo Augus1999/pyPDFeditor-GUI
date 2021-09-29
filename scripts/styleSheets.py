@@ -2,14 +2,14 @@
 # Author: Nianze A. TAO
 TAB_STYLE = '''
         QTabBar::tab{
-        border:none;
+        border-left:4px solid #6272a4;
         padding:3ex;
         margin:0px}
         QTabBar::tab:selected{
         border-left:4px solid #b7cbc9;
         background-color:#4f5c84}
         QTabBar::tab:hover{
-        border:none;
+        border-left:4px solid #ca8fc0;
         background-color:#ca8fc0}
         QToolTip{
         border:none;
@@ -18,6 +18,8 @@ TAB_STYLE = '''
         font-size:9pt;
         font-family:Verdana,Microsoft YaHei UI}
         QTabWidget{
+        border:none;
+        border-radius:0px;
         background-color:#6272a4}
         '''
 COMBO_BOX_STYLE = '''
@@ -74,7 +76,7 @@ TEXTEDIT_STYlE = '''
         margin:0 0 0 0;
         width:5px}
         QScrollBar::handle:horizontal{
-        background-color:#b7cbc9;
+        background-color:#6272a4;
         border-radius:4px;
         min-width:45px}
         '''
@@ -158,14 +160,18 @@ TABLE_STYLE2 = '''
         min-height:45px}
         '''
 LABEL_STYLE = '''
+        QLabel{
+        border:none;
+        border-radius:10px;
         font-size:8pt;
         font-family:Verdana,Microsoft YaHei UI;
         color:#1b124b;
-        background-color:rgba(255,255,255,0)
+        background-color:rgba(255,255,255,0)}
         '''
 BGC_STYLE = '''
         QWidget{
         border:none;
+        border-radius:0px;
         background-color:#f8f8f2}
         QToolTip{
         border:none;

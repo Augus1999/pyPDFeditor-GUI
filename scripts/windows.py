@@ -347,7 +347,7 @@ class MainR(QTabWidget):
                                     for y in range(int(self.size2 * 2))]
             self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # important! call this method first!
             self.windowEffect.addWindowAnimation(int(self.winId()))
-            self.windowEffect.addShadowEffect(int(self.winId()))
+            # self.windowEffect.addShadowEffect(int(self.winId()))
         else:
             self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
             self.tab2.grid.addWidget(self.tab2.button3, 0, 20)
