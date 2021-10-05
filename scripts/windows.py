@@ -2,6 +2,7 @@
 # Author: Nianze A. TAO
 from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, QTransform
 from .styleSheets import *  # change here if thee want to change theme!
+from .functions import shadow
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit, QScrollArea,
                              QComboBox, QLineEdit, QPushButton, QTableWidget, QApplication)
@@ -210,7 +211,7 @@ class MainR(QTabWidget):
         width = height*1.36  # 1290
         self.size1 = height * 0.04
         self.size2 = height * 0.03
-        self.BORDER_WIDTH = 8
+        self.BORDER_WIDTH = 5
         self.monitor_info = None
         self.resize(width, height)
         self.setMinimumSize(0.47 * width, 0.45 * height)
@@ -346,6 +347,7 @@ class MainR(QTabWidget):
             self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
                                     for y in range(int(self.size2 * 2))]
             self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # important! call this method first!
+            self.setAttribute(QtCore.Qt.WA_StyledBackground)
             self.windowEffect.addWindowAnimation(int(self.winId()))
             # self.windowEffect.addShadowEffect(int(self.winId()))
         else:
@@ -358,7 +360,10 @@ class MainR(QTabWidget):
         QTabWidget.close(self)
 
     def paintEvent(self, event) -> None:
-        pass
+        painter = QPainter(self)
+        painter.setPen(QtCore.Qt.NoPen)
+        painter.setBrush(QColor(MAIN_COLOUR))
+        painter.drawRect(self.rect())
 
     # -------well, why do the following ugly codes exist?-------
     # -------they are used to re-enable, correctly, the window animations under Windows platform-------
@@ -484,20 +489,12 @@ class MainR(QTabWidget):
             self.btn_max_3.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
             self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
 
-    @staticmethod
-    def _shadow(widget, colour: QColor, radius: int) -> None:
-        shadow = QtWidgets.QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(radius)
-        shadow.setColor(colour)
-        shadow.setOffset(0, 0)
-        widget.setGraphicsEffect(shadow)
-
     def tab0_init(self) -> None:
         self.tab0.setStyleSheet(BGC_STYLE)
         self.tab0.grid = QGridLayout(self.tab0)
         label = QLabel(self.tab0)
         label.setStyleSheet(f'image:url(./{WELCOME_PAGE})')
-        self._shadow(label, QColor(0, 0, 0, 90), 10)
+        shadow(label, QColor(0, 0, 0, 90), 10)
         label_w = QLabel(self.tab0)
         label_w.setStyleSheet(LABEL_STYLE)
         label_w.setText("<a href='https://github.com/Augus1999/pyPDFeditor-GUI' style='color:#a3b5b3'>"
@@ -825,10 +822,6 @@ class MainR(QTabWidget):
         layout.addWidget(self.tab4.line3, 6, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab4.line4, 8, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab4.label0, 19, 0, 1, 3, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
-        self._shadow(self.tab4.line1, QColor('#e2e2dd'), 15)
-        self._shadow(self.tab4.line2, QColor('#e2e2dd'), 15)
-        self._shadow(self.tab4.line3, QColor('#e2e2dd'), 15)
-        self._shadow(self.tab4.line4, QColor('#e2e2dd'), 15)
 
 
 class SettingR(QWidget):
