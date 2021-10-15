@@ -127,14 +127,14 @@ def pdf_split(doc: Doc) -> list:
     return book_list
 
 
-def add_watermark(doc: Doc,
+def add_watermark(doc: any,
                   text: str,
                   rotate: int,
                   colour: tuple,
                   font_size: int,
                   font_file: str,
                   opacity=0.5,
-                  select=None) -> Doc:
+                  select=None) -> any:
     """
     add watermark
 
@@ -497,7 +497,9 @@ def save_as(index: int,
     :param main: main
     :return: None
     """
-    doc = copy(widget.book)
+    # doc = copy(widget.book)
+    doc = fitz.Document()
+    doc.insert_pdf(widget.book, widget.book_list[index], widget.book_list[index])
     f_name = os.path.splitext(
         os.path.basename(widget.book.name),
     )[0]+'-{}.pdf'.format(
@@ -511,11 +513,10 @@ def save_as(index: int,
     )
     if ok:
         if file_name.endswith('.pdf'):
-            doc.select([widget.book_list[index]])
             doc.save(file_name.replace('/', '\\'))
         if file_name.endswith('.jpg') or file_name.endswith('.png'):
             pix = fitz.utils.get_pixmap(
-                doc[widget.book_list[index]],
+                doc[0],
                 matrix=fitz.Matrix(1.0, 1.0),
                 alpha=True,
             )
@@ -559,7 +560,7 @@ def extract_img(index: int,
     :return: None
     """
     doc = widget.book
-    img_inf = doc[index].get_images()
+    img_inf = doc[widget.book_list[index]].get_images()
     for key, inf in enumerate(img_inf):
         f_name = os.path.splitext(
             os.path.basename(widget.book.name),
