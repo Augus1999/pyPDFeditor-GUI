@@ -12,7 +12,7 @@ class SwitchBtn(QWidget):
     stateChanged = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent=None):
-        super(QWidget, self).__init__(parent)
+        super(SwitchBtn, self).__init__(parent)
         self.checked = False
         self.bgColorOff = QColor("#e2e2dd")
         self.bgColorOn = QColor("#6272a4")
@@ -94,7 +94,7 @@ class SwitchBtn(QWidget):
     def isChecked(self) -> bool:
         return self.checked
 
-    def paintEvent(self, evt) -> None:
+    def paintEvent(self, event) -> None:
         painter = QPainter()
         painter.begin(self)
         painter.setRenderHint(QPainter.Antialiasing)
@@ -469,6 +469,7 @@ class MainR(QTabWidget):
         QTabWidget.resizeEvent(self, event)
         self.widget3.resize(self.width() * 0.9, self.height() * 0.9)
         self.widget4.resize(self.width() * 0.9, self.height() * 0.9)
+        self.repaint()
         if self.__system__ == 'Windows':
             self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
                                     for y in range(int(self.size2 * 2))]

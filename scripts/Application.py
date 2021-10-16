@@ -509,9 +509,6 @@ class PermMenu(PermMenuR):
     """
     signal = QtCore.pyqtSignal(int)
 
-    def __init__(self):
-        super(PermMenu, self).__init__()
-
     def set_language(self, language: str) -> None:
         lag_p(self, language)
 

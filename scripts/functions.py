@@ -75,9 +75,8 @@ def open_pdf(file_name: str,
                 doc.close()
                 del doc
                 return None, False
-            else:
-                doc.authenticate(value)
-                doc.pass_word = value
+            doc.authenticate(value)
+            doc.pass_word = value
     if not doc.is_pdf:
         pdf_bites = doc.convert_to_pdf()
         doc = Doc('pdf', pdf_bites)
@@ -315,7 +314,7 @@ def set_icon(widget: QWidget,
     x, y = 0, 0
     for i in widget.book_list:
         label = page_icon(
-            widget.book[i] if type(widget.book_list[0]) == int else (i[0] if doc is None else doc[0]),
+            widget.book[i] if isinstance(widget.book_list[0], int) else (i[0] if doc is None else doc[0]),
             widget.table.width(),
             widget.w_col,
             _scaled,
@@ -533,7 +532,7 @@ def clean(widget: QWidget) -> None:
     :return: None
     """
     if len(widget.book_list) != 0:
-        if type(widget.book_list[0]) == Doc:
+        if isinstance(widget.book_list[0], (Doc, fitz.Document,)):
             for item in widget.book_list:
                 item.close()
         else:

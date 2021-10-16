@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
-MAIN_COLOUR = '#6272a4'
+MAIN_COLOUR = '#6272a4'  # main colour of the theme
+COMP_COLOUR = '#b7cbc9'  # complementary colour of MAIN_COLOUR
+COMP_COLOUR_2 = '#ca8fc0'
 LIGHT_COLOUR = '#f8f8f2'
+DARK_COLOUR = '#4f5c84'
 TEXT_COLOUR = '#1b124b'
 TAB_STYLE = f'''
         QTabBar::tab{{
@@ -9,11 +12,11 @@ TAB_STYLE = f'''
         padding:3ex;
         margin:0px}}
         QTabBar::tab:selected{{
-        border-left:4px solid #b7cbc9;
-        background-color:#4f5c84}}
+        border-left:4px solid {COMP_COLOUR};
+        background-color:{DARK_COLOUR}}}
         QTabBar::tab:hover{{
-        border-left:4px solid #ca8fc0;
-        background-color:#ca8fc0}}
+        border-left:4px solid {COMP_COLOUR_2};
+        background-color:{COMP_COLOUR_2}}}
         QToolTip{{
         border:none;
         color:{TEXT_COLOUR};
@@ -72,7 +75,7 @@ TEXTEDIT_STYlE = f'''
         margin:0 0 0 0;
         width:8px}}
         QScrollBar::handle:vertical{{
-        background-color:#b7cbc9;
+        background-color:{COMP_COLOUR};
         border-radius:4px;
         min-height:45px}}
         QScrollBar:horizontal{{
@@ -95,7 +98,7 @@ LINE_EDIT_STYLE = f'''
         color:{LIGHT_COLOUR};
         font-family:Verdana,Microsoft YaHei UI}}
         QLineEdit:focus{{
-        border:2px solid #b7cbc9}}
+        border:2px solid {COMP_COLOUR}}}
         '''
 BUTTON_STYLE = '''
         QPushButton{{
@@ -197,7 +200,7 @@ SCROLL_AREA_STYlE = f'''
         margin:0px 21px 0 21px;
         border-radius:0px}}
         QScrollBar::handle:horizontal{{
-        background:#b7cbc9;
+        background:{COMP_COLOUR};
         min-width:25px;
         border-radius:0px}}
         QScrollBar::add-line:horizontal{{
@@ -227,7 +230,7 @@ SCROLL_AREA_STYlE = f'''
         margin:21px 0 21px 0;
         border-radius:0px}}
         QScrollBar::handle:vertical{{
-        background:#b7cbc9;
+        background:{COMP_COLOUR};
         min-height:25px;
         border-radius:0px}}
         QScrollBar::add-line:vertical{{
