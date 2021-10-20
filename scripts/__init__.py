@@ -16,6 +16,6 @@ else:
     __system__ = _system
 
 __author__ = 'Nianze A. TAO (Omozawa SUENO)'
-__version__ = 'v1.6.1'
+__version__ = 'v1.7'
 __all__ = ['__main__', '__system__', '__version__']
 # --------------完成！2021年八月十日に--------------

@@ -27,7 +27,7 @@ LAB_L4 = {
 LAB_LS = {
     "English": ['START DIR', 'SAVE DIR', 'OPEN AS PREVIOUS'],
     "中文": ['開啓路徑', '保存路徑', '記住先前的路徑'],
-    "日本語": ['開くルーチング', '保存する~', '前使ったルーチングを覚える']
+    "日本語": ['開くルーチング', '保存するルーチング', '前使ったルーチングを覚える']
 }
 LAB_LP = {
     "English": ['Enable Print', 'Enable Modifying File',
@@ -42,9 +42,9 @@ LAB_LP = {
             'ページ編集を許可にする', 'HDプリントを許可にする']
 }
 MENU_L = {
-    "English": ['delete', 'view', 'save as', 'extract images'],
-    "中文": ['刪除', '檢視', '另存新檔', '提取圖片'],
-    "日本語": ['削除', 'ビュー', '名前を付けて保存', 'イメージを出す']
+    "English": ['delete', 'view', 'save as', 'extract images', 'rotate 90°', 'rotate -90°'],
+    "中文": ['刪除', '檢視', '另存新檔', '提取圖片', '旋轉90°', '旋轉-90°'],
+    "日本語": ['削除', 'ビュー', '名前を付けて保存', 'イメージを出す', '90°を旋転する', '‐90°を旋転する']
 }
 LINE_L = {
     "English": ['    user password here',

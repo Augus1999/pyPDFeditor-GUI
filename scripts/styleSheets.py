@@ -6,6 +6,7 @@ COMP_COLOUR_2 = '#ca8fc0'
 LIGHT_COLOUR = '#f8f8f2'
 DARK_COLOUR = '#4f5c84'
 TEXT_COLOUR = '#1b124b'
+WELCOME_PAGE = 'ico/bkg.svg'
 TAB_STYLE = f'''
         QTabBar::tab{{
         border-left:4px solid {MAIN_COLOUR};
@@ -254,4 +255,3 @@ SCROLL_AREA_STYlE = f'''
         QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical{{
         background:none}}
         '''
-WELCOME_PAGE = 'ico/bkg.svg'

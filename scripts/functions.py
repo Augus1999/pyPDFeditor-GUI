@@ -26,6 +26,7 @@ class Doc(fitz.Document):
     def __init__(self, *args):
         super(Doc, self).__init__(*args)
         self.pass_word = None
+        self.rotatedPages = dict()
 
 
 def copy(doc: Doc) -> Doc:
@@ -39,6 +40,10 @@ def copy(doc: Doc) -> Doc:
     if doc.pass_word is not None:
         _doc.authenticate(doc.pass_word)
     _doc.name = doc.name
+    _doc.rotatedPages = doc.rotatedPages
+    if len(_doc.rotatedPages) != 0:
+        for page in _doc.rotatedPages:
+            _doc[page].set_rotation(_doc.rotatedPages[page])
     return _doc
 
 
@@ -402,7 +407,7 @@ def generate_menu(pos,
 
     :param pos: position
     :param select: select=0 => only delete;
-                   select=1 => with save as
+                   select=1 => with other functions
     :param widget: widget
     :param main: main
     :return: None
@@ -418,7 +423,7 @@ def generate_menu(pos,
             QtGui.QIcon('ico\\delete.svg'),
             MENU_L[main.language][0],
         )
-        item2, item3, item4 = None, None, None
+        item2, item3, item4, item5, item6 = None, None, None, None, None
         if select == 0:
             item3 = menu.addAction(
                 QtGui.QIcon('ico\\view.svg'),
@@ -432,6 +437,14 @@ def generate_menu(pos,
             item4 = menu.addAction(
                 QtGui.QIcon('ico\\Photo.svg'),
                 MENU_L[main.language][3],
+            )
+            item5 = menu.addAction(
+                QtGui.QIcon('ico\\rotate_clockwise.svg'),
+                MENU_L[main.language][4],
+            )
+            item6 = menu.addAction(
+                QtGui.QIcon('ico\\rotate_anticlockwise.svg'),
+                MENU_L[main.language][5],
             )
         action = menu.exec_(
             widget.table.mapToGlobal(pos),
@@ -452,6 +465,18 @@ def generate_menu(pos,
                 index=index,
                 widget=widget,
                 main=main,
+            )
+        if action == item5 and select == 1:
+            rotate_page(
+                index=index,
+                degree=90,
+                widget=widget,
+            )
+        if action == item6 and select == 1:
+            rotate_page(
+                index=index,
+                degree=-90,
+                widget=widget,
             )
         if action == item3 and select == 0:
             main._view(index, widget)
@@ -583,6 +608,28 @@ def extract_img(index: int,
         ),
         QMessageBox.Yes,
     )
+
+
+def rotate_page(index: int,
+                degree: int,
+                widget: QWidget) -> None:
+    """
+    rotate page
+
+    :param index: index of the page
+    :param degree: rotate degrees
+    :param widget: widget
+    :return: None
+    """
+    page_index = widget.book_list[index]
+    if page_index in widget.book.rotatedPages:
+        degree += widget.book.rotatedPages[page_index]
+        widget.book[page_index].set_rotation(degree)
+    else:
+        widget.book[page_index].set_rotation(degree)
+    widget.book.rotatedPages[page_index] = degree
+    widget.table.clearContents()
+    set_icon(widget)
 
 
 def choose(widget: QtWidgets.QLineEdit,
