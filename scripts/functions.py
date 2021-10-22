@@ -397,9 +397,6 @@ def delete(index: int,
         set_icon(widget)
 
 
-# TODO: add rearrange page function
-
-
 def generate_menu(pos,
                   widget: QWidget,
                   main: QWidget,
@@ -425,7 +422,7 @@ def generate_menu(pos,
             QtGui.QIcon('ico\\delete.svg'),
             MENU_L[main.language][0],
         )
-        item2, item3, item4, item5, item6 = None, None, None, None, None
+        item2, item3, item4, item5, item6, item7 = None, None, None, None, None, None
         if select == 0:
             item3 = menu.addAction(
                 QtGui.QIcon('ico\\view.svg'),
@@ -447,6 +444,10 @@ def generate_menu(pos,
             item6 = menu.addAction(
                 QtGui.QIcon('ico\\rotate_anticlockwise.svg'),
                 MENU_L[main.language][5],
+            )
+            item7 = menu.addAction(
+                QtGui.QIcon('ico\\move_page.svg'),
+                MENU_L[main.language][6],
             )
         action = menu.exec_(
             widget.table.mapToGlobal(pos),
@@ -481,6 +482,12 @@ def generate_menu(pos,
                 index=index,
                 degree=-90,
                 widget=widget,
+            )
+        if action == item7 and select == 1:
+            rearrange_page(
+                index=index,
+                widget=widget,
+                parent=main,
             )
 
 
@@ -629,6 +636,39 @@ def rotate_page(index: int,
     else:
         widget.book[page_index].set_rotation(degree)
     widget.book.rotatedPages[page_index] = degree
+    widget.table.clearContents()
+    set_icon(widget)
+
+
+def rearrange_page(index: int,
+                   widget: QWidget,
+                   parent: QWidget) -> None:
+    """
+    rearrange pages
+
+    :param index: position index of the selected page
+    :param widget: widget
+    :param parent: parent widget
+    :return: None
+    """
+    book_length = len(widget.book_list)
+    value, _ = QInputDialog.getText(
+        parent,
+        '',
+        f'Move to page: (from 1 to {book_length})',
+        QLineEdit.Normal,
+        '',
+        QtCore.Qt.Dialog,
+    )
+    if not _ or not (1 <= int(value) <= book_length):
+        return None
+    page_index = widget.book_list[index]
+    widget.book_list[index] = None
+    if int(value) <= index:
+        widget.book_list.insert(int(value)-1, page_index)
+    else:
+        widget.book_list.insert(int(value), page_index)
+    widget.book_list.remove(None)
     widget.table.clearContents()
     set_icon(widget)
 
