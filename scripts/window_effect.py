@@ -3,17 +3,8 @@
 import win32api
 import win32gui
 from win32.lib import win32con
-from ctypes import POINTER, c_int, byref, WinDLL, Structure
+from ctypes import POINTER, c_int, WinDLL, Structure
 from ctypes.wintypes import RECT, UINT, HWND, POINT
-
-
-class MARGINS(Structure):
-    _fields_ = [
-        ("cxLeftWidth", c_int),
-        ("cxRightWidth", c_int),
-        ("cyTopHeight", c_int),
-        ("cyBottomHeight", c_int),
-    ]
 
 
 class MINMAXINFO(Structure):
@@ -89,14 +80,3 @@ class WindowEffect:
             | win32con.CS_DBLCLKS
             | win32con.WS_THICKFRAME,
         )
-
-    def addShadowEffect(self, h_wnd: int) -> None:
-        """
-        add shadow to the window
-
-        :param h_wnd: winID
-        :return: None
-        """
-        self.DwmSetWindowAttribute(h_wnd, 2, byref(c_int(2)), 4)
-        margins = MARGINS(-1, -1, -1, -1)
-        self.DwmExtendFrameIntoClientArea(h_wnd, byref(margins))

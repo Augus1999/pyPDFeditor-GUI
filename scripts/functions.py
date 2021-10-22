@@ -32,6 +32,9 @@ class Doc(fitz.Document):
 def copy(doc: Doc) -> Doc:
     """
     copy the doc
+
+    :param doc: document to be copied
+    :return: copied document
     """
     _doc = Doc(doc.name)
     if not _doc.is_pdf:
@@ -137,23 +140,19 @@ def add_watermark(doc: any,
                   colour: tuple,
                   font_size: int,
                   font_file: str,
-                  opacity=0.5,
-                  select=None) -> any:
+                  opacity=0.5) -> any:
     """
     add watermark
 
-    :param doc: import file
+    :param doc: import file, i.e., fitz.Document or Doc
     :param text: content of watermark
     :param rotate: rotation angle of watermark
     :param colour: colour of watermark; in form of (a, b, c,)
     :param font_size: font size of letter in watermark
     :param font_file: font file location
     :param opacity: opacity of the watermark; range from 0 to 100
-    :param select: None or int;
-    :return: None if save==True; fitz.doc if save==False
+    :return: fitz.Document or Doc
     """
-    if select is not None:
-        doc.select([select])
     for page in doc:
         r1 = fitz.Rect(
             10,
@@ -166,7 +165,7 @@ def add_watermark(doc: any,
             page.rect.height//2,
         )
         shape = fitz.utils.Shape(page)
-        shape.insertTextbox(
+        shape.insert_textbox(
             r1,
             text,
             rotate=0,
@@ -193,7 +192,7 @@ def setting_warning(set_file_name: str,
 
     :param set_file_name: JSON file name
     :param parent: parent
-    :return: a dict loaded from JSON file
+    :return: a dict loaded from JSON file or default values
     """
     try:
         with open(
@@ -271,7 +270,7 @@ def page_icon(page: fitz.Page,
     :param w_col: collum count of the table
     :param _scaled: scaled coefficient of label
     :param _scaled_: scaled coefficient of image in label
-    :return: QWidget()
+    :return: shadowed QWidget()
     """
     _cover = render_pdf_page(page)
     label = QtWidgets.QLabel(None)
@@ -398,6 +397,9 @@ def delete(index: int,
         set_icon(widget)
 
 
+# TODO: add rearrange page function
+
+
 def generate_menu(pos,
                   widget: QWidget,
                   main: QWidget,
@@ -460,6 +462,8 @@ def generate_menu(pos,
                 widget=widget,
                 main=main,
             )
+        if action == item3 and select == 0:
+            main._view(index, widget)
         if action == item4 and select == 1:
             extract_img(
                 index=index,
@@ -478,8 +482,6 @@ def generate_menu(pos,
                 degree=-90,
                 widget=widget,
             )
-        if action == item3 and select == 0:
-            main._view(index, widget)
 
 
 def reset_table(book_len: int,
@@ -521,7 +523,6 @@ def save_as(index: int,
     :param main: main
     :return: None
     """
-    # doc = copy(widget.book)
     doc = fitz.Document()
     doc.insert_pdf(widget.book, widget.book_list[index], widget.book_list[index])
     f_name = os.path.splitext(

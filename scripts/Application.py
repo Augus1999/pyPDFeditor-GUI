@@ -431,7 +431,6 @@ class Main(MainR):
                 font_size=font_size,
                 opacity=opacity,
                 font_file=self.font_dir,
-                select=0,
             )
             self.tab3.table.clearContents()
             set_icon(widget=self.tab3, doc=doc)
