@@ -652,22 +652,24 @@ def rearrange_page(index: int,
     :return: None
     """
     book_length = len(widget.book_list)
-    value, _ = QInputDialog.getText(
+    value, _ = QInputDialog.getInt(
         parent,
         '',
         f'Move to page: (from 1 to {book_length})',
-        QLineEdit.Normal,
-        '',
-        QtCore.Qt.Dialog,
+        value=index+1,
+        min=1,
+        max=book_length,
+        step=1,
+        flags=QtCore.Qt.Dialog,
     )
-    if not _ or not (1 <= int(value) <= book_length):
+    if not _:
         return None
     page_index = widget.book_list[index]
     widget.book_list[index] = None
-    if int(value) <= index:
-        widget.book_list.insert(int(value)-1, page_index)
+    if value <= index:
+        widget.book_list.insert(value-1, page_index)
     else:
-        widget.book_list.insert(int(value), page_index)
+        widget.book_list.insert(value, page_index)
     widget.book_list.remove(None)
     widget.table.clearContents()
     set_icon(widget)
