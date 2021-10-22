@@ -561,7 +561,7 @@ class FontDialog(FontDialogR):
         shape = fitz.utils.Shape(page)
         shape.draw_rect(r1)
         shape.finish()
-        shape.insertTextbox(
+        shape.insert_textbox(
             r1,
             'Hello\nこんにちは\n你好\n3.14159',
             color=(0.24, 0.24, 0.24),
