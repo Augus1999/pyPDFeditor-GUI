@@ -352,11 +352,22 @@ class MainR(QTabWidget):
             self.windowEffect.addWindowAnimation(int(self.winId()))
             if self.system_style:
                 self.windowEffect.addShadowEffect(int(self.winId()))
+                self.tab0.setStyleSheet(BGC_STYLE % '#ffffff')
+                self.tab1.setStyleSheet(BGC_STYLE % '#ffffff')
+                self.tab2.setStyleSheet(BGC_STYLE % '#ffffff')
+                self.tab3.setStyleSheet(BGC_STYLE % '#ffffff')
+                self.tab4.setStyleSheet(BGC_STYLE % '#ffffff')
+                return
         else:
             self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
             self.tab2.grid.addWidget(self.tab2.button3, 0, 20)
             self.tab3.grid.addWidget(self.tab3.button3, 0, 20)
             self.tab4.grid.addWidget(self.tab4.button3, 0, 20)
+        self.tab0.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
+        self.tab1.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
+        self.tab2.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
+        self.tab3.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
+        self.tab4.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
     def close(self) -> None:
         QTabWidget.close(self)
@@ -483,10 +494,6 @@ class MainR(QTabWidget):
         self.tab0.grid.addWidget(label, 1, 0, 30, 21)
         self.tab0.grid.addWidget(self.tab0.label_v, 31, 0, 1, 5, QtCore.Qt.AlignBottom)
         self.tab0.grid.addWidget(label_w, 31, 17, 1, 4, QtCore.Qt.AlignBottom)
-        if self.system_style:
-            self.tab0.setStyleSheet(BGC_STYLE % '#ffffff')
-            return None
-        self.tab0.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
     def tab1_init(self) -> None:
         self.tab1.grid = QGridLayout(self.tab1)
@@ -521,10 +528,6 @@ class MainR(QTabWidget):
         self.tab1.grid.addWidget(self.tab1.button2, 0, 1)
         self.tab1.grid.addWidget(self.tab1.button4, 0, 2)
         self.tab1.grid.addWidget(self.tab1.table, 1, 0, 10, 21)
-        if self.system_style:
-            self.tab1.setStyleSheet(BGC_STYLE % '#ffffff')
-            return None
-        self.tab1.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
     def tab2_init(self) -> None:
         self.tab2.grid = QGridLayout(self.tab2)
@@ -559,10 +562,6 @@ class MainR(QTabWidget):
         self.tab2.grid.addWidget(self.tab2.button2, 0, 1)
         self.tab2.grid.addWidget(self.tab2.button4, 0, 2)
         self.tab2.grid.addWidget(self.tab2.table, 1, 0, 10, 21)
-        if self.system_style:
-            self.tab2.setStyleSheet(BGC_STYLE % '#ffffff')
-            return None
-        self.tab2.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
     def tab3_init(self) -> None:
         scroll_area = QScrollArea()
@@ -718,10 +717,6 @@ class MainR(QTabWidget):
         layout.addWidget(self.tab3.check1, 11, 16, 1, 2, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab3.check, 12, 16, 1, 2, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab3.button6, 10, 18, 1, 1, QtCore.Qt.AlignLeft)
-        if self.system_style:
-            self.tab3.setStyleSheet(BGC_STYLE % '#ffffff')
-            return None
-        self.tab3.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
     def tab4_init(self) -> None:
         scroll_area = QScrollArea()
@@ -811,10 +806,6 @@ class MainR(QTabWidget):
         layout.addWidget(self.tab4.line3, 6, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab4.line4, 8, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab4.label0, 19, 0, 1, 3, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
-        if self.system_style:
-            self.tab4.setStyleSheet(BGC_STYLE % '#ffffff')
-            return None
-        self.tab4.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
 
 class SettingR(QWidget):
