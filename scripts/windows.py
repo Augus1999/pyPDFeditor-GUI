@@ -370,7 +370,7 @@ class MainR(QTabWidget):
         painter.setPen(QtCore.Qt.NoPen)
         painter.setBrush(QColor(MAIN_COLOUR))
         painter.drawRect(QtCore.QRect(0, 0, self.width()-2, self.height()-2))
-        painter.setBrush(QColor(LIGHT_COLOUR))
+        painter.setBrush(QColor('#ffffff'))
         painter.drawRect(QtCore.QRect(0, self.height()-2, self.width(), 2))
         painter.drawRect(QtCore.QRect(self.width()-2, 0, 2, self.height()))
 
