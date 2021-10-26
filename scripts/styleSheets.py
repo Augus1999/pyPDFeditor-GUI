@@ -174,7 +174,7 @@ BGC_STYLE = f'''
         QWidget{{
         border:none;
         border-radius:0px;
-        background-color:{LIGHT_COLOUR}}}
+        background-color:%s}}
         QToolTip{{
         border:none;
         color:{TEXT_COLOUR};

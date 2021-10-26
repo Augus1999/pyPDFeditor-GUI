@@ -59,6 +59,10 @@ Run `$ python pdfEditor.py` to open the application window.
 
 If you are working on Windows platform and having no Python 3 installed, download pyinstaller-prepackaged executable files [here](https://github.com/Augus1999/pyPDFeditor-GUI/releases).
 
+### Using on Windows
+
+If you want the UI has a native round boder and shadow effect on <u>Windows 11</u>, go to the python file `pdfEditor.py`, find line 8, change the state `system_style=False` into `system_style=True`, and run the application again. It may affect the colour theme. The default setting is no-shadow-effect and border radius = 0.
+
 ## Screenshots
 <img src=".\screenshots\welcome.jpg" width=500 alt="welcome page">
 

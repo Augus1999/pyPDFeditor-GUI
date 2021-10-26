@@ -205,6 +205,7 @@ class MainR(QTabWidget):
         super(MainR, self).__init__()
         self.__system__ = system
         self.__version__ = version
+        self.system_style = system_style
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
         height = screen_rect.height()*0.88  # 950
@@ -228,8 +229,8 @@ class MainR(QTabWidget):
         self.tab4 = QWidget()
         self.widget3 = QWidget()
         self.widget4 = QWidget()
-        self.widget3.setStyleSheet(BGC_STYLE)
-        self.widget4.setStyleSheet(BGC_STYLE)
+        self.widget3.setStyleSheet(BGC_STYLE % 'transparent')
+        self.widget4.setStyleSheet(BGC_STYLE % 'transparent')
         self.tab0_init()
         self.tab1_init()
         self.tab2_init()
@@ -347,8 +348,9 @@ class MainR(QTabWidget):
             self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
                                     for y in range(int(self.size2 * 2))]
             self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # important! call this method first!
+            self.setAttribute(QtCore.Qt.WA_StyledBackground)
             self.windowEffect.addWindowAnimation(int(self.winId()))
-            if system_style:
+            if self.system_style:
                 self.windowEffect.addShadowEffect(int(self.winId()))
         else:
             self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
@@ -361,10 +363,16 @@ class MainR(QTabWidget):
 
     def paintEvent(self, event) -> None:
         super(MainR, self).paintEvent(event)
+        if self.__system__ != "Windows" or not self.system_style:
+            QTabWidget.paintEvent(self, event)
+            return None
         painter = QPainter(self)
         painter.setPen(QtCore.Qt.NoPen)
         painter.setBrush(QColor(MAIN_COLOUR))
-        painter.drawRect(self.rect())
+        painter.drawRect(QtCore.QRect(0, 0, self.width()-2, self.height()-2))
+        painter.setBrush(QColor(LIGHT_COLOUR))
+        painter.drawRect(QtCore.QRect(0, self.height()-2, self.width(), 2))
+        painter.drawRect(QtCore.QRect(self.width()-2, 0, 2, self.height()))
 
     # -------well, why do the following ugly codes exist?-------
     # -------they are used to re-enable, correctly, the window animations under Windows platform-------
@@ -460,10 +468,9 @@ class MainR(QTabWidget):
             self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
 
     def tab0_init(self) -> None:
-        self.tab0.setStyleSheet(BGC_STYLE)
         self.tab0.grid = QGridLayout(self.tab0)
         label = QLabel(self.tab0)
-        label.setStyleSheet(f'image:url(./{WELCOME_PAGE})')
+        label.setStyleSheet(f'image:url(./{WELCOME_PAGE});border-radius:15px')
         shadow(label, QColor(0, 0, 0, 90), 10)
         label_w = QLabel(self.tab0)
         label_w.setStyleSheet(LABEL_STYLE)
@@ -476,6 +483,10 @@ class MainR(QTabWidget):
         self.tab0.grid.addWidget(label, 1, 0, 30, 21)
         self.tab0.grid.addWidget(self.tab0.label_v, 31, 0, 1, 5, QtCore.Qt.AlignBottom)
         self.tab0.grid.addWidget(label_w, 31, 17, 1, 4, QtCore.Qt.AlignBottom)
+        if self.system_style:
+            self.tab0.setStyleSheet(BGC_STYLE % '#ffffff')
+            return None
+        self.tab0.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
     def tab1_init(self) -> None:
         self.tab1.grid = QGridLayout(self.tab1)
@@ -506,11 +517,14 @@ class MainR(QTabWidget):
         self.tab1.table.setContextMenuPolicy(
             QtCore.Qt.CustomContextMenu,
         )
-        self.tab1.setStyleSheet(BGC_STYLE)
         self.tab1.grid.addWidget(self.tab1.button1, 0, 0)
         self.tab1.grid.addWidget(self.tab1.button2, 0, 1)
         self.tab1.grid.addWidget(self.tab1.button4, 0, 2)
         self.tab1.grid.addWidget(self.tab1.table, 1, 0, 10, 21)
+        if self.system_style:
+            self.tab1.setStyleSheet(BGC_STYLE % '#ffffff')
+            return None
+        self.tab1.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
     def tab2_init(self) -> None:
         self.tab2.grid = QGridLayout(self.tab2)
@@ -541,11 +555,14 @@ class MainR(QTabWidget):
         self.tab2.table.setContextMenuPolicy(
             QtCore.Qt.CustomContextMenu,
         )
-        self.tab2.setStyleSheet(BGC_STYLE)
         self.tab2.grid.addWidget(self.tab2.button1, 0, 0)
         self.tab2.grid.addWidget(self.tab2.button2, 0, 1)
         self.tab2.grid.addWidget(self.tab2.button4, 0, 2)
         self.tab2.grid.addWidget(self.tab2.table, 1, 0, 10, 21)
+        if self.system_style:
+            self.tab2.setStyleSheet(BGC_STYLE % '#ffffff')
+            return None
+        self.tab2.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
     def tab3_init(self) -> None:
         scroll_area = QScrollArea()
@@ -554,7 +571,6 @@ class MainR(QTabWidget):
         layout = QGridLayout(self.widget3)
         scroll_area.setWidget(self.widget3)
         self.tab3.grid = QGridLayout(self.tab3)
-        self.tab3.setStyleSheet(BGC_STYLE)
         self.tab3.table = QTableWidget(self.tab3)
         self.tab3.table.setShowGrid(False)
         self.tab3.table.verticalHeader().setVisible(False)
@@ -702,6 +718,10 @@ class MainR(QTabWidget):
         layout.addWidget(self.tab3.check1, 11, 16, 1, 2, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab3.check, 12, 16, 1, 2, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab3.button6, 10, 18, 1, 1, QtCore.Qt.AlignLeft)
+        if self.system_style:
+            self.tab3.setStyleSheet(BGC_STYLE % '#ffffff')
+            return None
+        self.tab3.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
     def tab4_init(self) -> None:
         scroll_area = QScrollArea()
@@ -710,7 +730,6 @@ class MainR(QTabWidget):
         layout = QGridLayout(self.widget4)
         scroll_area.setWidget(self.widget4)
         self.tab4.grid = QGridLayout(self.tab4)
-        self.tab4.setStyleSheet(BGC_STYLE)
         self.tab4.button1 = QPushButton(self.tab4)
         self.tab4.button2 = QPushButton(self.tab4)
         self.tab4.button3 = QPushButton(self.tab4)
@@ -792,6 +811,10 @@ class MainR(QTabWidget):
         layout.addWidget(self.tab4.line3, 6, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab4.line4, 8, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab4.label0, 19, 0, 1, 3, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        if self.system_style:
+            self.tab4.setStyleSheet(BGC_STYLE % '#ffffff')
+            return None
+        self.tab4.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
 
 
 class SettingR(QWidget):
