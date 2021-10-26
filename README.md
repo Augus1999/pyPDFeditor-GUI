@@ -1,6 +1,6 @@
 # pyPDFeditor-GUI
 
-This project is based on PyQt5 and PyMuPDF and tested on Python 3.8.6 & 3.9.7 on Windows 10.
+This project is based on PyQt5 and PyMuPDF and tested on Python 3.8.6 & 3.9.7 on Windows 10 & 11.
 
 Current version is v2.0
 
@@ -21,11 +21,11 @@ I tried my best to make it close to Fluent UI. Icons used can be found [here](ht
 
 ## What's in
 
-* Merge files no matter they are PDF files (.pdf), image files (.jpg .png .jpeg .bmp .tiff .svg), or e-book files (.epub .xps .fb2 .cbz)
+* Merge files no matter they are PDF files (`.pdf`), image files (`.jpg` `.png` `.jpeg` `.bmp` `.tiff` `.svg`), or e-book files (`.epub` `.xps` `.fb2` `.cbz`) into one PDF file
 * (...right click the page then) Delete pages or rearrange pages
 * (...right click the page then) Extract images from a page
 * (...right click the page then) Rotate a page
-* (...right click the page then) Save a page as a PDF file or image file (.png .jpg)
+* (...right click the page then) Save a page as a PDF file or image file (`.png` `.jpg`)
 * Add watermark (PDF only)
 * Set password either user or/and owner password (PDF only)
 * Set permissions (PDF only)
@@ -39,7 +39,7 @@ Core:
 
 ```ASN.1
 PyQt5>=5.15.4
-PyMuPDF!=1.18.18
+PyMuPDF>=1.19.0
 ```
 
 optional if running on Windows:
@@ -68,7 +68,7 @@ If you are working on Windows platform and having no Python 3 installed, downloa
 
 ## If you want to change the theme
 
-The default Theme is written in the file `styleSheets.py` of folder `scripts`. Of course, you are welcomed to change it or create a new one. Just remember to keep the same variable names and same formats, especially the format of `SWITCH_STYLE` item, or you may well encounter errors : ) If you create a new theme, then put it into folder `scripts`, go to line 4 of `windows.py` and change:
+The default Theme is written in the file `styleSheets.py` of folder `\scripts`. Of course, you are welcomed to change it or create a new one. Just remember to keep the same variable names and same formats, especially the format of `SWITCH_STYLE` item, or you may well encounter errors : ) If you create a new theme, then put it into folder `\scripts`, go to line 4 of `windows.py` and change:
 
 ```python
 from .styleSheets import *

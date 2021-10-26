@@ -26,7 +26,7 @@ TAB_STYLE = f'''
         font-family:Verdana,Microsoft YaHei UI}}
         QTabWidget{{
         border:none;
-        border-radius:0px;
+        border-radius:5px;
         background-color:{MAIN_COLOUR}}}
         '''
 COMBO_BOX_STYLE = f'''

@@ -23,8 +23,8 @@ class Main(MainR):
     main window
     all app functions are written here
     """
-    def __init__(self, system: str, version: str):
-        super(Main, self).__init__(system, version)
+    def __init__(self, system: str, version: str, system_style: bool):
+        super(Main, self).__init__(system, version, system_style)
         content = setting_warning(
             'settings\\settings.json',
             self,
@@ -591,16 +591,20 @@ class FontDialog(FontDialogR):
 
 def __main__(system: str,
              version: str,
+             system_style: bool = False,
              debug: bool = True) -> None:
     """
     main function
 
+    :param system: system name
+    :param version: version name
+    :param system_style: whether use system window style
     :param debug: whether display mupdf errors or not
     :return: None
     """
     fitz.TOOLS.mupdf_display_errors(debug)
     arg = sys.argv
     app = QApplication(arg)
-    main = Main(system, version)
+    main = Main(system, version, system_style)
     main.show()
     sys.exit(app.exec_())

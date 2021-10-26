@@ -3,18 +3,8 @@
 import win32api
 import win32gui
 from win32.lib import win32con
-from ctypes import POINTER, c_int, WinDLL, Structure
-from ctypes.wintypes import RECT, UINT, HWND, POINT
-
-
-class MINMAXINFO(Structure):
-    _fields_ = [
-        ("ptReserved", POINT),
-        ("ptMaxSize", POINT),
-        ("ptMaxPosition", POINT),
-        ("ptMinTrackSize", POINT),
-        ("ptMaxTrackSize", POINT),
-    ]
+from ctypes import POINTER, c_int, WinDLL, Structure, byref
+from ctypes.wintypes import RECT, UINT, HWND
 
 
 class PWindowPOS(Structure):
@@ -36,6 +26,15 @@ class NCCalcSizePARAMS(Structure):
     ]
 
 
+class MARGINS(Structure):
+    _fields_ = [
+        ("cxLeftWidth", c_int),
+        ("cxRightWidth", c_int),
+        ("cyTopHeight", c_int),
+        ("cyBottomHeight", c_int),
+    ]
+
+
 class WindowEffect:
     """
     use Windows api to re-enable Windows type window-effects
@@ -44,7 +43,6 @@ class WindowEffect:
     def __init__(self):
         self.dwm_api = WinDLL("dwmapi")
         self.DwmExtendFrameIntoClientArea = self.dwm_api.DwmExtendFrameIntoClientArea
-        self.DwmSetWindowAttribute = self.dwm_api.DwmSetWindowAttribute
         
     @staticmethod
     def move_window(h_wnd: int) -> None:
@@ -80,3 +78,13 @@ class WindowEffect:
             | win32con.CS_DBLCLKS
             | win32con.WS_THICKFRAME,
         )
+
+    def addShadowEffect(self, h_wnd: int) -> None:
+        """
+        add shadow to the window
+
+        :param h_wnd: winID
+        :return: None
+        """
+        margins = MARGINS(-1, -1, -1, -1)
+        self.DwmExtendFrameIntoClientArea(h_wnd, byref(margins))

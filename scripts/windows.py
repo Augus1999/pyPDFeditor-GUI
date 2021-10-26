@@ -201,7 +201,7 @@ class MainR(QTabWidget):
     main window
     all window functions that define the appearance and behaviours are written here
     """
-    def __init__(self, system: str, version: str):
+    def __init__(self, system: str, version: str, system_style: bool):
         super(MainR, self).__init__()
         self.__system__ = system
         self.__version__ = version
@@ -347,8 +347,9 @@ class MainR(QTabWidget):
             self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
                                     for y in range(int(self.size2 * 2))]
             self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # important! call this method first!
-            self.setAttribute(QtCore.Qt.WA_StyledBackground)
             self.windowEffect.addWindowAnimation(int(self.winId()))
+            if system_style:
+                self.windowEffect.addShadowEffect(int(self.winId()))
         else:
             self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
             self.tab2.grid.addWidget(self.tab2.button3, 0, 20)
@@ -359,6 +360,7 @@ class MainR(QTabWidget):
         QTabWidget.close(self)
 
     def paintEvent(self, event) -> None:
+        super(MainR, self).paintEvent(event)
         painter = QPainter(self)
         painter.setPen(QtCore.Qt.NoPen)
         painter.setBrush(QColor(MAIN_COLOUR))
@@ -380,22 +382,14 @@ class MainR(QTabWidget):
         else:
             QTabWidget.mouseDoubleClickEvent(self, event)
 
-    def nativeEvent(self, event_type, message) -> any:
+    def nativeEvent(self, event_type, message) -> (bool, int):
         if self.__system__ == 'Windows':
             import win32api
             import win32con
-            import win32gui
             from ctypes import cast, POINTER
             from ctypes.wintypes import MSG
-            from .window_effect import NCCalcSizePARAMS, MINMAXINFO
+            from .window_effect import NCCalcSizePARAMS
             msg = MSG.from_address(message.__int__())
-
-            def __isWindowMaximized(h_wnd) -> bool:
-                """ whether is maximised """
-                window_placement = win32gui.GetWindowPlacement(h_wnd)
-                if not window_placement:
-                    return False
-                return window_placement[1] == win32con.SW_MAXIMIZE
 
             def __monitorNCCALCSIZE(_self, _msg: MSG) -> any:
                 _monitor = win32api.MonitorFromWindow(_msg.hWnd)
@@ -435,40 +429,16 @@ class MainR(QTabWidget):
                 elif rx:
                     return True, win32con.HTRIGHT
             elif msg.message == win32con.WM_NCCALCSIZE:
-                if __isWindowMaximized(msg.hWnd):
+                if self.isMaximized():
                     __monitorNCCALCSIZE(self, msg)
                 return True, 0
-            elif msg.message == win32con.WM_GETMINMAXINFO:
-                if __isWindowMaximized(msg.hWnd):
-                    window_rect = win32gui.GetWindowRect(msg.hWnd)
-                    if not window_rect:
-                        return False, 0
-                    # obtain monitor api
-                    monitor = win32api.MonitorFromRect(window_rect)
-                    if not monitor:
-                        return False, 0
-                    # obtain monitor information
-                    monitor_info = win32api.GetMonitorInfo(monitor)
-                    monitor_rect = monitor_info['Monitor']
-                    work_area = monitor_info['Work']
-                    # transform lParam into MINMAXINFO pointer
-                    info = cast(msg.lParam, POINTER(MINMAXINFO)).contents
-                    # resize window
-                    info.ptMaxSize.x = work_area[2] - work_area[0]
-                    info.ptMaxSize.y = work_area[3] - work_area[1]
-                    info.ptMaxTrackSize.x = info.ptMaxSize.x
-                    info.ptMaxTrackSize.y = info.ptMaxSize.y
-                    info.ptMaxPosition.x = abs(window_rect[0] - monitor_rect[0])
-                    info.ptMaxPosition.y = abs(window_rect[1] - monitor_rect[1])
-                    return True, 1
         return QTabWidget.nativeEvent(self, event_type, message)
     # -------here ends the ugly code-------
 
     def resizeEvent(self, event) -> None:
-        QTabWidget.resizeEvent(self, event)
+        super(MainR, self).resizeEvent(event)
         self.widget3.resize(self.width() * 0.9, self.height() * 0.9)
         self.widget4.resize(self.width() * 0.9, self.height() * 0.9)
-        self.repaint()
         if self.__system__ == 'Windows':
             self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
                                     for y in range(int(self.size2 * 2))]
