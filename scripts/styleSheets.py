@@ -145,7 +145,7 @@ TABLE_STYLE1 = f'''
         '''
 TABLE_STYLE2 = f'''
         QTableWidget{{
-        border-radius:5px;
+        border-radius:10px;
         border:none;
         background-color:#adb6e0}}
         QTableWidget::item:selected{{
@@ -153,8 +153,8 @@ TABLE_STYLE2 = f'''
         QScrollBar:vertical{{
         background-color:{LIGHT_COLOUR};
         border:none;
-        border-radius:0px;
-        margin:0 0 0 0;
+        border-radius:1px;
+        margin:21 0 21 0;
         width:5px}}
         QScrollBar::handle:vertical{{
         background-color:#939393;

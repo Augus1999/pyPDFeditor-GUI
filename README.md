@@ -2,7 +2,7 @@
 
 This project is based on PyQt5 and PyMuPDF and tested on Python 3.8.6 & 3.9.7 on Windows 10 & 11.
 
-Current version is v2.0
+Current version is v2.0.1
 
 ## Welcome
 
@@ -62,6 +62,8 @@ If you are working on Windows platform and having no Python 3 installed, downloa
 ### Using on Windows
 
 If you want the UI has a native round boder and shadow effect on <u>Windows 11</u>, go to the python file `pdfEditor.py`, find line 8, change the state `system_style=False` into `system_style=True`, and run the application again. It may affect the colour theme. The default setting is no-shadow-effect and border radius = 0.
+
+Also, [Snap Layout Menu](https://docs.microsoft.com/zh-cn/windows/apps/desktop/modernize/apply-snap-layout-menu) in Windows 11 is fully supported.
 
 ## Screenshots
 <img src=".\screenshots\welcome.jpg" width=500 alt="welcome page">

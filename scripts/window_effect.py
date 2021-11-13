@@ -43,6 +43,7 @@ class WindowEffect:
     def __init__(self):
         self.dwm_api = WinDLL("dwmapi")
         self.DwmExtendFrameIntoClientArea = self.dwm_api.DwmExtendFrameIntoClientArea
+        self.DwmEnableBlurBehindWindow = self.dwm_api.DwmEnableBlurBehindWindow
         
     @staticmethod
     def move_window(h_wnd: int) -> None:

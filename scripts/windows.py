@@ -309,6 +309,11 @@ class MainR(QTabWidget):
             self.btn_min_4.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
             self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
             self.btn_ext_4.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
+            self.btn_max_0.setObjectName('max0')
+            self.btn_max_1.setObjectName('max1')
+            self.btn_max_2.setObjectName('max2')
+            self.btn_max_3.setObjectName('max3')
+            self.btn_max_4.setObjectName('max4')
             self.tab0.grid.addWidget(self.btn_min_0, 0, 18)
             self.tab0.grid.addWidget(self.btn_max_0, 0, 19)
             self.tab0.grid.addWidget(self.btn_ext_0, 0, 20)
@@ -405,10 +410,12 @@ class MainR(QTabWidget):
         if self.__system__ == 'Windows':
             import win32api
             import win32con
+            import win32gui
             from ctypes import cast, POINTER
             from ctypes.wintypes import MSG
             from .window_effect import NCCalcSizePARAMS
             msg = MSG.from_address(message.__int__())
+            i = self.currentIndex()
 
             def __monitorNCCALCSIZE(_self, _msg: MSG) -> any:
                 _monitor = win32api.MonitorFromWindow(_msg.hWnd)
@@ -423,14 +430,25 @@ class MainR(QTabWidget):
                 params.rgrc[0].right = _self.monitor_info['Work'][2]
                 params.rgrc[0].bottom = _self.monitor_info['Work'][3]
 
+            def __isWindowMaximized(_self, h_wnd: MSG.hWnd) -> bool:
+                window_placement = win32gui.GetWindowPlacement(h_wnd)
+                if not window_placement:
+                    return False
+                return window_placement[1] == win32con.SW_MAXIMIZE
+
             if msg.message == win32con.WM_NCHITTEST:
-                x_pos = (win32api.LOWORD(msg.lParam)-self.frameGeometry().x()) % 65536
-                y_pos = win32api.HIWORD(msg.lParam)-self.frameGeometry().y()
-                w, h = self.width(), self.height()
+                x_pos = win32api.GetCursorPos()[0]-self.frameGeometry().x()
+                y_pos = win32api.GetCursorPos()[1]-self.frameGeometry().y()
+                max_btn_x_pos = x_pos - self.size2 * 2
                 lx = x_pos < self.BORDER_WIDTH
-                rx = x_pos + 9 > w - self.BORDER_WIDTH
+                rx = x_pos > self.width() - self.BORDER_WIDTH
                 ty = y_pos < self.BORDER_WIDTH
-                by = y_pos > h - self.BORDER_WIDTH
+                by = y_pos > self.height() - self.BORDER_WIDTH
+                btn = self.findChildren(QPushButton, f'max{i}')[0]
+                x_l, x_r = btn.x(), btn.x() + btn.width()
+                y_t, y_b = btn.y(), btn.y() + btn.height()
+                if x_l < max_btn_x_pos < x_r and y_t < y_pos < y_b and self.system_style:
+                    return True, win32con.HTMAXBUTTON
                 if lx and ty:
                     return True, win32con.HTTOPLEFT
                 elif rx and by:
@@ -447,8 +465,8 @@ class MainR(QTabWidget):
                     return True, win32con.HTLEFT
                 elif rx:
                     return True, win32con.HTRIGHT
-            elif msg.message == win32con.WM_NCCALCSIZE:
-                if self.isMaximized():
+            if msg.message == win32con.WM_NCCALCSIZE:
+                if __isWindowMaximized(self, msg.hWnd):
                     __monitorNCCALCSIZE(self, msg)
                 return True, 0
         return QTabWidget.nativeEvent(self, event_type, message)
