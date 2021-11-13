@@ -637,6 +637,10 @@ def rotate_page(index: int,
         widget.book[page_index].set_rotation(degree)
     widget.book.rotatedPages[page_index] = degree
     widget.table.clearContents()
+    reset_table(
+        book_len=len(widget.book_list),
+        widget=widget,
+    )
     set_icon(widget)
 
 
@@ -672,6 +676,10 @@ def rearrange_page(index: int,
         widget.book_list.insert(value, page_index)
     widget.book_list.remove(None)
     widget.table.clearContents()
+    reset_table(
+        book_len=len(widget.book_list),
+        widget=widget,
+    )
     set_icon(widget)
 
 
