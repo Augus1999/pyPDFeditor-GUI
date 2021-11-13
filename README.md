@@ -66,7 +66,12 @@ If you want the UI has a native round boder and shadow effect on <u>Windows 11</
 Also, [Snap Layout Menu](https://docs.microsoft.com/zh-cn/windows/apps/desktop/modernize/apply-snap-layout-menu) in Windows 11 is fully supported.
 
 ## Screenshots
-<img src=".\screenshots\welcome.jpg" width=500 alt="welcome page">
+
+using system style on Windows 11:
+
+<img src=".\screenshots\welcome.png" width=500 alt="welcome page">
+
+default window style on Windows platform:
 
 <img src=".\screenshots\tab2.jpg" width=500 alt="tab2"/>
 
