@@ -468,6 +468,17 @@ class MainR(QTabWidget):
             if msg.message == win32con.WM_NCCALCSIZE:
                 if __isWindowMaximized(self, msg.hWnd):
                     __monitorNCCALCSIZE(self, msg)
+                    self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
+                    self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
+                    self.btn_max_2.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
+                    self.btn_max_3.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
+                    self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
+                else:
+                    self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
+                    self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
+                    self.btn_max_2.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
+                    self.btn_max_3.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
+                    self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
                 return True, 0
         return QTabWidget.nativeEvent(self, event_type, message)
     # -------here ends the ugly code-------
@@ -483,18 +494,8 @@ class MainR(QTabWidget):
     def windowChange(self) -> None:
         if self.isMaximized():
             self.showNormal()
-            self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
-            self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
-            self.btn_max_2.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
-            self.btn_max_3.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
-            self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
         else:
             self.showMaximized()
-            self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
-            self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
-            self.btn_max_2.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
-            self.btn_max_3.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
-            self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
 
     def tab0_init(self) -> None:
         self.tab0.grid = QGridLayout(self.tab0)
