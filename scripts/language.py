@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
+"""
+language related functions
+"""
 from PyQt5 import QtWidgets
 
 TAB_L = {
@@ -42,9 +45,11 @@ LAB_LP = {
             'ページ編集を許可にする', 'HDプリントを許可にする']
 }
 MENU_L = {
-    "English": ['delete', 'view', 'save as', 'extract images', 'rotate 90°', 'rotate -90°', 'move to'],
+    "English": ['delete', 'view', 'save as', 'extract images',
+                'rotate 90°', 'rotate -90°', 'move to'],
     "中文": ['刪除', '檢視', '另存新檔', '提取圖片', '旋轉90°', '旋轉-90°', '移動到'],
-    "日本語": ['削除', 'ビュー', '名前を付けて保存', 'イメージを出す', '90°を旋転する', '‐90°を旋転する', 'ページを移動する']
+    "日本語": ['削除', 'ビュー', '名前を付けて保存', 'イメージを出す',
+            '90°を旋転する', '‐90°を旋転する', 'ページを移動する']
 }
 LINE_L = {
     "English": ['    user password here',
@@ -143,12 +148,18 @@ def set_language(widget: QtWidgets.QWidget) -> None:
 
 
 def lag_s(parent: QtWidgets.QWidget, language: str) -> None:
+    """
+    set language
+    """
     parent.label1.setText(LAB_LS[language][0])
     parent.label2.setText(LAB_LS[language][1])
     parent.label3.setText(LAB_LS[language][2])
 
 
 def lag_p(parent: QtWidgets.QWidget, language: str) -> None:
+    """
+    set language
+    """
     parent.label1.setText(LAB_LP[language][0])
     parent.label2.setText(LAB_LP[language][1])
     parent.label3.setText(LAB_LP[language][2])

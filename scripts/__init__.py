@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
+"""
+initialise the module
+"""
 import platform
 from .Application import __main__
 

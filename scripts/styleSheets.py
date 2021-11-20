@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
+"""
+all style sheets
+"""
 MAIN_COLOUR = '#6272a4'  # main colour of the theme
 COMP_COLOUR = '#b7cbc9'  # complementary colour of MAIN_COLOUR
 COMP_COLOUR_2 = '#ca8fc0'

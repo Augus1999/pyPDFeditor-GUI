@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
+"""
+win32api functions and classes
+"""
+from ctypes import POINTER, c_int, WinDLL, Structure, byref
+from ctypes.wintypes import RECT, UINT, HWND
 import win32api
 import win32gui
 from win32.lib import win32con
-from ctypes import POINTER, c_int, WinDLL, Structure, byref
-from ctypes.wintypes import RECT, UINT, HWND
 
 
 class PWindowPOS(Structure):
+    """
+    PWindowPOS
+    """
     _fields_ = [
         ('hWnd', HWND),
         ('hwndInsertAfter', HWND),
@@ -20,6 +26,9 @@ class PWindowPOS(Structure):
 
 
 class NCCalcSizePARAMS(Structure):
+    """
+    NCCalcSizePARAMS
+    """
     _fields_ = [
         ('rgrc', RECT*3),
         ('lppos', POINTER(PWindowPOS))
@@ -27,6 +36,9 @@ class NCCalcSizePARAMS(Structure):
 
 
 class MARGINS(Structure):
+    """
+    MARGINS
+    """
     _fields_ = [
         ("cxLeftWidth", c_int),
         ("cxRightWidth", c_int),
@@ -39,11 +51,10 @@ class WindowEffect:
     """
     use Windows api to re-enable Windows type window-effects
     """
-
     def __init__(self):
         self.dwm_api = WinDLL("dwmapi")
         self.DwmExtendFrameIntoClientArea = self.dwm_api.DwmExtendFrameIntoClientArea
-        
+
     @staticmethod
     def move_window(h_wnd: int) -> None:
         """
@@ -86,5 +97,5 @@ class WindowEffect:
         :param h_wnd: winID
         :return: None
         """
-        margins = MARGINS(-1, -1, -1, -1)
+        margins = MARGINS(-1)
         self.DwmExtendFrameIntoClientArea(h_wnd, byref(margins))

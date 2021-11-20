@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
+"""
+wrap the whole application to one function
+"""
 import sys
 import json
-import fitz
 import getpass
 import subprocess as sp
+import fitz
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtWidgets import QApplication, QColorDialog
@@ -24,7 +27,7 @@ class Main(MainR):
     all app functions are written here
     """
     def __init__(self, system: str, version: str, system_style: bool):
-        super(Main, self).__init__(system, version, system_style)
+        super().__init__(system, version, system_style)
         content = setting_warning(
             'settings\\settings.json',
             self,
@@ -44,10 +47,10 @@ class Main(MainR):
         self.PermMenuCD = PermMenu()
         self.PermMenuCD.set_language(self.language)
         self.SettingCD = None
-        self.tab1.book_list = list()
-        self.tab2.book_list = list()
-        self.tab3.book_list = list()
-        self.tab4.book_list = list()
+        self.tab1.book_list = []
+        self.tab2.book_list = []
+        self.tab3.book_list = []
+        self.tab4.book_list = []
         self.tab2.book = None
         self.tab4.book = None
         self.tab4.metadata = None
@@ -130,6 +133,9 @@ class Main(MainR):
         sys.exit(0)
 
     def enable_preview(self) -> None:
+        """
+        enable preview mode
+        """
         if self.tab3.check1.isChecked():
             self.tab3.text.textChanged.connect(self.preview)
             self.preview()
@@ -137,25 +143,35 @@ class Main(MainR):
             self.tab3.text.textChanged.disconnect(self.preview)
 
     def enable_perm_set(self) -> None:
+        """
+        enable set permissions
+        """
         if self.tab3.check2.isChecked():
             self.perm_int = 2820
             self.tab3.button6.clicked.connect(self._perm_set)
-            self.tab3.button6.setStyleSheet(BUTTON_STYLE.format('more.svg', 'more_h.svg', 'more_p.svg'))
+            self.tab3.button6.setStyleSheet(
+                BUTTON_STYLE.format('more.svg', 'more_h.svg', 'more_p.svg'),
+            )
         else:
-            self.tab3.button6.setStyleSheet(BUTTON_STYLE.format('more_d.svg', 'more_d.svg', 'more_d.svg'))
+            self.tab3.button6.setStyleSheet(
+                BUTTON_STYLE.format('more_d.svg', 'more_d.svg', 'more_d.svg'),
+            )
             self.tab3.button6.clicked.disconnect()
             self.perm_int = 4028
 
     @staticmethod
-    def _view(index=None,
-              widget=None,
-              f_name=None) -> None:
+    def view(index=None,
+             widget=None,
+             f_name=None) -> None:
         if f_name is not None:
             sp.Popen('explorer ' + f_name)
         else:
             sp.Popen('explorer '+widget.book_list[index].name)
 
     def save1(self) -> None:
+        """
+        tab1 save function
+        """
         if len(self.tab1.book_list) != 0:
             doc0 = copy(self.tab1.book_list[0])
             for item in self.tab1.book_list[1:]:
@@ -165,7 +181,7 @@ class Main(MainR):
             if ok:
                 try:
                     doc0.save(file_name, garbage=1)
-                    self._view(f_name=file_name)
+                    self.view(f_name=file_name)
                 except RuntimeError:
                     _warning(self)
                 except ValueError:
@@ -174,6 +190,9 @@ class Main(MainR):
             del doc0
 
     def save2(self) -> None:
+        """
+        tab2 save function
+        """
         if len(self.tab2.book_list) != 0:
             doc0 = copy(self.tab2.book)
             doc0.select(self.tab2.book_list)
@@ -182,7 +201,7 @@ class Main(MainR):
             if ok:
                 try:
                     doc0.save(file_name, garbage=1)
-                    self._view(f_name=file_name)
+                    self.view(f_name=file_name)
                 except RuntimeError:
                     _warning(self)
                 except ValueError:
@@ -191,6 +210,9 @@ class Main(MainR):
             del doc0
 
     def save3(self) -> None:
+        """
+        tab3 save function
+        """
         u_password = self.tab3.line1.text()
         o_password = self.tab3.line2.text()
         rotation = int(self.tab3.line5.text())
@@ -212,6 +234,7 @@ class Main(MainR):
                     opacity=opacity,
                     font_file=self.font_dir,
                 )
+                set_metadata0(doc=doc, author=self.Author)
                 try:
                     doc.save(
                         file_name,
@@ -222,7 +245,7 @@ class Main(MainR):
                         owner_pw=o_password,
                     )
                     if self.tab3.check.isChecked():
-                        self._view(f_name=file_name)
+                        self.view(f_name=file_name)
                 except RuntimeError:
                     _warning(self)
                 except ValueError:
@@ -231,6 +254,9 @@ class Main(MainR):
             del doc
 
     def save4(self) -> None:
+        """
+        tab4 save function
+        """
         title = self.tab4.line1.text()
         author = self.tab4.line2.text()
         subject = self.tab4.line3.text()
@@ -275,9 +301,15 @@ class Main(MainR):
 
     def get_perm_para(self,
                       par) -> None:
+        """
+        obtain permission code
+        """
         self.perm_int = par
 
     def add1(self) -> None:
+        """
+        tab1 add file function
+        """
         f_name, _ = add(
             self,
             'PDF files (*.pdf);;'
@@ -297,6 +329,9 @@ class Main(MainR):
             pass
 
     def add2(self) -> None:
+        """
+        tab2 add function
+        """
         if len(self.tab2.book_list) == 0:
             f_name, _ = add(self, '(*.pdf);;ebooks (*.epub *.xps *.fb2 *.cbz)')
             if _:
@@ -315,6 +350,9 @@ class Main(MainR):
                 pass
 
     def add3(self) -> None:
+        """
+        tab3 add function
+        """
         if len(self.tab3.book_list) == 0:
             f_name, _ = add(self, '(*.pdf)')
             if _:
@@ -330,6 +368,9 @@ class Main(MainR):
                 pass
 
     def add4(self) -> None:
+        """
+        tab4 add function
+        """
         f_name, _ = add(self, '(*.pdf)')
         if _:
             self.tab4.metadata = None
@@ -360,6 +401,9 @@ class Main(MainR):
                  par2,
                  par3,
                  par5) -> None:
+        """
+        obtain settings from setting window
+        """
         self.s_dir = par1
         self.o_dir = par2
         self.dir_store_state = par3
@@ -370,11 +414,17 @@ class Main(MainR):
 
     def get_font_dir(self,
                      par) -> None:
+        """
+        obtain font file directory from font window
+        """
         self.font_dir = par
         if self.tab3.check1.isChecked():
             self.preview()
 
     def get_colour(self) -> None:
+        """
+        obtain colour data from colour dialog
+        """
         _colour = QColorDialog.getColor(
             initial=QColor(
                 int(255*self.colour_r),
@@ -396,6 +446,9 @@ class Main(MainR):
         del _colour
 
     def get_font(self) -> None:
+        """
+        open font window
+        """
         font_paths = QtCore.QStandardPaths.standardLocations(
             QtCore.QStandardPaths.FontsLocation,
         )
@@ -414,6 +467,9 @@ class Main(MainR):
         self.PermMenuCD.signal.connect(self.get_perm_para)
 
     def preview(self) -> None:
+        """
+        preview watermark effects
+        """
         rotation = int(self.tab3.line5.text())
         font_size = int(self.tab3.line3.text())
         watermark = self.tab3.text.toPlainText()
@@ -439,6 +495,9 @@ class Main(MainR):
 
     @staticmethod
     def showIndex(par, widget):
+        """
+        show recent clicked page number
+        """
         index = par[0] * widget.w_col + par[1]  # get position
         if len(widget.book_list) != 0:
             widget.label0.setText(f'page {index+1}')
@@ -456,7 +515,7 @@ class Setting(SettingR):
     )
 
     def __init__(self, set_dict: dict):
-        super(Setting, self).__init__()
+        super().__init__()
         self.s_dir = set_dict["start dir"]
         self.o_dir = set_dict["save dir"]
         self.language = set_dict["language"]
@@ -474,8 +533,12 @@ class Setting(SettingR):
 
     def _enable_select(self):
         if self.check.isChecked():
-            self.button1.setStyleSheet(BUTTON_STYLE.format('folder_d.svg', 'folder_d.svg', 'folder_d.svg'))
-            self.button2.setStyleSheet(BUTTON_STYLE.format('folder_d.svg', 'folder_d.svg', 'folder_d.svg'))
+            self.button1.setStyleSheet(
+                BUTTON_STYLE.format('folder_d.svg', 'folder_d.svg', 'folder_d.svg'),
+            )
+            self.button2.setStyleSheet(
+                BUTTON_STYLE.format('folder_d.svg', 'folder_d.svg', 'folder_d.svg'),
+            )
             try:
                 self.button1.clicked.disconnect()
                 self.button2.clicked.disconnect()
@@ -484,14 +547,21 @@ class Setting(SettingR):
             self.line1.setReadOnly(True)
             self.line2.setReadOnly(True)
         else:
-            self.button1.setStyleSheet(BUTTON_STYLE.format('folder.svg', 'folder_h.svg', 'folder_p.svg'))
-            self.button2.setStyleSheet(BUTTON_STYLE.format('folder.svg', 'folder_h.svg', 'folder_p.svg'))
+            self.button1.setStyleSheet(
+                BUTTON_STYLE.format('folder.svg', 'folder_h.svg', 'folder_p.svg'),
+            )
+            self.button2.setStyleSheet(
+                BUTTON_STYLE.format('folder.svg', 'folder_h.svg', 'folder_p.svg'),
+            )
             self.button1.clicked.connect(lambda: choose(self.line1, self.s_dir))
             self.button2.clicked.connect(lambda: choose(self.line2, self.o_dir))
             self.line1.setReadOnly(False)
             self.line2.setReadOnly(False)
 
     def closeEvent(self, event) -> None:
+        """
+        re-write closeEvent
+        """
         self.signal.emit(
             self.line1.text(),
             self.line2.text(),
@@ -509,6 +579,9 @@ class PermMenu(PermMenuR):
     signal = QtCore.pyqtSignal(int)
 
     def set_language(self, language: str) -> None:
+        """
+        set language
+        """
         lag_p(self, language)
 
     def closeEvent(self, event) -> None:
@@ -535,13 +608,16 @@ class PermMenu(PermMenuR):
 
 
 class FontDialog(FontDialogR):
+    """
+    font menu window
+    """
     signal = QtCore.pyqtSignal(str)
 
     def __init__(self,
                  font_dir: str,
                  name_dict: dict,
                  file_dict: dict):
-        super(FontDialog, self).__init__()
+        super().__init__()
         self.name_dict = name_dict
         for item in name_dict:
             self.combobox.addItem(item)
@@ -554,6 +630,9 @@ class FontDialog(FontDialogR):
         self.combobox.currentTextChanged.connect(self.change_text_font)
 
     def change_text_font(self) -> None:
+        """
+        display the font
+        """
         doc = fitz.Document()
         fitz.utils.new_page(doc, -1, 380, 220)
         r1 = fitz.Rect(10, 10, 370, 210)

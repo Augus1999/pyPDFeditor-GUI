@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
+"""
+all function needed
+"""
 import os
 import gc
 import sys
-import fitz
 import json
 import time
-from .language import MENU_L, MESSAGE
+from typing import Union
+import fitz
 from PyQt5 import (
     QtGui,
     QtCore,
@@ -20,13 +23,17 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QWidget,
 )
+from .language import MENU_L, MESSAGE
 
 
 class Doc(fitz.Document):
+    """
+    a wrapper to fitz.Document class
+    """
     def __init__(self, *args):
-        super(Doc, self).__init__(*args)
+        super().__init__(*args)
         self.pass_word = None
-        self.rotatedPages = dict()
+        self.rotatedPages = {}
 
 
 def copy(doc: Doc) -> Doc:
@@ -51,7 +58,7 @@ def copy(doc: Doc) -> Doc:
 
 
 def open_pdf(file_name: str,
-             parent: QWidget) -> (any, bool):
+             parent: QWidget) -> (Union[Doc, None], bool):
     """
     open pdf file and return a fitz object if applied
 
@@ -128,7 +135,7 @@ def pdf_split(doc: Doc) -> list:
     :param doc: target PDF file to be split
     :return: book_list
     """
-    book_list = list()
+    book_list = []
     for page in range(doc.page_count):
         book_list.append(page)
     return book_list
@@ -221,9 +228,8 @@ def setting_warning(set_file_name: str,
         reply = QMessageBox.warning(
             parent,
             'Error',
-            'Cannot find {}\n\nCreate an empty setting file?'.format(
-                set_file_name.split('\\')[-1],
-            ),
+            f'Cannot find {os.path.basename(set_file_name)}\n\n'
+            f'Create an empty setting file?',
             QMessageBox.Yes | QMessageBox.No,
         )
         if reply == QMessageBox.No:
@@ -303,7 +309,7 @@ def page_icon(page: fitz.Page,
 
 
 def set_icon(widget: QWidget,
-             doc: any = None,
+             doc: Union[Doc, fitz.Document, None] = None,
              _scaled: float = 0.95,
              _scaled_=1) -> None:
     """
@@ -318,7 +324,10 @@ def set_icon(widget: QWidget,
     x, y = 0, 0
     for i in widget.book_list:
         label = page_icon(
-            widget.book[i] if isinstance(widget.book_list[0], int) else (i[0] if doc is None else doc[0]),
+            widget.book[i] if isinstance(
+                widget.book_list[0],
+                int,
+            ) else (i[0] if doc is None else doc[0]),
             widget.table.width(),
             widget.w_col,
             _scaled,
@@ -464,7 +473,7 @@ def generate_menu(pos,
                 main=main,
             )
         if action == item3 and select == 0:
-            main._view(index, widget)
+            main.view(index, widget)
         if action == item4 and select == 1:
             extract_img(
                 index=index,
@@ -534,9 +543,7 @@ def save_as(index: int,
     doc.insert_pdf(widget.book, widget.book_list[index], widget.book_list[index])
     f_name = os.path.splitext(
         os.path.basename(widget.book.name),
-    )[0]+'-{}.pdf'.format(
-        widget.book_list[index]+1,
-    )
+    )[0]+f'-{widget.book_list[index]+1}.pdf'
     file_name, ok = QFileDialog.getSaveFileName(
         main,
         "save",
@@ -571,7 +578,7 @@ def clean(widget: QWidget) -> None:
         else:
             widget.book.close()
             widget.book = None
-        widget.book_list = list()
+        widget.book_list = []
         widget.table.clearContents()
         reset_table(
             book_len=1,
@@ -596,10 +603,7 @@ def extract_img(index: int,
     for key, inf in enumerate(img_inf):
         f_name = os.path.splitext(
             os.path.basename(widget.book.name),
-        )[0] + '-{}-image-{}.png'.format(
-            widget.book_list[index] + 1,
-            key + 1,
-        )
+        )[0] + f'-{widget.book_list[index]+1}-image-{key+1}.png'
         img_name = main.s_dir+'\\'+f_name
         # xref is inf[0]
         img = fitz.Pixmap(
@@ -681,6 +685,7 @@ def rearrange_page(index: int,
         widget=widget,
     )
     set_icon(widget)
+    return None
 
 
 def choose(widget: QtWidgets.QLineEdit,
@@ -704,7 +709,7 @@ def choose(widget: QtWidgets.QLineEdit,
 
 
 def set_metadata0(doc: fitz.fitz,
-                  author: any) -> None:
+                  author: Union[str, None]) -> None:
     """
     set defeat metadata
 
@@ -715,16 +720,17 @@ def set_metadata0(doc: fitz.fitz,
     _time = time.localtime(time.time())
     metadata = doc.metadata
     metadata["producer"] = "pyPDFEditor-GUI"
-    metadata["modDate"] = "D:{}{}{}{}{}{}".format(
-        _time[0],
+    metadata["modDate"] = "D:" + "".join((
+        str(_time[0]),
         str(_time[1]).zfill(2),
         str(_time[2]).zfill(2),
         str(_time[3]).zfill(2),
         str(_time[4]).zfill(2),
         str(_time[5]).zfill(2),
-    )
-    if author is not None:
-        metadata["author"] = author
+        time.strftime('%z'),
+        '\'' + time.strftime('%z')[3:] + '\'',
+    ))
+    metadata["author"] = author
     doc.set_metadata(metadata)
 
 
@@ -745,14 +751,16 @@ def set_metadata1(metadata: dict,
     """
     _time = time.localtime(time.time())
     metadata["producer"] = "pyPDFEditor-GUI"
-    metadata["modDate"] = "D:{}{}{}{}{}{}".format(
-        _time[0],
+    metadata["modDate"] = "D:" + "".join((
+        str(_time[0]),
         str(_time[1]).zfill(2),
         str(_time[2]).zfill(2),
         str(_time[3]).zfill(2),
         str(_time[4]).zfill(2),
         str(_time[5]).zfill(2),
-    )
+        time.strftime('%z')[:3],
+        '\''+time.strftime('%z')[3:]+'\'',
+    ))
     metadata["title"] = title
     metadata["author"] = author
     metadata["subject"] = subject
@@ -765,14 +773,11 @@ def toc2plaintext(toc: list) -> str:
     :param toc: table of content <- DOCUMENT.get_toc()
     :return: plaintext
     """
-    plaintext = ''
+    plaintext = []
     for content in toc:
-        head = '{}-->{}-->{}\n'.format(
-            int(content[0])*'*',
-            content[1],
-            content[2],
-        )
-        plaintext += head
+        head = f'{int(content[0])*"*"}-->{content[1]}-->{content[2]}'
+        plaintext.append(head)
+    plaintext = '\n'.join(plaintext)
     return plaintext
 
 
@@ -781,15 +786,12 @@ def plaintext2toc(plaintext: str) -> list:
     :param plaintext: plaintext
     :return: table of content -> DOCUMENT.get_toc()
     """
-    toc = list()
+    toc = []
     contents = plaintext.split('\n')
     for content in contents:
         if len(content) != 0:
             c = content.split('-->')
-            t = list()
-            t.append(len(c[0]))
-            t.append(c[1])
-            t.append(int(c[2]))
+            t = [len(c[0]), c[1], int(c[2])]
             toc.append(t)
     return toc
 
@@ -802,8 +804,8 @@ def find_font(font_dirs: list) -> (dict, dict):
     :return: two dictionaries => {font name: font file address} &
                                  {font file address: font name}
     """
-    name_dict = dict()
-    dir_dict = dict()
+    name_dict = {}
+    dir_dict = {}
     for font_dir in font_dirs:
         for file_name in os.listdir(font_dir):
             full_name = os.path.join(

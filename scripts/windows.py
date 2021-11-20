@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
+"""
+application window forms
+"""
 from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, QTransform
-from .styleSheets import *  # change here if thee want to change theme!
-from .functions import shadow
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit, QScrollArea,
                              QComboBox, QLineEdit, QPushButton, QTableWidget, QApplication)
+from .styleSheets import *  # change here if thee want to change theme!
+from .functions import shadow
 
 
 class SwitchBtn(QWidget):
+    """
+    switch button
+    """
     stateChanged = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent=None):
-        super(SwitchBtn, self).__init__(parent)
+        super().__init__(parent)
         self.checked = False
         self.bgColorOff = QColor("#e2e2dd")
         self.bgColorOn = QColor("#6272a4")
@@ -32,6 +38,9 @@ class SwitchBtn(QWidget):
         self.setFont(QFont("calibri", 11))
 
     def setStyleSheet(self, style_sheet: str) -> None:
+        """
+        define set-style-sheet behaviour
+        """
         style_sheet = style_sheet.replace(' ', '').replace('\n', '').replace('\t', '')
         li = style_sheet.split('}')
         for i in li:
@@ -57,6 +66,9 @@ class SwitchBtn(QWidget):
                         self.textColorOff = QColor(style[6:])
 
     def update_value(self) -> None:
+        """
+        update positions values
+        """
         if self.checked:
             if self.startX < self.endX:
                 self.startX = self.startX + self.step
@@ -72,6 +84,9 @@ class SwitchBtn(QWidget):
         self.update()
 
     def mousePressEvent(self, event) -> None:
+        """
+        mousePressEvent
+        """
         self.checked = not self.checked
         self.stateChanged.emit(self.checked)
         self.step = self.width() / 50
@@ -82,6 +97,9 @@ class SwitchBtn(QWidget):
         self.timer.start(5)
 
     def setChecked(self, on: bool) -> None:
+        """
+        set-checked
+        """
         self.step = self.width() / 50
         if on:
             self.checked = True
@@ -92,9 +110,15 @@ class SwitchBtn(QWidget):
         self.timer.start(5)
 
     def isChecked(self) -> bool:
+        """
+        is-checked
+        """
         return self.checked
 
     def paintEvent(self, event) -> None:
+        """
+        paintEvent
+        """
         painter = QPainter()
         painter.begin(self)
         painter.setRenderHint(QPainter.Antialiasing)
@@ -104,6 +128,9 @@ class SwitchBtn(QWidget):
         painter.end()
 
     def draw_text(self, painter) -> None:
+        """
+        draw text
+        """
         painter.save()
         if self.checked:
             painter.setPen(self.textColorOn)
@@ -128,6 +155,9 @@ class SwitchBtn(QWidget):
         painter.restore()
 
     def draw_bg(self, painter) -> None:
+        """
+        draw background
+        """
         painter.save()
         painter.setPen(QtCore.Qt.NoPen)
         if self.checked:
@@ -165,6 +195,9 @@ class SwitchBtn(QWidget):
         painter.restore()
 
     def draw_slider(self, painter) -> None:
+        """
+        draw slider
+        """
         painter.save()
         painter.setPen(QtCore.Qt.NoPen)
         if self.checked:
@@ -184,9 +217,15 @@ class SwitchBtn(QWidget):
 
 
 class TableWidget(QTableWidget):
+    """
+    a wrapper to QTableWidget
+    """
     Index = QtCore.pyqtSignal(tuple)
 
     def mousePressEvent(self, event) -> None:
+        """
+        re-write mousePressEvent
+        """
         QTableWidget.mousePressEvent(self, event)
         if event.button() == QtCore.Qt.LeftButton:
             row_num = col_num = int()
@@ -202,7 +241,7 @@ class MainR(QTabWidget):
     all window functions that define the appearance and behaviours are written here
     """
     def __init__(self, system: str, version: str, system_style: bool):
-        super(MainR, self).__init__()
+        super().__init__()
         self.__system__ = system
         self.__version__ = version
         self.system_style = system_style
@@ -212,8 +251,6 @@ class MainR(QTabWidget):
         width = height*1.36  # 1290
         self.size1 = height * 0.04
         self.size2 = height * 0.03
-        self.BORDER_WIDTH = 5
-        self.monitor_info = None
         self.resize(width, height)
         self.setMinimumSize(0.47 * width, 0.45 * height)
         self.setWindowTitle('PDF Editor')
@@ -264,6 +301,7 @@ class MainR(QTabWidget):
             '',
         )
         if self.__system__ == 'Windows':
+            self.monitor_info = None
             self.btn_min_0 = QPushButton(self.tab0)
             self.btn_max_0 = QPushButton(self.tab0)
             self.btn_ext_0 = QPushButton(self.tab0)
@@ -373,12 +411,19 @@ class MainR(QTabWidget):
         self.tab2.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
         self.tab3.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
         self.tab4.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
+        return
 
     def close(self) -> None:
+        """
+        re-write close
+        """
         QTabWidget.close(self)
 
     def paintEvent(self, event) -> None:
-        super(MainR, self).paintEvent(event)
+        """
+        re-write paintEvent
+        """
+        super().paintEvent(event)
         if self.__system__ != "Windows" or not self.system_style:
             QTabWidget.paintEvent(self, event)
             return None
@@ -391,8 +436,11 @@ class MainR(QTabWidget):
         painter.drawRect(QtCore.QRect(self.width()-2, 0, 2, self.height()))
 
     # -------well, why do the following ugly codes exist?-------
-    # -------they are used to re-enable, correctly, the window animations under Windows platform-------
+    # -------they are used to re-enable the window animations under Windows platform-------
     def mousePressEvent(self, event) -> None:
+        """
+        re-write mousePressEvent
+        """
         if self.__system__ == 'Windows':
             if event.pos() in self._status_bar_pos:
                 self.windowEffect.move_window(int(self.winId()))
@@ -400,6 +448,9 @@ class MainR(QTabWidget):
             QTabWidget.mousePressEvent(self, event)
 
     def mouseDoubleClickEvent(self, event) -> None:
+        """
+        re-write mouseDoubleClickEvent
+        """
         if self.__system__ == 'Windows':
             if event.button() == QtCore.Qt.LeftButton and event.pos() in self._status_bar_pos:
                 self.windowChange()
@@ -407,6 +458,9 @@ class MainR(QTabWidget):
             QTabWidget.mouseDoubleClickEvent(self, event)
 
     def nativeEvent(self, event_type, message) -> (bool, int):
+        """
+        re-write nativeEvent
+        """
         if self.__system__ == 'Windows':
             import win32api
             import win32con
@@ -417,11 +471,11 @@ class MainR(QTabWidget):
             msg = MSG.from_address(message.__int__())
             i = self.currentIndex()
 
-            def __monitorNCCALCSIZE(_self, _msg: MSG) -> any:
+            def __monitorNCCALCSIZE(_self, _msg: MSG) -> None:
                 _monitor = win32api.MonitorFromWindow(_msg.hWnd)
-                if _monitor is None and not self.monitor_info:
-                    return _monitor
-                elif _monitor is not None:
+                if _monitor is None and not _self.monitor_info:
+                    return None
+                if _monitor is not None:
                     _self.monitor_info = win32api.GetMonitorInfo(_monitor)
                 # resize window
                 params = cast(_msg.lParam, POINTER(NCCalcSizePARAMS)).contents
@@ -429,6 +483,7 @@ class MainR(QTabWidget):
                 params.rgrc[0].top = _self.monitor_info['Work'][1]
                 params.rgrc[0].right = _self.monitor_info['Work'][2]
                 params.rgrc[0].bottom = _self.monitor_info['Work'][3]
+                return None
 
             def __isWindowMaximized(_self, h_wnd: MSG.hWnd) -> bool:
                 window_placement = win32gui.GetWindowPlacement(h_wnd)
@@ -440,10 +495,10 @@ class MainR(QTabWidget):
                 x_pos = win32api.GetCursorPos()[0]-self.frameGeometry().x()
                 y_pos = win32api.GetCursorPos()[1]-self.frameGeometry().y()
                 max_btn_x_pos = x_pos - self.size2 * 2
-                lx = x_pos < self.BORDER_WIDTH
-                rx = x_pos > self.width() - self.BORDER_WIDTH
-                ty = y_pos < self.BORDER_WIDTH
-                by = y_pos > self.height() - self.BORDER_WIDTH
+                lx = x_pos < 5
+                rx = x_pos > self.width() - 5
+                ty = y_pos < 5
+                by = y_pos > self.height() - 5
                 btn = self.findChildren(QPushButton, f'max{i}')[0]
                 x_l, x_r = btn.x(), btn.x() + btn.width()
                 y_t, y_b = btn.y(), btn.y() + btn.height()
@@ -484,7 +539,10 @@ class MainR(QTabWidget):
     # -------here ends the ugly code-------
 
     def resizeEvent(self, event) -> None:
-        super(MainR, self).resizeEvent(event)
+        """
+        re-write resizeEvent
+        """
+        super().resizeEvent(event)
         self.widget3.resize(self.width() * 0.9, self.height() * 0.9)
         self.widget4.resize(self.width() * 0.9, self.height() * 0.9)
         if self.__system__ == 'Windows':
@@ -492,20 +550,28 @@ class MainR(QTabWidget):
                                     for y in range(int(self.size2 * 2))]
 
     def windowChange(self) -> None:
+        """
+        maximise or normalise the window
+        """
         if self.isMaximized():
             self.showNormal()
         else:
             self.showMaximized()
 
     def tab0_init(self) -> None:
+        """
+        initialise tab0
+        """
         self.tab0.grid = QGridLayout(self.tab0)
         label = QLabel(self.tab0)
         label.setStyleSheet(f'image:url(./{WELCOME_PAGE});border-radius:15px')
         shadow(label, QColor(0, 0, 0, 90), 10)
         label_w = QLabel(self.tab0)
         label_w.setStyleSheet(LABEL_STYLE)
-        label_w.setText("<a href='https://github.com/Augus1999/pyPDFeditor-GUI' style='color:#a3b5b3'>"
-                        "<small>https://github.com/Augus1999/pyPDFeditor-GUI</small></a>")
+        label_w.setText(
+            "<a href='https://github.com/Augus1999/pyPDFeditor-GUI' style='color:#a3b5b3'>"
+            "<small>https://github.com/Augus1999/pyPDFeditor-GUI</small></a>",
+        )
         label_w.setOpenExternalLinks(True)
         self.tab0.label_v = QLabel(self.tab0)
         self.tab0.label_v.setStyleSheet(LABEL_STYLE)
@@ -515,16 +581,27 @@ class MainR(QTabWidget):
         self.tab0.grid.addWidget(label_w, 31, 17, 1, 4, QtCore.Qt.AlignBottom)
 
     def tab1_init(self) -> None:
+        """
+        initialise tab1
+        """
         self.tab1.grid = QGridLayout(self.tab1)
         self.tab1.table = QTableWidget(self.tab1)
         self.tab1.button1 = QPushButton(self.tab1)
         self.tab1.button2 = QPushButton(self.tab1)
         self.tab1.button3 = QPushButton(self.tab1)
         self.tab1.button4 = QPushButton(self.tab1)
-        self.tab1.button1.setStyleSheet(BUTTON_STYLE.format('Add.svg', 'Add_h.svg', 'Add_p.svg'))
-        self.tab1.button2.setStyleSheet(BUTTON_STYLE.format('down.svg', 'down_h.svg', 'down_p.svg'))
-        self.tab1.button3.setStyleSheet(BUTTON_STYLE.format('settings.svg', 'settings_h.svg', 'settings_p.svg'))
-        self.tab1.button4.setStyleSheet(BUTTON_STYLE.format('delete.svg', 'delete_h.svg', 'delete_p.svg'))
+        self.tab1.button1.setStyleSheet(
+            BUTTON_STYLE.format('Add.svg', 'Add_h.svg', 'Add_p.svg'),
+        )
+        self.tab1.button2.setStyleSheet(
+            BUTTON_STYLE.format('down.svg', 'down_h.svg', 'down_p.svg'),
+        )
+        self.tab1.button3.setStyleSheet(
+            BUTTON_STYLE.format('settings.svg', 'settings_h.svg', 'settings_p.svg'),
+        )
+        self.tab1.button4.setStyleSheet(
+            BUTTON_STYLE.format('delete.svg', 'delete_h.svg', 'delete_p.svg'),
+        )
         self.tab1.button1.setFixedSize(self.size2 * 2, self.size2)
         self.tab1.button2.setFixedSize(self.size2 * 2, self.size2)
         self.tab1.button3.setFixedSize(self.size2 * 2, self.size2)
@@ -549,16 +626,27 @@ class MainR(QTabWidget):
         self.tab1.grid.addWidget(self.tab1.table, 1, 0, 10, 21)
 
     def tab2_init(self) -> None:
+        """
+        initialise tab2
+        """
         self.tab2.grid = QGridLayout(self.tab2)
         self.tab2.table = QTableWidget(self.tab2)
         self.tab2.button1 = QPushButton(self.tab2)
         self.tab2.button2 = QPushButton(self.tab2)
         self.tab2.button3 = QPushButton(self.tab2)
         self.tab2.button4 = QPushButton(self.tab2)
-        self.tab2.button1.setStyleSheet(BUTTON_STYLE.format('Add.svg', 'Add_h.svg', 'Add_p.svg'))
-        self.tab2.button2.setStyleSheet(BUTTON_STYLE.format('down.svg', 'down_h.svg', 'down_p.svg'))
-        self.tab2.button3.setStyleSheet(BUTTON_STYLE.format('settings.svg', 'settings_h.svg', 'settings_p.svg'))
-        self.tab2.button4.setStyleSheet(BUTTON_STYLE.format('delete.svg', 'delete_h.svg', 'delete_p.svg'))
+        self.tab2.button1.setStyleSheet(
+            BUTTON_STYLE.format('Add.svg', 'Add_h.svg', 'Add_p.svg'),
+        )
+        self.tab2.button2.setStyleSheet(
+            BUTTON_STYLE.format('down.svg', 'down_h.svg', 'down_p.svg'),
+        )
+        self.tab2.button3.setStyleSheet(
+            BUTTON_STYLE.format('settings.svg', 'settings_h.svg', 'settings_p.svg'),
+        )
+        self.tab2.button4.setStyleSheet(
+            BUTTON_STYLE.format('delete.svg', 'delete_h.svg', 'delete_p.svg'),
+        )
         self.tab2.button1.setFixedSize(self.size2 * 2, self.size2)
         self.tab2.button2.setFixedSize(self.size2 * 2, self.size2)
         self.tab2.button3.setFixedSize(self.size2 * 2, self.size2)
@@ -583,6 +671,9 @@ class MainR(QTabWidget):
         self.tab2.grid.addWidget(self.tab2.table, 1, 0, 10, 21)
 
     def tab3_init(self) -> None:
+        """
+        initialise tab3
+        """
         scroll_area = QScrollArea()
         scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
         self.widget3.setMinimumSize(self.width()*0.8, self.height()*0.8)
@@ -613,14 +704,30 @@ class MainR(QTabWidget):
         self.tab3.button6 = QPushButton(self.tab3)
         self.tab3.button7 = QPushButton(self.tab3)
         self.tab3.button8 = QPushButton(self.tab3)
-        self.tab3.button1.setStyleSheet(BUTTON_STYLE.format('Add.svg', 'Add_h.svg', 'Add_p.svg'))
-        self.tab3.button2.setStyleSheet(BUTTON_STYLE.format('down.svg', 'down_h.svg', 'down_p.svg'))
-        self.tab3.button3.setStyleSheet(BUTTON_STYLE.format('settings.svg', 'settings_h.svg', 'settings_p.svg'))
-        self.tab3.button4.setStyleSheet(BUTTON_STYLE.format('color.svg', 'color_h.svg', 'color_p.svg'))
-        self.tab3.button5.setStyleSheet(BUTTON_STYLE.format('view.svg', 'view_h.svg', 'view_p.svg'))
-        self.tab3.button6.setStyleSheet(BUTTON_STYLE.format('more_d.svg', 'more_d.svg', 'more_d.svg'))
-        self.tab3.button7.setStyleSheet(BUTTON_STYLE.format('font.svg', 'font_h.svg', 'font_p.svg'))
-        self.tab3.button8.setStyleSheet(BUTTON_STYLE.format('delete.svg', 'delete_h.svg', 'delete_p.svg'))
+        self.tab3.button1.setStyleSheet(
+            BUTTON_STYLE.format('Add.svg', 'Add_h.svg', 'Add_p.svg'),
+        )
+        self.tab3.button2.setStyleSheet(
+            BUTTON_STYLE.format('down.svg', 'down_h.svg', 'down_p.svg'),
+        )
+        self.tab3.button3.setStyleSheet(
+            BUTTON_STYLE.format('settings.svg', 'settings_h.svg', 'settings_p.svg'),
+        )
+        self.tab3.button4.setStyleSheet(
+            BUTTON_STYLE.format('color.svg', 'color_h.svg', 'color_p.svg'),
+        )
+        self.tab3.button5.setStyleSheet(
+            BUTTON_STYLE.format('view.svg', 'view_h.svg', 'view_p.svg'),
+        )
+        self.tab3.button6.setStyleSheet(
+            BUTTON_STYLE.format('more_d.svg', 'more_d.svg', 'more_d.svg'),
+        )
+        self.tab3.button7.setStyleSheet(
+            BUTTON_STYLE.format('font.svg', 'font_h.svg', 'font_p.svg'),
+        )
+        self.tab3.button8.setStyleSheet(
+            BUTTON_STYLE.format('delete.svg', 'delete_h.svg', 'delete_p.svg'),
+        )
         self.tab3.table.setFixedSize(self.size2 * 20, self.size2 * 27)
         self.tab3.button1.setFixedSize(self.size2 * 2, self.size2)
         self.tab3.button2.setFixedSize(self.size2 * 2, self.size2)
@@ -738,6 +845,9 @@ class MainR(QTabWidget):
         layout.addWidget(self.tab3.button6, 10, 18, 1, 1, QtCore.Qt.AlignLeft)
 
     def tab4_init(self) -> None:
+        """
+        initialise tab4
+        """
         scroll_area = QScrollArea()
         scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
         self.widget4.setMinimumSize(self.width() * 0.8, self.height() * 0.8)
@@ -748,10 +858,18 @@ class MainR(QTabWidget):
         self.tab4.button2 = QPushButton(self.tab4)
         self.tab4.button3 = QPushButton(self.tab4)
         self.tab4.button4 = QPushButton(self.tab4)
-        self.tab4.button1.setStyleSheet(BUTTON_STYLE.format('Add.svg', 'Add_h.svg', 'Add_p.svg'))
-        self.tab4.button2.setStyleSheet(BUTTON_STYLE.format('down.svg', 'down_h.svg', 'down_p.svg'))
-        self.tab4.button3.setStyleSheet(BUTTON_STYLE.format('settings.svg', 'settings_h.svg', 'settings_p.svg'))
-        self.tab4.button4.setStyleSheet(BUTTON_STYLE.format('delete.svg', 'delete_h.svg', 'delete_p.svg'))
+        self.tab4.button1.setStyleSheet(
+            BUTTON_STYLE.format('Add.svg', 'Add_h.svg', 'Add_p.svg'),
+        )
+        self.tab4.button2.setStyleSheet(
+            BUTTON_STYLE.format('down.svg', 'down_h.svg', 'down_p.svg'),
+        )
+        self.tab4.button3.setStyleSheet(
+            BUTTON_STYLE.format('settings.svg', 'settings_h.svg', 'settings_p.svg'),
+        )
+        self.tab4.button4.setStyleSheet(
+            BUTTON_STYLE.format('delete.svg', 'delete_h.svg', 'delete_p.svg'),
+        )
         self.tab4.button1.setFixedSize(self.size2 * 2, self.size2)
         self.tab4.button2.setFixedSize(self.size2 * 2, self.size2)
         self.tab4.button3.setFixedSize(self.size2 * 2, self.size2)
@@ -831,9 +949,8 @@ class SettingR(QWidget):
     """
     setting window
     """
-
     def __init__(self):
-        super(SettingR, self).__init__()
+        super().__init__()
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
         height = screen_rect.height()*0.26  # 280
@@ -891,7 +1008,7 @@ class PermMenuR(QWidget):
     permission setting menu window
     """
     def __init__(self):
-        super(PermMenuR, self).__init__()
+        super().__init__()
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
         height = screen_rect.height()*0.37  # 400
@@ -967,8 +1084,11 @@ class PermMenuR(QWidget):
 
 
 class FontDialogR(QWidget):
+    """
+    font menu window
+    """
     def __init__(self):
-        super(FontDialogR, self).__init__()
+        super().__init__()
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
         height = screen_rect.height()*0.27
