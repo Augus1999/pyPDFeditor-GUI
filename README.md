@@ -81,16 +81,16 @@ default window style on Windows platform:
 
 ## If you want to change the theme
 
-The default Theme is written in the file `styleSheets.py` of folder `\scripts`. Of course, you are welcomed to change it or create a new one. Just remember to keep the same variable names and same formats, especially the format of `SWITCH_STYLE` item, or you may well encounter errors : ) If you create a new theme, then put it into folder `\scripts`, go to <u>line 10</u> of `windows.py` and change:
+The default Theme is written in the file `style_sheets.py` of folder `\scripts`. Of course, you are welcomed to change it or create a new one. Just remember to keep the same variable names and same formats, especially the format of `SWITCH_STYLE` item, or you may well encounter errors : ) If you create a new theme, then put it into folder `\scripts`, go to <u>line 10</u> of `windows.py` and change:
 
 ```python
-from .styleSheets import *
+from .style_sheets import *
 ```
 
 into `from YOUR_STYLESHEETS import *` for instance:
 
 ```python
-from .styleSheets_yurucamp_shimaRIN import *
+from .style_sheets_yurucamp_shimaRIN import *
 ```
 
  You are also welcomed to share your themes [here](https://github.com/Augus1999/pyPDFeditor-GUI/pulls).
