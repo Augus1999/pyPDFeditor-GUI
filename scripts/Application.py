@@ -3,6 +3,7 @@
 """
 wrap the whole application to one function
 """
+import os.path
 import sys
 import json
 import getpass
@@ -18,7 +19,7 @@ from .functions import (setting_warning, toc2plaintext, plaintext2toc,
                         set_metadata0, set_metadata1, generate_menu,
                         reset_table, pdf_split, find_font, _warning,
                         open_pdf, set_icon, add_watermark, choose, clean,
-                        add, render_pdf_page, save, copy,)
+                        add, render_pdf_page, save, copy, read_from_font_cache,)
 
 
 class Main(MainR):
@@ -449,10 +450,15 @@ class Main(MainR):
         """
         open font window
         """
-        font_paths = QtCore.QStandardPaths.standardLocations(
-            QtCore.QStandardPaths.FontsLocation,
-        )
-        name_dict, file_dict = find_font(font_paths)
+        if os.path.exists('settings//font_dir_cache.json'):
+            name_dict, file_dict = read_from_font_cache(
+                'settings//font_dir_cache.json',
+            )
+        else:
+            font_paths = QtCore.QStandardPaths.standardLocations(
+                QtCore.QStandardPaths.FontsLocation,
+            )
+            name_dict, file_dict = find_font(font_paths)
         self.FontDialogCD = FontDialog(
             self.font_dir,
             name_dict,

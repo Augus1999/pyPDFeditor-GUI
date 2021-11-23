@@ -799,6 +799,7 @@ def plaintext2toc(plaintext: str) -> list:
 def find_font(font_dirs: list) -> (dict, dict):
     """
     find all TrueType font files (.ttf): all their font name and file addresses
+    then write their directories to a json file
 
     :param font_dirs: the directions where font files locate
     :return: two dictionaries => {font name: font file address} &
@@ -818,6 +819,38 @@ def find_font(font_dirs: list) -> (dict, dict):
                 dir_dict[full_name] = font_name
             except RuntimeError:
                 pass
+    with open(
+        file='settings\\font_dir_cache.json',
+        mode='w',
+        encoding='utf-8',
+    ) as f:
+        json.dump(
+            name_dict,
+            f,
+            sort_keys=True,
+            indent=4,
+            separators=(",", ": "),
+        )
+    return name_dict, dir_dict
+
+
+def read_from_font_cache(cache_file_name: str) -> (dict, dict):
+    """
+    read font directories from json file
+
+    :param cache_file_name: json cache file name
+    :return: two dictionaries => {font name: font file address} &
+                                 {font file address: font name}
+    """
+    dir_dict = {}
+    with open(
+        file=cache_file_name,
+        mode='r',
+        encoding='utf-8',
+    ) as f:
+        name_dict = json.load(f)
+    for font_name in name_dict:
+        dir_dict[name_dict[font_name]] = font_name
     return name_dict, dir_dict
 
 
