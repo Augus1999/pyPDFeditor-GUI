@@ -61,7 +61,7 @@ If you are working on Windows platform and having no Python 3 installed, downloa
 
 ### Using on Windows
 
-If you want the UI has a native round boder and shadow effect on <u>Windows 11</u>, go to the python file `pdfEditor.py`, find <u>line 8</u>, change the state `system_style=False` into `system_style=True`, and run the application again. It may affect the colour theme. The default setting is no-shadow-effect and border radius = 0.
+If you want the UI has a native round boder and shadow effect on <u>Windows 11</u>, go to the python file [`pdfEditor.py`](pdfEditor.py), find <u>line 8</u>, change the state `system_style=False` into `system_style=True`, and run the application again. It may affect the colour theme. The default setting is no-shadow-effect and border radius = 0.
 
 Also, [Snap Layout Menu](https://docs.microsoft.com/zh-cn/windows/apps/desktop/modernize/apply-snap-layout-menu) in Windows 11 is fully supported.
 
@@ -81,7 +81,7 @@ default window style on Windows platform:
 
 ## If you want to change the theme
 
-The default Theme is written in the file `style_sheets.py` of folder `\scripts`. Of course, you are welcomed to change it or create a new one. Just remember to keep the same variable names and same formats, especially the format of `SWITCH_STYLE` item, or you may well encounter errors : ) If you create a new theme, then put it into folder `\scripts`, go to <u>line 10</u> of `windows.py` and change:
+The default Theme is written in the file [`style_sheets.py`](.\scripts\style_sheets.py)of folder `\scripts`. Of course, you are welcomed to change it or create a new one. Just remember to keep the same variable names and same formats, especially the format of `SWITCH_STYLE` item, or you may well encounter errors : ) If you create a new theme, then put it into folder `\scripts`, go to <u>line 10</u> of [`windows.py`](.\scripts\windows.py) and change:
 
 ```python
 from .style_sheets import *
@@ -97,5 +97,5 @@ from .style_sheets_yurucamp_shimaRIN import *
 
 ## Others
 
-I wrote this scripts as robust as possible. If you encountered any crash and could not see any error from PyQt and python itself, open the python file `pdfEditor.py` in IDE, find <u>line 11</u>, change the state `debug=False` into `debug=True`, and run the application again. Then you will see all mupdf errors (and warnings) in terminal. Please report these errors to [Issues](https://github.com/Augus1999/pyPDFeditor-GUI/issues). Thank you!
+I wrote this scripts as robust as possible. If you encountered any crash and could not see any error from PyQt and python itself, open the python file [`pdfEditor.py`](pdfEditor.py) in IDE, find <u>line 11</u>, change the state `debug=False` into `debug=True`, and run the application again. Then you will see all mupdf errors (and warnings) in terminal. Please report these errors to [Issues](https://github.com/Augus1999/pyPDFeditor-GUI/issues). Thank you!
 
