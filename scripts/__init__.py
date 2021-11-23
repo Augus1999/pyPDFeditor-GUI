@@ -4,7 +4,7 @@
 initialise the module
 """
 import platform
-from .Application import __main__
+from .application import __main__
 
 
 _system = platform.system()

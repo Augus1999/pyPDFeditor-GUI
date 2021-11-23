@@ -7,7 +7,7 @@ from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, Q
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit, QScrollArea,
                              QComboBox, QLineEdit, QPushButton, QTableWidget, QApplication)
-from .styleSheets import *  # change here if thee want to change theme!
+from .style_sheets import *  # change here if thee want to change theme!
 from .functions import shadow
 
 
@@ -962,6 +962,10 @@ class SettingR(QWidget):
         self.setWindowIcon(
             QIcon('ico\\settings.svg'),
         )
+        self.setWindowFlags(
+            QtCore.Qt.CustomizeWindowHint |
+            QtCore.Qt.WindowCloseButtonHint,
+        )
         self.setStyleSheet('background-color:#ffffff')
         self.label1 = QLabel(self)
         self.label2 = QLabel(self)
@@ -1020,6 +1024,10 @@ class PermMenuR(QWidget):
         self.setWindowTitle(' ')
         self.setWindowIcon(QIcon('ico\\lock.svg'))
         self.setStyleSheet('background-color:#ffffff')
+        self.setWindowFlags(
+            QtCore.Qt.CustomizeWindowHint |
+            QtCore.Qt.WindowCloseButtonHint,
+        )
         self.check1 = SwitchBtn(self)
         self.check2 = SwitchBtn(self)
         self.check3 = SwitchBtn(self)
@@ -1097,6 +1105,10 @@ class FontDialogR(QWidget):
         self.resize(width, height)
         self.setWindowTitle('Select Font')
         self.setWindowIcon(QIcon('ico\\font.svg'))
+        self.setWindowFlags(
+            QtCore.Qt.CustomizeWindowHint |
+            QtCore.Qt.WindowCloseButtonHint,
+        )
         self.combobox = QComboBox(self)
         self.combobox.setStyleSheet(COMBO_BOX_STYLE)
         self.combobox.setFixedHeight(height/7)
