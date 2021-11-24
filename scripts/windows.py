@@ -3,6 +3,7 @@
 """
 application window forms
 """
+import re
 from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, QTransform
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit, QScrollArea,
@@ -42,28 +43,24 @@ class SwitchBtn(QWidget):
         define set-style-sheet behaviour
         """
         style_sheet = style_sheet.replace(' ', '').replace('\n', '').replace('\t', '')
-        li = style_sheet.split('}')
-        for i in li:
-            if 'SwitchBtn:on' in i:
-                lines = i.split('{')
-                line1 = lines[1]
-                styles = line1.split(';')
-                for style in styles:
-                    if 'background-color:' in style:
-                        self.bgColorOn = QColor(style[17:])
-                    if 'color:' in style and 'background-color:' not in style:
-                        self.sliderColorOn = QColor(style[6:])
-                        self.textColorOn = QColor(style[6:])
-            if 'SwitchBtn:off' in i:
-                lines = i.split('{')
-                line1 = lines[1]
-                styles = line1.split(';')
-                for style in styles:
-                    if 'background-color:' in style:
-                        self.bgColorOff = QColor(style[17:])
-                    if 'color:' in style and 'background-color:' not in style:
-                        self.sliderColorOff = QColor(style[6:])
-                        self.textColorOff = QColor(style[6:])
+        on_style = str(re.findall(r'SwitchBtn:on{[^{][^}]+}', style_sheet))
+        off_style = str(re.findall(r'SwitchBtn:off{[^{][^}]+}', style_sheet))
+        bg_colour_on = re.findall(r'background-color:#\w+', on_style)
+        bg_colour_on = ''.join(re.findall(r'#\w+', str(bg_colour_on)))
+        colour_on = re.findall(r'[^-]color:#\w+', on_style)
+        colour_on = ''.join(re.findall(r'#\w+', str(colour_on)))
+        bg_colour_off = re.findall(r'background-color:#\w+', off_style)
+        bg_colour_off = ''.join(re.findall(r'#\w+', str(bg_colour_off)))
+        colour_off = re.findall(r'[^-]color:#\w+', off_style)
+        colour_off = ''.join(re.findall(r'#\w+', str(colour_off)))
+        if bg_colour_on != '':
+            self.bgColorOn = QColor(bg_colour_on)
+        if colour_on != '':
+            self.sliderColorOn = self.textColorOn = QColor(colour_on)
+        if bg_colour_off != '':
+            self.bgColorOff = QColor(bg_colour_off)
+        if colour_off != '':
+            self.sliderColorOff = self.textColorOff = QColor(colour_off)
 
     def update_value(self) -> None:
         """
