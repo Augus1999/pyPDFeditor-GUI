@@ -42,9 +42,9 @@ class SwitchBtn(QWidget):
         """
         define set-style-sheet behaviour
         """
-        style_sheet = style_sheet.replace(' ', '').replace('\n', '').replace('\t', '')
-        on_style = str(re.findall(r'SwitchBtn:on{[^{][^}]+}', style_sheet))
-        off_style = str(re.findall(r'SwitchBtn:off{[^{][^}]+}', style_sheet))
+        style_sheet = re.sub(r'\s+', '', style_sheet)
+        on_style = str(re.findall(r'SwitchBtn:on{.+?}', style_sheet))
+        off_style = str(re.findall(r'SwitchBtn:off{.+?}', style_sheet))
         bg_colour_on = re.findall(r'background-color:#\w+', on_style)
         bg_colour_on = ''.join(re.findall(r'#\w+', str(bg_colour_on)))
         colour_on = re.findall(r'[^-]color:#\w+', on_style)
