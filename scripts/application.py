@@ -122,6 +122,8 @@ class Main(MainR):
             "font dir": self.font_dir,
             "language": self.language
         }
+        if not os.path.exists('settings'):
+            os.makedirs('settings')
         with open(
                 'settings/settings.json',
                 mode='w',
