@@ -708,6 +708,29 @@ def choose(widget: QtWidgets.QLineEdit,
         )
 
 
+def remove_invalid_xref_key(metadata: dict) -> dict:
+    """
+    remove invalid xref key(s)
+    """
+    valid_keys = (
+        'author',
+        'producer',
+        'creator',
+        'title',
+        'format',
+        'encryption',
+        'creationDate',
+        'modDate',
+        'subject',
+        'keywords',
+        'trapped',
+    )
+    for key in metadata:
+        if key not in valid_keys:
+            metadata.pop(key)
+    return metadata
+
+
 def set_metadata0(doc: fitz.fitz,
                   author: Union[str, None]) -> None:
     """
@@ -731,7 +754,10 @@ def set_metadata0(doc: fitz.fitz,
         '\'' + time.strftime('%z')[3:] + '\'',
     ))
     metadata["author"] = author
-    doc.set_metadata(metadata)
+    doc.xref_set_key(-1, "Info", "null")  # remove all original xref
+    doc.set_metadata(
+        remove_invalid_xref_key(metadata),
+    )
 
 
 def set_metadata1(metadata: dict,
@@ -765,6 +791,7 @@ def set_metadata1(metadata: dict,
     metadata["author"] = author
     metadata["subject"] = subject
     metadata["keywords"] = keywords
+    metadata = remove_invalid_xref_key(metadata)
     return metadata
 
 

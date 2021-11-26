@@ -286,20 +286,22 @@ class Main(MainR):
                 keywords=keywords,
             )
             doc.set_toc(toc)
+            doc.xref_set_key(-1, "Info", "null")  # remove all original xref
             doc.set_metadata(metadata)
             if doc.can_save_incrementally():
                 doc.saveIncr()
                 del doc
-            else:
-                file_name, ok = save(self, '.pdf')
-                if ok:
-                    try:
-                        doc.save(file_name, garbage=1)
-                    except RuntimeError:
-                        _warning(self)
-                    except ValueError:
-                        _warning(self)
-                del doc
+                return
+            file_name, ok = save(self, '.pdf')
+            if ok:
+                try:
+                    doc.save(file_name, garbage=1)
+                except RuntimeError:
+                    _warning(self)
+                except ValueError:
+                    _warning(self)
+            del doc
+            return
 
     def _set(self) -> None:
         self.SettingCD = Setting(
@@ -339,8 +341,7 @@ class Main(MainR):
             self.tab1.table.clear()
             set_icon(widget=self.tab1)
             del doc, state
-        else:
-            pass
+        return
 
     def add2(self) -> None:
         """
@@ -360,8 +361,7 @@ class Main(MainR):
                 else:
                     self.tab2.book = None
                 del doc, state
-            else:
-                pass
+            return
 
     def add3(self) -> None:
         """
@@ -378,8 +378,7 @@ class Main(MainR):
                 else:
                     pass
                 del doc, state
-            else:
-                pass
+            return
 
     def add4(self) -> None:
         """
@@ -407,8 +406,7 @@ class Main(MainR):
             else:
                 self.tab4.book = None
             del doc, state
-        else:
-            pass
+        return
 
     def get_data(self,
                  par1,
