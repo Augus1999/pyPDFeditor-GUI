@@ -13,7 +13,7 @@ if _system == 'Windows':
         import win32
         __system__ = _system
     except ImportError:
-        __system__ = 'windows without pywin32'
+        __system__ = 'Windows without pywin32'
         print('WARNING: \"pywin32\" is not installed on your computer')
 else:
     __system__ = _system

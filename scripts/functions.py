@@ -526,6 +526,7 @@ def reset_table(book_len: int,
             i,
             (widget.table.width()//widget.w_col)*4//3,
         )
+    fitz.TOOLS.store_shrink(100)  # delete MuPDF caches
 
 
 def save_as(index: int,
@@ -560,6 +561,7 @@ def save_as(index: int,
                 alpha=True,
             )
             pix.save(file_name.replace('/', '\\'))
+            fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
     doc.close()
     del doc
 
@@ -620,6 +622,7 @@ def extract_img(index: int,
         ),
         QMessageBox.Yes,
     )
+    fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
 
 
 def rotate_page(index: int,

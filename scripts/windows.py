@@ -572,7 +572,7 @@ class MainR(QTabWidget):
         label_w.setOpenExternalLinks(True)
         self.tab0.label_v = QLabel(self.tab0)
         self.tab0.label_v.setStyleSheet(LABEL_STYLE)
-        self.tab0.label_v.setText(f'version {self.__version__}')
+        self.tab0.label_v.setText(f'⌛ version {self.__version__}')
         self.tab0.grid.addWidget(label, 1, 0, 30, 21)
         self.tab0.grid.addWidget(self.tab0.label_v, 31, 0, 1, 5, QtCore.Qt.AlignBottom)
         self.tab0.grid.addWidget(label_w, 31, 17, 1, 4, QtCore.Qt.AlignBottom)

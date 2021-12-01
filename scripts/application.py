@@ -108,7 +108,7 @@ class Main(MainR):
             self.tab4.line4.clear(),
             self.tab4.label0.clear(),
         ))
-        self.tab4.table.Index.connect(lambda par: self.showIndex(par, self.tab4))
+        self.tab4.table.Index.connect(lambda par: self.show_index(par, self.tab4))
         set_language(self)
 
     def closeEvent(self, event) -> None:
@@ -165,8 +165,8 @@ class Main(MainR):
             self.tab3.button6.clicked.disconnect()
             self.perm_int = 4028
 
-    @staticmethod
-    def view(index=None,
+    def view(self,
+             index=None,
              widget=None,
              f_name=None) -> None:
         """
@@ -177,10 +177,14 @@ class Main(MainR):
         :param f_name: file name
         :return: None
         """
+        # ----- different command in Windows and Linux -----
+        cmd_options = {True: 'explorer ', False: 'open '}
+        cmd = cmd_options["Windows" in self.__system__]
+        # --------------------------------------------------
         if f_name is not None:
-            sp.Popen('explorer ' + f_name)
+            sp.Popen(cmd+f_name)
         else:
-            sp.Popen('explorer '+widget.book_list[index].name)
+            sp.Popen(cmd+widget.book_list[index].name)
 
     def save1(self) -> None:
         """
@@ -453,7 +457,7 @@ class Main(MainR):
             self.colour_r = _colour.getRgbF()[0]
             self.colour_g = _colour.getRgbF()[1]
             self.colour_b = _colour.getRgbF()[2]
-            self.tab3.line4.setText('%.f' % (100*_colour.getRgbF()[3]))
+            self.tab3.line4.setText(f'{100 * _colour.getRgbF()[3]:.0f}')
             if self.tab3.check1.isChecked():
                 self.preview()
         del _colour
@@ -512,13 +516,13 @@ class Main(MainR):
             del doc
 
     @staticmethod
-    def showIndex(par, widget):
+    def show_index(par, widget):
         """
         show recent clicked page number
         """
         index = par[0] * widget.w_col + par[1]  # get position
         if len(widget.book_list) != 0:
-            widget.label0.setText(f'page {index+1}')
+            widget.label0.setText(f'📖 page {index+1}')
 
 
 class Setting(SettingR):
@@ -681,6 +685,7 @@ class FontDialog(FontDialogR):
             ),
         )
         doc.close()
+        fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
         del cover, shape, page, r1, doc
 
     def closeEvent(self, event) -> None:
