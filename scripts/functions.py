@@ -343,6 +343,7 @@ def set_icon(widget: QWidget,
             x += 1
             y -= (widget.w_col - 1)
         # --------------------------------------------------------------
+    fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
 
 
 def add(main: QWidget,
@@ -526,7 +527,6 @@ def reset_table(book_len: int,
             i,
             (widget.table.width()//widget.w_col)*4//3,
         )
-    fitz.TOOLS.store_shrink(100)  # delete MuPDF caches
 
 
 def save_as(index: int,

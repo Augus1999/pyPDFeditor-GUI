@@ -59,7 +59,6 @@ class WindowEffect:
     def move_window(h_wnd: int) -> None:
         """
         move the window
-
         :param h_wnd: winID
         :return: None
         """
@@ -75,7 +74,6 @@ class WindowEffect:
     def addWindowAnimation(h_wnd: int) -> None:
         """
         Windows type animation
-
         :param h_wnd: winID
         :return: None
         """
@@ -93,7 +91,6 @@ class WindowEffect:
     def addShadowEffect(self, h_wnd: int) -> None:
         """
         add shadow to the window
-
         :param h_wnd: winID
         :return: None
         """

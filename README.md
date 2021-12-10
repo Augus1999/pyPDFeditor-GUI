@@ -60,46 +60,14 @@ files [here](https://github.com/Augus1999/pyPDFeditor-GUI/releases).
 
 ### Using on Windows
 
-If you want the UI has a native round border and shadow effect on <u>Windows 11</u>, go to the python
-file [`📄pdfEditor.py`](pdfEditor.py), find <u>line 8</u>, change the state `system_style=False` into `system_style=True`,
-and run the application again. It may affect the colour theme. The default setting is no-shadow-effect and border radius
-= 0.
-
-Also, [Snap Layout Menu](https://docs.microsoft.com/zh-cn/windows/apps/desktop/modernize/apply-snap-layout-menu) in
+[Snap Layout Menu](https://docs.microsoft.com/zh-cn/windows/apps/desktop/modernize/apply-snap-layout-menu) in
 Windows 11 is fully supported.
 
-## Screenshots 🎞️
+## Screenshot 🎞️
 
-using system style on Windows 11:
-
-![welcome page](./screenshots/welcome.png)
+on Windows 11:
 
 ![tab2 win11](./screenshots/tab2.png)
-
-default window style on Windows platform:
-
-![tab2 win default](./screenshots/tab2.jpg)
-
-![tab3 win default](./screenshots/tab3.jpg)
-
-## If you want to change the theme 🎨
-
-The default Theme is written in the file [`📄style_sheets.py`](scripts/style_sheets.py)of folder [`📁scripts`](scripts). Of course,
-you are welcomed to change it or create a new one. Just remember to keep the same variable names and same formats,
-especially the format of `SWITCH_STYLE` item, or you may well encounter errors😶 .If you create a new theme, then put
-it into folder [`📁scripts`](scripts), go to <u>line 11</u> of [`📄windows.py`](scripts/windows.py) and change:
-
-```python
-from .style_sheets import *
-```
-
-into `from YOUR_STYLESHEETS import *` for instance:
-
-```python
-from .style_sheets_yurucamp_shimaRIN import *
-```
-
-You are also welcomed to share your themes [🔗here](https://github.com/Augus1999/pyPDFeditor-GUI/pulls).
 
 ## Others
 

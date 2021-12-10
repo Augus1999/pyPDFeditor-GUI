@@ -237,11 +237,10 @@ class MainR(QTabWidget):
     main window
     all window functions that define the appearance and behaviours are written here
     """
-    def __init__(self, system: str, version: str, system_style: bool):
+    def __init__(self, system: str, version: str):
         super().__init__()
         self.__system__ = system
         self.__version__ = version
-        self.system_style = system_style
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
         height = screen_rect.height()*0.88  # 950
@@ -390,14 +389,7 @@ class MainR(QTabWidget):
             self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # important! call this method first!
             self.setAttribute(QtCore.Qt.WA_StyledBackground)
             self.windowEffect.addWindowAnimation(int(self.winId()))
-            if self.system_style:
-                self.windowEffect.addShadowEffect(int(self.winId()))
-                self.tab0.setStyleSheet(BGC_STYLE % '#ffffff')
-                self.tab1.setStyleSheet(BGC_STYLE % '#ffffff')
-                self.tab2.setStyleSheet(BGC_STYLE % '#ffffff')
-                self.tab3.setStyleSheet(BGC_STYLE % '#ffffff')
-                self.tab4.setStyleSheet(BGC_STYLE % '#ffffff')
-                return
+            self.windowEffect.addShadowEffect(int(self.winId()))
         else:
             self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
             self.tab2.grid.addWidget(self.tab2.button3, 0, 20)
@@ -420,15 +412,15 @@ class MainR(QTabWidget):
         """
         re-write paintEvent
         """
-        super().paintEvent(event)
-        if self.__system__ != "Windows" or not self.system_style:
+        if self.__system__ != "Windows":
             QTabWidget.paintEvent(self, event)
-            return None
+            return
+        super().paintEvent(event)
         painter = QPainter(self)
         painter.setPen(QtCore.Qt.NoPen)
         painter.setBrush(QColor(MAIN_COLOUR))
         painter.drawRect(QtCore.QRect(0, 0, self.width()-2, self.height()-2))
-        painter.setBrush(QColor('#ffffff'))
+        painter.setBrush(QColor(LIGHT_COLOUR))
         painter.drawRect(QtCore.QRect(0, self.height()-2, self.width(), 2))
         painter.drawRect(QtCore.QRect(self.width()-2, 0, 2, self.height()))
 
@@ -499,7 +491,7 @@ class MainR(QTabWidget):
                 btn = self.findChildren(QPushButton, f'max{i}')[0]
                 x_l, x_r = btn.x(), btn.x() + btn.width()
                 y_t, y_b = btn.y(), btn.y() + btn.height()
-                if x_l < max_btn_x_pos < x_r and y_t < y_pos < y_b and self.system_style:
+                if x_l < max_btn_x_pos < x_r and y_t < y_pos < y_b:
                     return True, win32con.HTMAXBUTTON
                 if lx and ty:
                     return True, win32con.HTTOPLEFT
@@ -560,9 +552,24 @@ class MainR(QTabWidget):
         initialise tab0
         """
         self.tab0.grid = QGridLayout(self.tab0)
-        label = QLabel(self.tab0)
-        label.setStyleSheet(f'image:url(./{WELCOME_PAGE});border-radius:15px')
-        shadow(label, QColor(0, 0, 0, 90), 10)
+        text = QTextEdit(self.tab0)
+        text.setStyleSheet('border-radius:15px')
+        text.setFocusPolicy(QtCore.Qt.NoFocus)
+        text.setReadOnly(True)
+        text.setHtml(
+            """
+            <h1 style='color:#333;font-family:Verdana'>Welcome 🎃🎉</h1>
+            <p style='color:#333;font-family:Verdana'>Out [1]: Welcome to pyPDFeditor-GUI.</p>
+            <p style='color:#333;font-family:Verdana'>Out [2]: pyPDFeditor-GUI is a cross-platform 
+            application, thanks to <u>Python</u>, <u>PyQt5</u> and <u>PyMuPDF</u>, 
+            designed to work on simple PDF handling.</p>
+            <p style='color:#333;font-family:Verdana'>Out [3]: User manual is on
+            <a style='color:#a3b5b3'>
+            https://github.com/Augus1999/pyPDFeditor-GUI#readme</a></p>
+            <p style='color:#333;font-family:Verdana'>Out [4]: ...</p>
+            """
+        )
+        shadow(text, QColor(0, 0, 0, 90), 10)
         label_w = QLabel(self.tab0)
         label_w.setStyleSheet(LABEL_STYLE)
         label_w.setText(
@@ -573,7 +580,7 @@ class MainR(QTabWidget):
         self.tab0.label_v = QLabel(self.tab0)
         self.tab0.label_v.setStyleSheet(LABEL_STYLE)
         self.tab0.label_v.setText(f'⌛ version {self.__version__}')
-        self.tab0.grid.addWidget(label, 1, 0, 30, 21)
+        self.tab0.grid.addWidget(text, 5, 0, 20, 21)
         self.tab0.grid.addWidget(self.tab0.label_v, 31, 0, 1, 5, QtCore.Qt.AlignBottom)
         self.tab0.grid.addWidget(label_w, 31, 17, 1, 4, QtCore.Qt.AlignBottom)
 
