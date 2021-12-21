@@ -4,11 +4,11 @@
 application window forms
 """
 import re
-from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, QTransform
+from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, QTransform, QCursor
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit, QScrollArea,
                              QComboBox, QLineEdit, QPushButton, QTableWidget, QApplication)
-from .style_sheets import *  # change here if thee want to change theme!
+from .style_sheets import *
 from .functions import shadow
 
 
@@ -242,8 +242,8 @@ class MainR(QTabWidget):
         self.__system__ = system
         self.__version__ = version
         desktop = QApplication.desktop()
-        screen_rect = desktop.screenGeometry()
-        height = screen_rect.height()*0.88  # 950
+        self.screen_rect = desktop.availableGeometry()
+        height = self.screen_rect.height()*0.88  # 950
         width = height*1.36  # 1290
         self.size1 = height * 0.04
         self.size2 = height * 0.03
@@ -297,7 +297,8 @@ class MainR(QTabWidget):
             '',
         )
         if self.__system__ == 'Windows':
-            self.monitor_info = None
+            self.__move = False
+            self._start_pos = None
             self.btn_min_0 = QPushButton(self.tab0)
             self.btn_max_0 = QPushButton(self.tab0)
             self.btn_ext_0 = QPushButton(self.tab0)
@@ -372,7 +373,7 @@ class MainR(QTabWidget):
             self.btn_min_2.clicked.connect(self.showMinimized)
             self.btn_min_3.clicked.connect(self.showMinimized)
             self.btn_min_4.clicked.connect(self.showMinimized)
-            self.btn_max_0.clicked.connect(self.windowChange)
+            # self.btn_max_0.clicked.connect(self.windowChange)
             self.btn_max_1.clicked.connect(self.windowChange)
             self.btn_max_2.clicked.connect(self.windowChange)
             self.btn_max_3.clicked.connect(self.windowChange)
@@ -386,9 +387,6 @@ class MainR(QTabWidget):
             self.windowEffect = WindowEffect()
             self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
                                     for y in range(int(self.size2 * 2))]
-            self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # important! call this method first!
-            self.setAttribute(QtCore.Qt.WA_StyledBackground)
-            self.windowEffect.addWindowAnimation(int(self.winId()))
             self.windowEffect.addShadowEffect(int(self.winId()))
         else:
             self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
@@ -432,9 +430,27 @@ class MainR(QTabWidget):
         """
         if self.__system__ == 'Windows':
             if event.pos() in self._status_bar_pos:
-                self.windowEffect.move_window(int(self.winId()))
-        else:
-            QTabWidget.mousePressEvent(self, event)
+                self.__move = True
+                self._start_pos = event.pos()
+        return QTabWidget.mousePressEvent(self, event)
+
+    def mouseReleaseEvent(self, event) -> None:
+        """
+        re-write mouseReleaseEvent
+        """
+        if self.__move:
+            self.__move = False
+        QTabWidget.mouseReleaseEvent(self, event)
+
+    def mouseMoveEvent(self, event) -> None:
+        """
+        re-write mouseMoveEvent
+        move the frameless window
+        """
+        if self.__system__ == 'Windows':
+            if self.__move and event.buttons() == QtCore.Qt.LeftButton:
+                self.move(self.pos()+event.pos()-self._start_pos)
+        return QTabWidget.mouseMoveEvent(self, event)
 
     def mouseDoubleClickEvent(self, event) -> None:
         """
@@ -443,75 +459,48 @@ class MainR(QTabWidget):
         if self.__system__ == 'Windows':
             if event.button() == QtCore.Qt.LeftButton and event.pos() in self._status_bar_pos:
                 self.windowChange()
-        else:
-            QTabWidget.mouseDoubleClickEvent(self, event)
+        return QTabWidget.mouseDoubleClickEvent(self, event)
 
     def nativeEvent(self, event_type, message) -> (bool, int):
         """
         re-write nativeEvent
         """
         if self.__system__ == 'Windows':
-            import win32api
-            import win32con
-            import win32gui
-            from ctypes import cast, POINTER
             from ctypes.wintypes import MSG
-            from .window_effect import NCCalcSizePARAMS
             msg = MSG.from_address(message.__int__())
             i = self.currentIndex()
-
-            def __monitorNCCALCSIZE(_self, _msg: MSG) -> None:
-                _monitor = win32api.MonitorFromWindow(_msg.hWnd)
-                if _monitor is None and not _self.monitor_info:
-                    return None
-                if _monitor is not None:
-                    _self.monitor_info = win32api.GetMonitorInfo(_monitor)
-                # resize window
-                params = cast(_msg.lParam, POINTER(NCCalcSizePARAMS)).contents
-                params.rgrc[0].left = _self.monitor_info['Work'][0]
-                params.rgrc[0].top = _self.monitor_info['Work'][1]
-                params.rgrc[0].right = _self.monitor_info['Work'][2]
-                params.rgrc[0].bottom = _self.monitor_info['Work'][3]
-                return None
-
-            def __isWindowMaximized(_self, h_wnd: MSG.hWnd) -> bool:
-                window_placement = win32gui.GetWindowPlacement(h_wnd)
-                if not window_placement:
-                    return False
-                return window_placement[1] == win32con.SW_MAXIMIZE
-
-            if msg.message == win32con.WM_NCHITTEST:
-                x_pos = win32api.GetCursorPos()[0]-self.frameGeometry().x()
-                y_pos = win32api.GetCursorPos()[1]-self.frameGeometry().y()
+            if msg.message == 132:  # WM_NCHITTEST
+                x_pos = QCursor.pos().x() - self.frameGeometry().x()
+                y_pos = QCursor.pos().y() - self.frameGeometry().y()
                 max_btn_x_pos = x_pos - self.size2 * 2
                 lx = x_pos < 5
-                rx = x_pos > self.width() - 5
+                rx = x_pos > self.width() - 15
                 ty = y_pos < 5
                 by = y_pos > self.height() - 5
                 btn = self.findChildren(QPushButton, f'max{i}')[0]
                 x_l, x_r = btn.x(), btn.x() + btn.width()
                 y_t, y_b = btn.y(), btn.y() + btn.height()
                 if x_l < max_btn_x_pos < x_r and y_t < y_pos < y_b:
-                    return True, win32con.HTMAXBUTTON
+                    return True, 9  # HTMAXBUTTON
                 if lx and ty:
-                    return True, win32con.HTTOPLEFT
+                    return True, 13  # HTTOPLEFT
                 elif rx and by:
-                    return True, win32con.HTBOTTOMRIGHT
+                    return True, 17  # HTBOTTOMRIGHT
                 elif rx and ty:
-                    return True, win32con.HTTOPRIGHT
+                    return True, 14  # HTTOPRIGHT
                 elif lx and by:
-                    return True, win32con.HTBOTTOMLEFT
+                    return True, 16  # HTBOTTOMLEFT
                 elif ty:
-                    return True, win32con.HTTOP
+                    return True, 12  # HTTOP
                 elif by:
-                    return True, win32con.HTBOTTOM
+                    return True, 15  # HTBOTTOM
                 elif lx:
-                    return True, win32con.HTLEFT
+                    return True, 10  # HTLEFT
                 elif rx:
-                    return True, win32con.HTRIGHT
-            if msg.message == win32con.WM_NCCALCSIZE:
-                if __isWindowMaximized(self, msg.hWnd):
-                    __monitorNCCALCSIZE(self, msg)
+                    return True, 11  # HTRIGHT
+            if msg.message == 131:  # WM_NCCALCSIZE
+                if self.windowEffect.isWindowMaximised(msg.hWnd):
+                    self.windowEffect.monitorNCCALCSIZE(msg, self.screen_rect)
                     self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
                     self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
                     self.btn_max_2.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
@@ -523,7 +512,7 @@ class MainR(QTabWidget):
                     self.btn_max_2.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
                     self.btn_max_3.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
                     self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
-                return True, 0
+                return True, 0  # HTNOWHERE
         return QTabWidget.nativeEvent(self, event_type, message)
     # -------here ends the ugly code-------
 
@@ -558,7 +547,7 @@ class MainR(QTabWidget):
         text.setReadOnly(True)
         text.setHtml(
             """
-            <h1 style='color:#333;font-family:Verdana'>Welcome 🎃🎉</h1>
+            <h1 style='color:#02554e;font-family:Verdana'>Welcome 🎃🎉</h1>
             <p style='color:#333;font-family:Verdana'>Out [1]: Welcome to pyPDFeditor-GUI.</p>
             <p style='color:#333;font-family:Verdana'>Out [2]: pyPDFeditor-GUI is a cross-platform 
             application, thanks to <u>Python</u>, <u>PyQt5</u> and <u>PyMuPDF</u>, 

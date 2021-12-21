@@ -108,7 +108,7 @@ def render_pdf_page(page_data: Doc.load_page) -> QtGui.QPixmap:
     """
     page_pixmap = fitz.utils.get_pixmap(
         page_data,
-        matrix=fitz.Matrix(1.0, 1.0),
+        matrix=fitz.Identity,
         clip=True,
     )
     if page_pixmap.alpha:
@@ -273,7 +273,7 @@ def page_icon(page: fitz.Page,
 
     :param page: file page
     :param width: width of the table cell
-    :param w_col: collum count of the table
+    :param w_col: column count of the table
     :param _scaled: scaled coefficient of label
     :param _scaled_: scaled coefficient of image in label
     :return: shadowed QWidget()
@@ -548,16 +548,16 @@ def save_as(index: int,
         main,
         "save",
         main.o_dir + '\\' + f_name,
-        "PDF file (*.pdf);;images (*.png *.jpg)",
+        "PDF file (*.pdf);;images (*.png *.psd *ppm)",
     )
     if ok:
         if file_name.endswith('.pdf'):
             doc.save(file_name.replace('/', '\\'))
-        if file_name.endswith('.jpg') or file_name.endswith('.png'):
+        if file_name.endswith(('.psd', '.png', '.ppm',)):
             pix = fitz.utils.get_pixmap(
                 doc[0],
-                matrix=fitz.Matrix(1.0, 1.0),
-                alpha=True,
+                dpi=220,
+                alpha=False if file_name.endswith('.ppm') else True,
             )
             pix.save(file_name.replace('/', '\\'))
             fitz.TOOLS.store_shrink(100)  # delete MuPDF cache

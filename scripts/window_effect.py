@@ -3,11 +3,9 @@
 """
 win32api functions and classes
 """
-from ctypes import POINTER, c_int, WinDLL, Structure, byref
-from ctypes.wintypes import RECT, UINT, HWND
-import win32api
+from ctypes import POINTER, c_int, WinDLL, Structure, byref, cast
+from ctypes.wintypes import RECT, UINT, HWND, MSG
 import win32gui
-from win32.lib import win32con
 
 
 class PWindowPOS(Structure):
@@ -55,39 +53,6 @@ class WindowEffect:
         self.dwm_api = WinDLL("dwmapi")
         self.DwmExtendFrameIntoClientArea = self.dwm_api.DwmExtendFrameIntoClientArea
 
-    @staticmethod
-    def move_window(h_wnd: int) -> None:
-        """
-        move the window
-        :param h_wnd: winID
-        :return: None
-        """
-        win32gui.ReleaseCapture()
-        win32api.SendMessage(
-            h_wnd,
-            win32con.WM_SYSCOMMAND,
-            win32con.SC_MOVE + win32con.HTCAPTION,
-            0,
-        )
-
-    @staticmethod
-    def addWindowAnimation(h_wnd: int) -> None:
-        """
-        Windows type animation
-        :param h_wnd: winID
-        :return: None
-        """
-        style = win32gui.GetWindowLong(h_wnd, win32con.GWL_STYLE)
-        win32gui.SetWindowLong(
-            h_wnd,
-            win32con.GWL_STYLE,
-            style
-            | win32con.WS_MAXIMIZEBOX
-            | win32con.WS_CAPTION
-            | win32con.CS_DBLCLKS
-            | win32con.WS_THICKFRAME,
-        )
-
     def addShadowEffect(self, h_wnd: int) -> None:
         """
         add shadow to the window
@@ -96,3 +61,21 @@ class WindowEffect:
         """
         margins = MARGINS(-1)
         self.DwmExtendFrameIntoClientArea(h_wnd, byref(margins))
+
+    @staticmethod
+    def monitorNCCALCSIZE(_msg: MSG, geometry) -> None:
+        params = cast(_msg.lParam, POINTER(NCCalcSizePARAMS)).contents
+        params.rgrc[0].left = geometry.x()
+        params.rgrc[0].top = geometry.y()
+        params.rgrc[0].right = geometry.width()
+        params.rgrc[0].bottom = geometry.height()
+
+    @staticmethod
+    def isWindowMaximised(h_wnd: MSG.hWnd) -> bool:
+        """
+        is window maximised
+        """
+        window_placement = win32gui.GetWindowPlacement(h_wnd)
+        if not window_placement:
+            return False
+        return window_placement[1] == 3  # SW_MAXIMIZE

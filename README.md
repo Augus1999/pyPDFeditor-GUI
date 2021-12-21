@@ -26,7 +26,7 @@ I tried my best to make it close to Fluent UI. Icons used can be found [🔗here
 * (...right-click the page then) Delete pages or rearrange pages
 * (...right-click the page then) Extract images from a page
 * (...right-click the page then) Rotate a page
-* (...right-click the page then) Save a page as a PDF file or image file (`.png` `.jpg`)
+* (...right-click the page then) Save a page as a PDF file or image file (`.png` `.psd` `.ppm`)
 * Add watermark (PDF only)
 * Set password either user or/and owner password (PDF only)🔒
 * Set permissions (PDF only)🔏
@@ -40,7 +40,7 @@ Core:
 
 ```ASN.1
 PyQt5>=5.15.4
-PyMuPDF>=1.19.0
+PyMuPDF>=1.19.2
 ```
 
 optional if running on Windows:
