@@ -5,7 +5,7 @@ win32api functions and classes
 """
 from ctypes import POINTER, c_int, WinDLL, Structure, byref, cast
 from ctypes.wintypes import RECT, UINT, HWND, MSG
-import win32gui
+from win32gui import GetWindowPlacement
 
 
 class PWindowPOS(Structure):
@@ -64,6 +64,9 @@ class WindowEffect:
 
     @staticmethod
     def monitorNCCALCSIZE(_msg: MSG, geometry) -> None:
+        """
+        resize the window to fit the screen
+        """
         params = cast(_msg.lParam, POINTER(NCCalcSizePARAMS)).contents
         params.rgrc[0].left = geometry.x()
         params.rgrc[0].top = geometry.y()
@@ -75,7 +78,7 @@ class WindowEffect:
         """
         is window maximised
         """
-        window_placement = win32gui.GetWindowPlacement(h_wnd)
+        window_placement = GetWindowPlacement(h_wnd)
         if not window_placement:
             return False
         return window_placement[1] == 3  # SW_MAXIMIZE

@@ -453,7 +453,10 @@ class MainR(QTabWidget):
         """
         if self.__system__ == 'Windows':
             if self.__move and event.buttons() == QtCore.Qt.LeftButton:
-                self.move(self.pos()+event.pos()-self._start_pos)
+                if not self.windowEffect.isWindowMaximised(int(self.winId())):
+                    self.move(self.pos()+event.pos()-self._start_pos)
+                else:
+                    self.showNormal()
         return QTabWidget.mouseMoveEvent(self, event)
 
     def mouseDoubleClickEvent(self, event) -> None:
@@ -502,7 +505,7 @@ class MainR(QTabWidget):
                 elif rx:
                     return True, 11  # HTRIGHT
             if msg.message == 131:  # WM_NCCALCSIZE
-                if self.windowEffect.isWindowMaximised(msg):
+                if self.windowEffect.isWindowMaximised(msg.hWnd):
                     self.windowEffect.monitorNCCALCSIZE(msg, self.screen_rect)
                     self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
                     self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
