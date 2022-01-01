@@ -11,6 +11,8 @@ from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit
 from .style_sheets import *
 from .functions import shadow
 
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # using high-dpi icons
+
 
 class SwitchBtn(QWidget):
     """
@@ -373,7 +375,7 @@ class MainR(QTabWidget):
             self.btn_min_2.clicked.connect(self.showMinimized)
             self.btn_min_3.clicked.connect(self.showMinimized)
             self.btn_min_4.clicked.connect(self.showMinimized)
-            # self.btn_max_0.clicked.connect(self.windowChange)
+            self.btn_max_0.clicked.connect(self.windowChange)
             self.btn_max_1.clicked.connect(self.windowChange)
             self.btn_max_2.clicked.connect(self.windowChange)
             self.btn_max_3.clicked.connect(self.windowChange)
@@ -384,7 +386,9 @@ class MainR(QTabWidget):
             self.btn_ext_3.clicked.connect(self.close)
             self.btn_ext_4.clicked.connect(self.close)
             from .window_effect import WindowEffect
+            from ctypes.wintypes import MSG
             self.windowEffect = WindowEffect()
+            self.msg = MSG
             self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
                                     for y in range(int(self.size2 * 2))]
             self.windowEffect.addShadowEffect(int(self.winId()))
@@ -466,8 +470,7 @@ class MainR(QTabWidget):
         re-write nativeEvent
         """
         if self.__system__ == 'Windows':
-            from ctypes.wintypes import MSG
-            msg = MSG.from_address(message.__int__())
+            msg = self.msg.from_address(message.__int__())
             i = self.currentIndex()
             if msg.message == 132:  # WM_NCHITTEST
                 x_pos = QCursor.pos().x() - self.frameGeometry().x()
@@ -499,7 +502,7 @@ class MainR(QTabWidget):
                 elif rx:
                     return True, 11  # HTRIGHT
             if msg.message == 131:  # WM_NCCALCSIZE
-                if self.windowEffect.isWindowMaximised(msg.hWnd):
+                if self.windowEffect.isWindowMaximised(msg):
                     self.windowEffect.monitorNCCALCSIZE(msg, self.screen_rect)
                     self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
                     self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
@@ -960,6 +963,7 @@ class SettingR(QWidget):
             QtCore.Qt.WindowCloseButtonHint,
         )
         self.setStyleSheet('background-color:#ffffff')
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.label1 = QLabel(self)
         self.label2 = QLabel(self)
         self.label3 = QLabel(self)
@@ -1021,6 +1025,7 @@ class PermMenuR(QWidget):
             QtCore.Qt.CustomizeWindowHint |
             QtCore.Qt.WindowCloseButtonHint,
         )
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.check1 = SwitchBtn(self)
         self.check2 = SwitchBtn(self)
         self.check3 = SwitchBtn(self)
@@ -1102,6 +1107,7 @@ class FontDialogR(QWidget):
             QtCore.Qt.CustomizeWindowHint |
             QtCore.Qt.WindowCloseButtonHint,
         )
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.combobox = QComboBox(self)
         self.combobox.setStyleSheet(COMBO_BOX_STYLE)
         self.combobox.setFixedHeight(height/7)
