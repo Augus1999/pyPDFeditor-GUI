@@ -378,7 +378,7 @@ def save(main: QWidget,
     f_name, state = QFileDialog.getSaveFileName(
         main,
         "save",
-        main.o_dir + "new.pdf",
+        main.o_dir + "\\new.pdf",
         _format,
     )
     if state and main.dir_store_state:
@@ -415,8 +415,9 @@ def generate_menu(pos,
     generate menu
 
     :param pos: position
-    :param select: select=0 => only delete;
-                   select=1 => with other functions
+    :param select: select=0 => only delete and view;
+                   select=1 => with all other functionalities;
+                   select=2 => delete, view and rearrange
     :param widget: widget
     :param main: main
     :return: None
@@ -433,7 +434,7 @@ def generate_menu(pos,
             MENU_L[main.language][0],
         )
         item2, item3, item4, item5, item6, item7 = None, None, None, None, None, None
-        if select == 0:
+        if select == 0 or select == 2:
             item3 = menu.addAction(
                 QtGui.QIcon('ico\\view.svg'),
                 MENU_L[main.language][1],
@@ -455,6 +456,7 @@ def generate_menu(pos,
                 QtGui.QIcon('ico\\rotate_anticlockwise.svg'),
                 MENU_L[main.language][5],
             )
+        if select == 1 or select == 2:
             item7 = menu.addAction(
                 QtGui.QIcon('ico\\move_page.svg'),
                 MENU_L[main.language][6],
@@ -473,7 +475,7 @@ def generate_menu(pos,
                 widget=widget,
                 main=main,
             )
-        if action == item3 and select == 0:
+        if action == item3 and (select == 0 or select == 2):
             main.view(index, widget)
         if action == item4 and select == 1:
             extract_img(
@@ -493,7 +495,7 @@ def generate_menu(pos,
                 degree=-90,
                 widget=widget,
             )
-        if action == item7 and select == 1:
+        if action == item7 and (select == 1 or select == 2):
             rearrange_page(
                 index=index,
                 widget=widget,

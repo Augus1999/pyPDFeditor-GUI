@@ -62,7 +62,7 @@ class Main(MainR):
         self.tab3.w_row, self.tab3.w_col = 1, 1
         self.tab4.w_row, self.tab4.w_col = 2, 1
         self.tab1.table.customContextMenuRequested.connect(
-            lambda pos: generate_menu(pos, self.tab1, main=self),
+            lambda pos: generate_menu(pos, self.tab1, select=2, main=self),
         )
         self.tab2.table.customContextMenuRequested.connect(
             lambda pos: generate_menu(pos, self.tab2, select=1, main=self),
@@ -176,8 +176,15 @@ class Main(MainR):
         :param f_name: file name
         :return: None
         """
-        cmds = {"Windows": "explorer", "Linux": "xdg-open", "Darwin": "open"}
-        cmd = cmds[self.__system__]  # use `preview` if not work on macOS
+        cmds = {
+            "Windows": "explorer ",
+            "Linux": "xdg-open ",
+            "Darwin": "open ",  # use `preview` if not work
+            "Java": 0,
+        }
+        cmd = cmds[self.__system__] if self.__system__ in cmds else 0
+        if cmd == 0:
+            return
         if f_name is not None:
             sp.Popen(cmd+f_name)
         else:
