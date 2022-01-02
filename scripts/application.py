@@ -176,15 +176,8 @@ class Main(MainR):
         :param f_name: file name
         :return: None
         """
-        cmd = ''
-        # ----- different command in Windows, macOS and Linux -----
-        if "Windows" in self.__system__:
-            cmd = 'explorer '
-        if self.__system__ == "Linux":
-            cmd = 'xdg-open '
-        if self.__system__ == 'Darwin':  # macOS
-            cmd = 'open '  # use `preview` if not work
-        # --------------------------------------------------
+        cmds = {"Windows": "explorer", "Linux": "xdg-open", "Darwin": "open"}
+        cmd = cmds[self.__system__]  # use `preview` if not work on macOS
         if f_name is not None:
             sp.Popen(cmd+f_name)
         else:

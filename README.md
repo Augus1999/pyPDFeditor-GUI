@@ -1,4 +1,4 @@
-# pyPDFeditor-GUI 
+# pyPDFeditor-GUI
 
 This project is based on PyQt5 and PyMuPDF and tested on Python 3.8.6 & 3.9.7 on Windows 10 & 11.
 
@@ -36,17 +36,9 @@ I tried my best to make it close to Fluent UI. Icons used can be found [🔗here
 
 ## Required Packages 🧩
 
-Core:
-
 ```ASN.1
 PyQt5>=5.15.4
 PyMuPDF>=1.19.2
-```
-
-optional if running on Windows:
-
-```ASN.1
-pywin32>=301
 ```
 
 ## Install & Run
@@ -58,16 +50,11 @@ Run `$ python pdfEditor.py` to open the application window.
 If you are working on Windows platform and having no Python 3 installed, download pyinstaller-prepackaged executable
 files [here](https://github.com/Augus1999/pyPDFeditor-GUI/releases).
 
-### Using on Windows
-
-[Snap Layout Menu](https://docs.microsoft.com/zh-cn/windows/apps/desktop/modernize/apply-snap-layout-menu) in
-Windows 11 is fully supported.
-
 ## Screenshot 🎞️
 
 on Windows 11:
 
-![tab2 win11](./screenshots/tab2.png)
+<img src="./screenshots/tab2.png" width="400" alt="tab2 win11"/>
 
 ## Others
 

@@ -453,7 +453,7 @@ class MainR(QTabWidget):
         """
         if self.__system__ == 'Windows':
             if self.__move and event.buttons() == QtCore.Qt.LeftButton:
-                if not self.windowEffect.isWindowMaximised(int(self.winId())):
+                if not self.isMaximized():
                     self.move(self.pos()+event.pos()-self._start_pos)
                 else:
                     self.showNormal()
@@ -474,20 +474,13 @@ class MainR(QTabWidget):
         """
         if self.__system__ == 'Windows':
             msg = self.msg.from_address(message.__int__())
-            i = self.currentIndex()
             if msg.message == 132:  # WM_NCHITTEST
                 x_pos = QCursor.pos().x() - self.frameGeometry().x()
                 y_pos = QCursor.pos().y() - self.frameGeometry().y()
-                max_btn_x_pos = x_pos - self.size2 * 2
                 lx = x_pos < 5
                 rx = x_pos > self.width() - 15
                 ty = y_pos < 5
                 by = y_pos > self.height() - 5
-                btn = self.findChildren(QPushButton, f'max{i}')[0]
-                x_l, x_r = btn.x(), btn.x() + btn.width()
-                y_t, y_b = btn.y(), btn.y() + btn.height()
-                if x_l < max_btn_x_pos < x_r and y_t < y_pos < y_b:
-                    return True, 9  # HTMAXBUTTON
                 if lx and ty:
                     return True, 13  # HTTOPLEFT
                 elif rx and by:
@@ -505,7 +498,7 @@ class MainR(QTabWidget):
                 elif rx:
                     return True, 11  # HTRIGHT
             if msg.message == 131:  # WM_NCCALCSIZE
-                if self.windowEffect.isWindowMaximised(msg.hWnd):
+                if self.isMaximized():
                     self.windowEffect.monitorNCCALCSIZE(msg, self.screen_rect)
                     self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
                     self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))

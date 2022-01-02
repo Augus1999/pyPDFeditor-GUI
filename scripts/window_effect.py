@@ -5,7 +5,6 @@ win32api functions and classes
 """
 from ctypes import POINTER, c_int, WinDLL, Structure, byref, cast
 from ctypes.wintypes import RECT, UINT, HWND, MSG
-from win32gui import GetWindowPlacement
 
 
 class PWindowPOS(Structure):
@@ -59,7 +58,7 @@ class WindowEffect:
         :param h_wnd: winID
         :return: None
         """
-        margins = MARGINS(-1)
+        margins = MARGINS(1, 1, 1, 1)
         self.DwmExtendFrameIntoClientArea(h_wnd, byref(margins))
 
     @staticmethod
@@ -72,13 +71,3 @@ class WindowEffect:
         params.rgrc[0].top = geometry.y()
         params.rgrc[0].right = geometry.width()
         params.rgrc[0].bottom = geometry.height()
-
-    @staticmethod
-    def isWindowMaximised(h_wnd: MSG.hWnd) -> bool:
-        """
-        is window maximised
-        """
-        window_placement = GetWindowPlacement(h_wnd)
-        if not window_placement:
-            return False
-        return window_placement[1] == 3  # SW_MAXIMIZE

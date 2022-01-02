@@ -80,7 +80,7 @@ def open_pdf(file_name: str,
         while doc.is_encrypted:
             value, _ = QInputDialog.getText(
                 parent,
-                '',
+                ' ',
                 'Password:',
                 QLineEdit.Password,
                 '',
@@ -662,7 +662,7 @@ def rearrange_page(index: int,
     book_length = len(widget.book_list)
     value, _ = QInputDialog.getInt(
         parent,
-        '',
+        ' ',
         f'Move to page: (from 1 to {book_length})',
         value=index+1,
         min=1,
