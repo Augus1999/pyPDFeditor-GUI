@@ -299,8 +299,6 @@ class MainR(QTabWidget):
             '',
         )
         if self.__system__ == 'Windows':
-            self.__move = False
-            self._start_pos = None
             self.btn_min_0 = QPushButton(self.tab0)
             self.btn_max_0 = QPushButton(self.tab0)
             self.btn_ext_0 = QPushButton(self.tab0)
@@ -331,6 +329,11 @@ class MainR(QTabWidget):
             self.btn_min_4.setFixedSize(self.size2 * 2, self.size2)
             self.btn_max_4.setFixedSize(self.size2 * 2, self.size2)
             self.btn_ext_4.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_max_0.setObjectName('max0')
+            self.btn_max_1.setObjectName('max1')
+            self.btn_max_2.setObjectName('max2')
+            self.btn_max_3.setObjectName('max3')
+            self.btn_max_4.setObjectName('max4')
             self.btn_min_0.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
             self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
             self.btn_ext_0.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
@@ -346,11 +349,6 @@ class MainR(QTabWidget):
             self.btn_min_4.setStyleSheet(BUTTON_STYLE0.format('minimize.svg'))
             self.btn_max_4.setStyleSheet(BUTTON_STYLE0.format('maximize.svg'))
             self.btn_ext_4.setStyleSheet(BUTTON_STYLE1.format('dismiss.svg', 'dismiss_h.svg'))
-            self.btn_max_0.setObjectName('max0')
-            self.btn_max_1.setObjectName('max1')
-            self.btn_max_2.setObjectName('max2')
-            self.btn_max_3.setObjectName('max3')
-            self.btn_max_4.setObjectName('max4')
             self.tab0.grid.addWidget(self.btn_min_0, 0, 18)
             self.tab0.grid.addWidget(self.btn_max_0, 0, 19)
             self.tab0.grid.addWidget(self.btn_ext_0, 0, 20)
@@ -391,7 +389,9 @@ class MainR(QTabWidget):
             self.msg = MSG
             self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
                                     for y in range(int(self.size2 * 2))]
+            self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
             self.windowEffect.addShadowEffect(int(self.winId()))
+            self.windowEffect.addWindowStyle(int(self.winId()))
         else:
             self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
             self.tab2.grid.addWidget(self.tab2.button3, 0, 20)
@@ -428,35 +428,16 @@ class MainR(QTabWidget):
 
     # -------well, why do the following ugly codes exist?-------
     # -------they are used to re-enable the window animations under Windows platform-------
-    def mousePressEvent(self, event) -> None:
-        """
-        re-write mousePressEvent
-        """
-        if self.__system__ == 'Windows':
-            if event.pos() in self._status_bar_pos:
-                self.__move = True
-                self._start_pos = event.pos()
-        return QTabWidget.mousePressEvent(self, event)
-
-    def mouseReleaseEvent(self, event) -> None:
-        """
-        re-write mouseReleaseEvent
-        """
-        if self.__move:
-            self.__move = False
-        QTabWidget.mouseReleaseEvent(self, event)
-
     def mouseMoveEvent(self, event) -> None:
         """
         re-write mouseMoveEvent
         move the frameless window
         """
         if self.__system__ == 'Windows':
-            if self.__move and event.buttons() == QtCore.Qt.LeftButton:
-                if not self.isMaximized():
-                    self.move(self.pos()+event.pos()-self._start_pos)
-                else:
-                    self.showNormal()
+            if event.pos() in self._status_bar_pos and event.buttons() == QtCore.Qt.LeftButton:
+                self.windowEffect.move_window(int(self.winId()))
+                desktop = QApplication.desktop()
+                self.screen_rect = desktop.availableGeometry()
         return QTabWidget.mouseMoveEvent(self, event)
 
     def mouseDoubleClickEvent(self, event) -> None:
@@ -474,13 +455,17 @@ class MainR(QTabWidget):
         """
         if self.__system__ == 'Windows':
             msg = self.msg.from_address(message.__int__())
+            i = self.currentIndex()
             if msg.message == 132:  # WM_NCHITTEST
                 x_pos = QCursor.pos().x() - self.frameGeometry().x()
                 y_pos = QCursor.pos().y() - self.frameGeometry().y()
+                btn = self.findChildren(QPushButton, f'max{i}')[0]
                 lx = x_pos < 5
-                rx = x_pos > self.width() - 15
+                rx = x_pos > self.width() - 5
                 ty = y_pos < 5
                 by = y_pos > self.height() - 5
+                if QtCore.QPoint(x_pos-btn.width(), y_pos) in btn.geometry():
+                    return True, 9  # HTMAXBUTTON
                 if lx and ty:
                     return True, 13  # HTTOPLEFT
                 elif rx and by:
@@ -498,7 +483,7 @@ class MainR(QTabWidget):
                 elif rx:
                     return True, 11  # HTRIGHT
             if msg.message == 131:  # WM_NCCALCSIZE
-                if self.isMaximized():
+                if self.windowEffect.isMaximised(msg.hWnd):
                     self.windowEffect.monitorNCCALCSIZE(msg, self.screen_rect)
                     self.btn_max_0.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))
                     self.btn_max_1.setStyleSheet(BUTTON_STYLE0.format('slide_multiple.svg'))

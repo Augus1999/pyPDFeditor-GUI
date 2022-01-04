@@ -49,8 +49,13 @@ class WindowEffect:
     use Windows api to re-enable Windows type window-effects
     """
     def __init__(self):
-        self.dwm_api = WinDLL("dwmapi")
-        self.DwmExtendFrameIntoClientArea = self.dwm_api.DwmExtendFrameIntoClientArea
+        self._dwm_api = WinDLL("dwmapi")
+        self._user32 = WinDLL("user32")
+        self._extend = self._dwm_api.DwmExtendFrameIntoClientArea
+        self._GetWindowLong = self._user32.GetWindowLongA
+        self._SetWindowLong = self._user32.SetWindowLongA
+        self._SendMessage = self._user32.SendMessageA
+        self.isMaximised = self._user32.IsZoomed
 
     def addShadowEffect(self, h_wnd: int) -> None:
         """
@@ -58,8 +63,8 @@ class WindowEffect:
         :param h_wnd: winID
         :return: None
         """
-        margins = MARGINS(1, 1, 1, 1)
-        self.DwmExtendFrameIntoClientArea(h_wnd, byref(margins))
+        margins = MARGINS(-1)
+        self._extend(h_wnd, byref(margins))
 
     @staticmethod
     def monitorNCCALCSIZE(_msg: MSG, geometry) -> None:
@@ -71,3 +76,26 @@ class WindowEffect:
         params.rgrc[0].top = geometry.y()
         params.rgrc[0].right = geometry.width()
         params.rgrc[0].bottom = geometry.height()
+
+    def addWindowStyle(self, h_wnd: int) -> None:
+        style = self._GetWindowLong(h_wnd, -16)
+        self._SetWindowLong(
+            h_wnd,
+            -16,  # GWL_STYLE
+            style |
+            0x00C00000 |  # WS_CAPTION
+            0x00010000 |  # WS_MAXIMIZEBOX
+            0x00020000 |  # WS_MINIMIZEBOX
+            0x0008 |  # CS_DBLCLKS
+            0x00040000 |  # WS_SIZEBOX
+            0x00080000,  # WS_SYSMENU
+        )
+
+    def move_window(self, h_wnd: int) -> None:
+        self._user32.ReleaseCapture()
+        self._SendMessage(
+            h_wnd,
+            0x0112,  # WM_SYSCOMMAND
+            0xF010 + 2,  # SC_MOVE + HTCAPTION
+            0,
+        )

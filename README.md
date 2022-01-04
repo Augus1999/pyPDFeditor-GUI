@@ -18,6 +18,9 @@ I tried my best to make it close to Fluent UI. Icons used can be found [🔗here
 * Fluent UI design
 * Cross-platform support
 * Open-source and free to use under MIT licence
+* Frameless Window on
+  Windows ([Snap Layout](https://answers.microsoft.com/en-us/windows/forum/all/how-to-use-snap-layouts-and-snap-groups-in-windows/3213a6b6-5a33-4d40-bbce-e01388a40976)
+  on Windows 11 is supported)
 
 ## What's in
 
@@ -36,7 +39,11 @@ I tried my best to make it close to Fluent UI. Icons used can be found [🔗here
 
 ## Required Packages 🧩
 
-```ASN.1
+```text
+Python>=3.7
+```
+
+```text
 PyQt5>=5.15.4
 PyMuPDF>=1.19.2
 ```
@@ -47,14 +54,14 @@ Run `$ pip install -r requirements.txt` to install all required packages.
 
 Run `$ python pdfEditor.py` to open the application window.
 
-If you are working on Windows platform and having no Python 3 installed, download pyinstaller-prepackaged executable
-files [here](https://github.com/Augus1999/pyPDFeditor-GUI/releases).
-
 ## Screenshot 🎞️
 
 on Windows 11:
 
 <img src="./screenshots/tab2.png" width="400" alt="tab2 win11"/>
+
+Support [Snap Layouts](https://answers.microsoft.com/en-us/windows/forum/all/how-to-use-snap-layouts-and-snap-groups-in-windows/3213a6b6-5a33-4d40-bbce-e01388a40976)
+on Windows 11
 
 ## Others
 

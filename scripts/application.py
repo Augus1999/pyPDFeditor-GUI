@@ -177,18 +177,19 @@ class Main(MainR):
         :return: None
         """
         cmds = {
-            "Windows": "explorer ",
-            "Linux": "xdg-open ",
-            "Darwin": "open ",  # use `preview` if not work
+            "Windows": "explorer",
+            "Linux": "xdg-open",
+            "Darwin": "open",  # use `preview` if not work
             "Java": 0,
         }
         cmd = cmds[self.__system__] if self.__system__ in cmds else 0
-        if cmd == 0:
+        if not cmd:
+            print(f'platform \"{self.__system__}\" cannot be recognised')
             return
         if f_name is not None:
-            sp.Popen(cmd+f_name)
+            sp.Popen([cmd, f_name])
         else:
-            sp.Popen(cmd+widget.book_list[index].name)
+            sp.Popen([cmd, widget.book_list[index].name])
 
     def save1(self) -> None:
         """
