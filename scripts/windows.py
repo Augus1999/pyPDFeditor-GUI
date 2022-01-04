@@ -38,7 +38,7 @@ class SwitchBtn(QWidget):
         self.endX = 0
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_value)
-        self.setFont(QFont("calibri", 11))
+        self.setFont(QFont("calibri", 10))
 
     def setStyleSheet(self, style_sheet: str) -> None:
         """
@@ -245,12 +245,12 @@ class MainR(QTabWidget):
         self.__version__ = version
         desktop = QApplication.desktop()
         self.screen_rect = desktop.availableGeometry()
-        height = self.screen_rect.height()*0.88  # 950
-        width = height*1.36  # 1290
-        self.size1 = height * 0.04
-        self.size2 = height * 0.03
+        height = int(self.screen_rect.height()*0.88)  # 950
+        width = int(height*1.36)  # 1290
+        self.size1 = int(height * 0.04)
+        self.size2 = int(height * 0.03)
         self.resize(width, height)
-        self.setMinimumSize(0.47 * width, 0.45 * height)
+        self.setMinimumSize(int(0.47*width), int(0.45*height))
         self.setWindowTitle('PDF Editor')
         self.setWindowIcon(QIcon('ico\\pdf icon.svg'))
         self.setTabShape(QTabWidget.Rounded)
@@ -505,8 +505,8 @@ class MainR(QTabWidget):
         re-write resizeEvent
         """
         super().resizeEvent(event)
-        self.widget3.resize(self.width() * 0.9, self.height() * 0.9)
-        self.widget4.resize(self.width() * 0.9, self.height() * 0.9)
+        self.widget3.resize(int(self.width()*0.9), int(self.height()*0.9))
+        self.widget4.resize(int(self.width()*0.9), int(self.height()*0.9))
         if self.__system__ == 'Windows':
             self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
                                     for y in range(int(self.size2 * 2))]
@@ -653,7 +653,7 @@ class MainR(QTabWidget):
         """
         scroll_area = QScrollArea()
         scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
-        self.widget3.setMinimumSize(self.width()*0.8, self.height()*0.8)
+        self.widget3.setMinimumSize(int(self.width()*0.8), int(self.height()*0.8))
         layout = QGridLayout(self.widget3)
         scroll_area.setWidget(self.widget3)
         self.tab3.grid = QGridLayout(self.tab3)
@@ -781,9 +781,9 @@ class MainR(QTabWidget):
         self.tab3.check = SwitchBtn(self.tab3)
         self.tab3.check1 = SwitchBtn(self.tab3)
         self.tab3.check2 = SwitchBtn(self.tab3)
-        self.tab3.check.setFixedSize(self.size1 * 2.1, self.size2)
-        self.tab3.check1.setFixedSize(self.size1 * 2.1, self.size2)
-        self.tab3.check2.setFixedSize(self.size1 * 2.1, self.size2)
+        self.tab3.check.setFixedSize(self.size1 * 2, self.size2)
+        self.tab3.check1.setFixedSize(self.size1 * 2, self.size2)
+        self.tab3.check2.setFixedSize(self.size1 * 2, self.size2)
         self.tab3.check.setChecked(True)
         self.tab3.check1.setChecked(False)
         self.tab3.check2.setChecked(False)
@@ -827,7 +827,7 @@ class MainR(QTabWidget):
         """
         scroll_area = QScrollArea()
         scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
-        self.widget4.setMinimumSize(self.width() * 0.8, self.height() * 0.8)
+        self.widget4.setMinimumSize(int(self.width()*0.8), int(self.height()*0.8))
         layout = QGridLayout(self.widget4)
         scroll_area.setWidget(self.widget4)
         self.tab4.grid = QGridLayout(self.tab4)
@@ -899,7 +899,7 @@ class MainR(QTabWidget):
         self.tab4.line2.setFixedSize(self.size2 * 12, self.size1)
         self.tab4.line3.setFixedSize(self.size2 * 12, self.size1)
         self.tab4.line4.setFixedSize(self.size2 * 12, self.size1)
-        self.tab4.text.setFixedSize(self.size2 * 12, self.height() * 0.47)
+        self.tab4.text.setFixedSize(self.size2 * 12, int(self.height()*0.5))
         self.tab4.line1.setAlignment(QtCore.Qt.AlignCenter)
         self.tab4.line2.setAlignment(QtCore.Qt.AlignCenter)
         self.tab4.line3.setAlignment(QtCore.Qt.AlignCenter)
@@ -930,9 +930,9 @@ class SettingR(QWidget):
         super().__init__()
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
-        height = screen_rect.height()*0.26  # 280
-        width = height*2.14  # 600
-        fixed_h = width*2//30
+        height = int(screen_rect.height()*0.26)  # 280
+        width = int(height*2.14)  # 600
+        fixed_h = int(width*2//30)
         grid = QGridLayout(self)
         self.setFixedSize(width, height)
         self.setWindowTitle('Setting')
@@ -967,12 +967,12 @@ class SettingR(QWidget):
         self.label1.setAlignment(QtCore.Qt.AlignVCenter)
         self.label2.setAlignment(QtCore.Qt.AlignVCenter)
         self.label3.setAlignment(QtCore.Qt.AlignVCenter)
-        self.check.setFixedSize(fixed_h * 2, fixed_h * 0.75)
+        self.check.setFixedSize(fixed_h * 2, int(fixed_h*0.75))
         self.line1.setFixedSize(fixed_h * 10, fixed_h)
         self.line2.setFixedSize(fixed_h * 10, fixed_h)
-        self.button1.setFixedSize(fixed_h * 0.7, fixed_h * 0.7)
-        self.button2.setFixedSize(fixed_h * 0.7, fixed_h * 0.7)
-        self.combobox.setFixedSize(fixed_h*17/4, fixed_h)
+        self.button1.setFixedSize(int(fixed_h*0.7), int(fixed_h*0.7))
+        self.button2.setFixedSize(int(fixed_h*0.7), int(fixed_h*0.7))
+        self.combobox.setFixedSize(int(fixed_h*4.25), fixed_h)
         grid.addWidget(self.label1, 0, 0, 1, 5, QtCore.Qt.AlignLeft)
         grid.addWidget(self.label2, 1, 0, 1, 5, QtCore.Qt.AlignLeft)
         grid.addWidget(self.label3, 2, 0, 1, 7, QtCore.Qt.AlignLeft)
@@ -993,10 +993,10 @@ class PermMenuR(QWidget):
         super().__init__()
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
-        height = screen_rect.height()*0.37  # 400
-        width = height*1.2  # 480
-        x = height/5
-        y = width/16
+        height = int(screen_rect.height()*0.37)  # 400
+        width = int(height*1.2)  # 480
+        x = int(height/5)
+        y = int(width/16)
         grid = QGridLayout(self)
         self.setFixedSize(width, height)
         self.setWindowTitle(' ')
@@ -1078,8 +1078,8 @@ class FontDialogR(QWidget):
         super().__init__()
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
-        height = screen_rect.height()*0.27
-        width = height*1.37
+        height = int(screen_rect.height()*0.27)
+        width = int(height*1.37)
         grid = QGridLayout(self)
         self.resize(width, height)
         self.setWindowTitle('Select Font')
@@ -1091,7 +1091,7 @@ class FontDialogR(QWidget):
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.combobox = QComboBox(self)
         self.combobox.setStyleSheet(COMBO_BOX_STYLE)
-        self.combobox.setFixedHeight(height/7)
+        self.combobox.setFixedHeight(int(height/7))
         self.label = QLabel(self)
         self.label.setAlignment(QtCore.Qt.AlignTop)
         grid.addWidget(self.combobox, 0, 0, QtCore.Qt.AlignCenter)
