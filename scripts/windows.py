@@ -881,8 +881,8 @@ class MainR(QTabWidget):
         self.tab4.label5.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setPixmap(
             QPixmap('ico\\book2.svg').scaled(
-                self.height()*0.2,
-                self.height()*0.2,
+                int(self.height()*0.2),
+                int(self.height()*0.2),
                 QtCore.Qt.IgnoreAspectRatio,
                 QtCore.Qt.SmoothTransformation,
             ),
