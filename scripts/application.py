@@ -704,21 +704,17 @@ class FontDialog(FontDialogR):
 
 def __main__(system: str,
              version: str,
-             debug: bool = True,
-             test: bool = False) -> None:
+             debug: bool = True) -> None:
     """
     main function
     :param system: system name
     :param version: version name
     :param debug: whether display mupdf errors or not
-    :param test: whether is used in test unit
     :return: None
     """
     fitz.TOOLS.mupdf_display_errors(debug)
     arg = sys.argv
     app = QApplication(arg)
     main = Main(system, version)
-    if test:
-        return
     main.show()
     sys.exit(app.exec())

@@ -7,7 +7,6 @@ def test():
     """
     try:
         from scripts import __main__, __system__, __version__
-        __main__(__system__, __version__, test=True)
         return 1
     except Exception:
         return 0
