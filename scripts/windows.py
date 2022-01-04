@@ -252,7 +252,7 @@ class MainR(QTabWidget):
         self.resize(width, height)
         self.setMinimumSize(int(0.47*width), int(0.45*height))
         self.setWindowTitle('PDF Editor')
-        self.setWindowIcon(QIcon('ico\\pdf icon.svg'))
+        self.setWindowIcon(QIcon('ico/pdf icon.svg'))
         self.setTabShape(QTabWidget.Rounded)
         self.setTabPosition(QTabWidget.West)
         self.setIconSize(QtCore.QSize(self.size1, self.size1))
@@ -275,27 +275,27 @@ class MainR(QTabWidget):
         matrix.rotate(90)
         self.addTab(
             self.tab0,
-            QIcon(QPixmap('ico\\home.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
+            QIcon(QPixmap('ico/home.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
             ''
         )
         self.addTab(
             self.tab1,
-            QIcon(QPixmap('ico\\merge.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
+            QIcon(QPixmap('ico/merge.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
         self.addTab(
             self.tab2,
-            QIcon(QPixmap('ico\\edit.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
+            QIcon(QPixmap('ico/edit.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
         self.addTab(
             self.tab3,
-            QIcon(QPixmap('ico\\lock.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
+            QIcon(QPixmap('ico/lock.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
         self.addTab(
             self.tab4,
-            QIcon(QPixmap('ico\\metadata.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
+            QIcon(QPixmap('ico/metadata.svg').transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
         if self.__system__ == 'Windows':
@@ -880,7 +880,7 @@ class MainR(QTabWidget):
         self.tab4.label4.setStyleSheet(LABEL_STYLE)
         self.tab4.label5.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setPixmap(
-            QPixmap('ico\\book2.svg').scaled(
+            QPixmap('ico/book2.svg').scaled(
                 int(self.height()*0.2),
                 int(self.height()*0.2),
                 QtCore.Qt.IgnoreAspectRatio,
@@ -937,7 +937,7 @@ class SettingR(QWidget):
         self.setFixedSize(width, height)
         self.setWindowTitle('Setting')
         self.setWindowIcon(
-            QIcon('ico\\settings.svg'),
+            QIcon('ico/settings.svg'),
         )
         self.setWindowFlags(
             QtCore.Qt.CustomizeWindowHint |
@@ -1000,7 +1000,7 @@ class PermMenuR(QWidget):
         grid = QGridLayout(self)
         self.setFixedSize(width, height)
         self.setWindowTitle(' ')
-        self.setWindowIcon(QIcon('ico\\lock.svg'))
+        self.setWindowIcon(QIcon('ico/lock.svg'))
         self.setStyleSheet('background-color:#ffffff')
         self.setWindowFlags(
             QtCore.Qt.CustomizeWindowHint |
@@ -1083,7 +1083,7 @@ class FontDialogR(QWidget):
         grid = QGridLayout(self)
         self.resize(width, height)
         self.setWindowTitle('Select Font')
-        self.setWindowIcon(QIcon('ico\\font.svg'))
+        self.setWindowIcon(QIcon('ico/font.svg'))
         self.setWindowFlags(
             QtCore.Qt.CustomizeWindowHint |
             QtCore.Qt.WindowCloseButtonHint,

@@ -362,8 +362,8 @@ def add(main: QWidget,
         _format,
     )
     if state and main.dir_store_state:
-        main.s_dir = os.path.dirname(f_name.replace('/', '\\'))
-    return f_name.replace('/', '\\'), state
+        main.s_dir = os.path.dirname(f_name)
+    return f_name, state
 
 
 def save(main: QWidget,
@@ -378,12 +378,12 @@ def save(main: QWidget,
     f_name, state = QFileDialog.getSaveFileName(
         main,
         "save",
-        main.o_dir + "\\new.pdf",
+        os.path.join(main.o_dir, "new.pdf"),
         _format,
     )
     if state and main.dir_store_state:
-        main.o_dir = os.path.dirname(f_name.replace('/', '\\'))
-    return f_name.replace('/', '\\'), state
+        main.o_dir = os.path.dirname(f_name)
+    return f_name, state
 
 
 def delete(index: int,
@@ -430,35 +430,35 @@ def generate_menu(pos,
     if 0 <= index < len(widget.book_list):
         menu = QtWidgets.QMenu()
         item1 = menu.addAction(
-            QtGui.QIcon('ico\\delete.svg'),
+            QtGui.QIcon('ico/delete.svg'),
             MENU_L[main.language][0],
         )
         item2, item3, item4, item5, item6, item7 = None, None, None, None, None, None
         if select == 0 or select == 2:
             item3 = menu.addAction(
-                QtGui.QIcon('ico\\view.svg'),
+                QtGui.QIcon('ico/view.svg'),
                 MENU_L[main.language][1],
             )
         if select == 1:
             item2 = menu.addAction(
-                QtGui.QIcon('ico\\down.svg'),
+                QtGui.QIcon('ico/down.svg'),
                 MENU_L[main.language][2],
             )
             item4 = menu.addAction(
-                QtGui.QIcon('ico\\Photo.svg'),
+                QtGui.QIcon('ico/Photo.svg'),
                 MENU_L[main.language][3],
             )
             item5 = menu.addAction(
-                QtGui.QIcon('ico\\rotate_clockwise.svg'),
+                QtGui.QIcon('ico/rotate_clockwise.svg'),
                 MENU_L[main.language][4],
             )
             item6 = menu.addAction(
-                QtGui.QIcon('ico\\rotate_anticlockwise.svg'),
+                QtGui.QIcon('ico/rotate_anticlockwise.svg'),
                 MENU_L[main.language][5],
             )
         if select == 1 or select == 2:
             item7 = menu.addAction(
-                QtGui.QIcon('ico\\move_page.svg'),
+                QtGui.QIcon('ico/move_page.svg'),
                 MENU_L[main.language][6],
             )
         action = menu.exec_(
@@ -549,19 +549,19 @@ def save_as(index: int,
     file_name, ok = QFileDialog.getSaveFileName(
         main,
         "save",
-        main.o_dir + '\\' + f_name,
+        os.path.join(main.o_dir, f_name),
         "PDF file (*.pdf);;images (*.png *.psd *ppm)",
     )
     if ok:
         if file_name.endswith('.pdf'):
-            doc.save(file_name.replace('/', '\\'))
+            doc.save(file_name)
         if file_name.endswith(('.psd', '.png', '.ppm',)):
             pix = fitz.utils.get_pixmap(
                 doc[0],
                 dpi=220,
                 alpha=False if file_name.endswith('.ppm') else True,
             )
-            pix.save(file_name.replace('/', '\\'))
+            pix.save(file_name)
             fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
     doc.close()
     del doc
@@ -606,7 +606,7 @@ def extract_img(index: int,
         f_name = os.path.splitext(
             os.path.basename(widget.book.name),
         )[0] + f'-{widget.book_list[index]+1}-image-{key+1}.png'
-        img_name = main.s_dir+'\\'+f_name
+        img_name = os.path.join(main.s_dir, f_name)
         # xref is inf[0]
         img = fitz.Pixmap(
             doc,
@@ -705,7 +705,7 @@ def choose(widget: QtWidgets.QLineEdit,
     )
     if len(root) != 0:
         widget.setText(
-            root.replace('/', '\\'),
+            root#.replace('/', '\\'),
         )
 
 
@@ -837,7 +837,7 @@ def find_font(font_dirs: list) -> (dict, dict):
     for font_dir in font_dirs:
         for file_name in os.listdir(font_dir):
             full_name = os.path.join(
-                font_dir.replace('/', '\\'),
+                font_dir,
                 file_name,
             )
             try:
@@ -847,7 +847,7 @@ def find_font(font_dirs: list) -> (dict, dict):
             except RuntimeError:
                 pass
     with open(
-        file='settings\\font_dir_cache.json',
+        file='settings/font_dir_cache.json',
         mode='w',
         encoding='utf-8',
     ) as f:

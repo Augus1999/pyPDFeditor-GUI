@@ -8,6 +8,7 @@ import sys
 import json
 import getpass
 import subprocess as sp
+from pathlib import Path
 import fitz
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
@@ -32,7 +33,7 @@ class Main(MainR):
                  version: str):
         super().__init__(system, version)
         content = setting_warning(
-            'settings\\settings.json',
+            'settings/settings.json',
             self,
             )
         self.Author = getpass.getuser()
@@ -187,9 +188,9 @@ class Main(MainR):
             print(f'platform \"{self.__system__}\" cannot be recognised')
             return
         if f_name is not None:
-            sp.Popen([cmd, f_name])
+            sp.Popen([cmd, Path(f_name)])
         else:
-            sp.Popen([cmd, widget.book_list[index].name])
+            sp.Popen([cmd, Path(widget.book_list[index].name)])
 
     def save1(self) -> None:
         """
@@ -471,9 +472,9 @@ class Main(MainR):
         """
         open font window
         """
-        if os.path.exists('settings//font_dir_cache.json'):
+        if os.path.exists('settings/font_dir_cache.json'):
             name_dict, file_dict = read_from_font_cache(
-                'settings//font_dir_cache.json',
+                'settings/font_dir_cache.json',
             )
         else:
             font_paths = QtCore.QStandardPaths.standardLocations(
