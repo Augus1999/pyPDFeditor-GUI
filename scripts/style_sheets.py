@@ -25,7 +25,7 @@ TAB_STYLE = f'''
         color:{TEXT_COLOUR};
         background-color:{LIGHT_COLOUR};
         font-size:9pt;
-        font-family:Verdana,Microsoft YaHei UI}}
+        font-family:Verdana,Microsoft YaHei UI,PingFang SC}}
         QTabWidget{{
         border:none;
         border-radius:5px;
@@ -34,7 +34,7 @@ TAB_STYLE = f'''
 COMBO_BOX_STYLE = f'''
         QComboBox{{
         font-size:11pt;
-        font-family:Verdana,Microsoft YaHei UI;
+        font-family:Verdana,Microsoft YaHei UI,PingFang SC;
         border-radius:5px;
         background-color:{MAIN_COLOUR};
         color:{LIGHT_COLOUR}}}
@@ -69,7 +69,7 @@ TEXTEDIT_STYlE = f'''
         border-bottom-right-radius:0px;
         background-color:{MAIN_COLOUR};
         color:{LIGHT_COLOUR};
-        font-family:Verdana,Microsoft YaHei UI}}
+        font-family:Verdana,Microsoft YaHei UI,PingFang SC}}
         QScrollBar:vertical{{
         border:none;
         border-top-right-radius:4px;
@@ -99,7 +99,7 @@ LINE_EDIT_STYLE = f'''
         border-radius:10px;
         background-color:{MAIN_COLOUR};
         color:{LIGHT_COLOUR};
-        font-family:Verdana,Microsoft YaHei UI}}
+        font-family:Verdana,Microsoft YaHei UI,PingFang SC}}
         QLineEdit:focus{{
         border:2px solid {COMP_COLOUR}}}
         '''
@@ -168,7 +168,7 @@ LABEL_STYLE = f'''
         border:none;
         border-radius:10px;
         font-size:8pt;
-        font-family:Verdana,Microsoft YaHei UI;
+        font-family:Verdana,Microsoft YaHei UI,PingFang SC;
         color:{TEXT_COLOUR};
         background-color:transparent}}
         '''
@@ -182,7 +182,7 @@ BGC_STYLE = f'''
         color:{TEXT_COLOUR};
         background-color:{LIGHT_COLOUR};
         font-size:9pt;
-        font-family:Verdana,Microsoft YaHei UI}}
+        font-family:Verdana,Microsoft YaHei UI,PingFang SC}}
         '''
 SWITCH_STYLE = f'''
         SwitchBtn:on{{
