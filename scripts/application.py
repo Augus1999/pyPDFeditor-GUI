@@ -136,7 +136,6 @@ class Main(MainR):
                 indent=4,
                 separators=(",", ": "),
             )
-        sys.exit(0)
 
     def enable_preview(self) -> None:
         """
@@ -705,7 +704,8 @@ class FontDialog(FontDialogR):
 
 def __main__(system: str,
              version: str,
-             debug: bool = True) -> None:
+             debug: bool = True,
+             test: bool = False) -> None:
     """
     main function
     :param system: system name
@@ -718,4 +718,7 @@ def __main__(system: str,
     app = QApplication(arg)
     main = Main(system, version)
     main.show()
-    sys.exit(app.exec_())
+    if test:
+        main.close()
+        return
+    sys.exit(app.exec())
