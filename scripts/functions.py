@@ -704,9 +704,7 @@ def choose(widget: QtWidgets.QLineEdit,
         c_dir,
     )
     if len(root) != 0:
-        widget.setText(
-            root#.replace('/', '\\'),
-        )
+        widget.setText(root)
 
 
 def remove_invalid_xref_key(metadata: dict) -> dict:

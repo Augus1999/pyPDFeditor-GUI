@@ -1,17 +1,17 @@
-import sys
-import fitz
-from PyQt5.QtWidgets import QApplication
-from scripts import Main, __system__, __version__
+# test
+def test():
+    """Import all function and parameters.
+
+    >>> test()
+    1
+    """
+    try:
+        from scripts import __main__, __system__, __version__
+        return 1
+    except Exception:
+        return 0
 
 
 if __name__ == '__main__':
-    fitz.TOOLS.mupdf_display_errors(True)
-    arg = sys.argv
-    app = QApplication(arg)
-    main = Main(__system__, __version__)
-    main.show()
-    main.windowChange()
-    main.showMinimized()
-    main.showNormal()
-    main.close()
-    sys.exit(app.exec_())
+    import doctest
+    doctest.testmod()
