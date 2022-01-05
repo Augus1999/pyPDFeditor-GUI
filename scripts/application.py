@@ -113,7 +113,7 @@ class Main(MainR):
 
     def closeEvent(self, event) -> None:
         """
-        close all child windows and write settings to settings.json
+        write settings to settings.json
         """
         _settings = {
             "start dir": self.s_dir,
@@ -124,11 +124,20 @@ class Main(MainR):
         }
         if not os.path.exists('settings'):
             os.makedirs('settings')
+        if os.path.exists('settings/settings.json'):
+            with open(
+                'settings/settings.json',
+                mode='r',
+                encoding='utf-8',
+            ) as c:
+                states = json.load(c)
+            if states == _settings:
+                return  # if no new settings do not write
         with open(
                 'settings/settings.json',
                 mode='w',
                 encoding='utf-8',
-        ) as f:
+        ) as f:  # write new settings
             json.dump(
                 _settings,
                 f,
@@ -162,7 +171,7 @@ class Main(MainR):
                 BUTTON_STYLE.format('more_d.svg', 'more_d.svg', 'more_d.svg'),
             )
             self.tab3.button6.clicked.disconnect()
-            self.perm_int = 4028
+            self.perm_int = 4028  # value of all permissions
 
     def view(self,
              index=None,
