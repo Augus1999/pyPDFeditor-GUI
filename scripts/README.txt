@@ -1,1 +1,0 @@
-Python file 'window_effect.py' is not a needed file on Linux and macOS platform.
