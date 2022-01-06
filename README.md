@@ -37,7 +37,7 @@ I tried my best to make it close to Fluent UI. Icons used can be found [🔗here
 * Edit metadata of the file (PDF only)📝
 * Convert image files or e-book files to PDF
 
-## Required Packages 🧩
+## Requirements 🧩
 
 ```text
 Python>=3.7
@@ -50,9 +50,22 @@ PyMuPDF>=1.19.2
 
 ## Install & Run
 
-Run `$ pip install -r requirements.txt` to install all required packages.
+### install from source
 
-Run `$ python pdfEditor.py` to open the application window.
+```bash
+$ python setup.py bdist_wheel
+$ python setup.py install
+```
+
+### install from PyPi
+
+[![Downloads](https://static.pepy.tech/personalized-badge/pyPDFeditor-GUI?period=total&units=international_system&left_color=black&right_color=green&left_text=Downloads)](https://pepy.tech/project/pyPDFeditor-GUI)
+
+```bash
+$ pip install pyPDFeditor-GUI
+```
+
+Run `$ pdfEditor` to open the application window.
 
 ## Screenshot 🎞️
 
