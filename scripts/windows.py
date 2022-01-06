@@ -1078,10 +1078,10 @@ class FontDialogR(QWidget):
         super().__init__()
         desktop = QApplication.desktop()
         screen_rect = desktop.screenGeometry()
-        height = int(screen_rect.height()*0.27)
-        width = int(height*1.37)
+        height = int(screen_rect.height()*0.3)
+        width = int(height*1.5)
         grid = QGridLayout(self)
-        self.resize(width, height)
+        self.setFixedSize(width, height)
         self.setWindowTitle('Select Font')
         self.setWindowIcon(QIcon('ico/font.svg'))
         self.setWindowFlags(
