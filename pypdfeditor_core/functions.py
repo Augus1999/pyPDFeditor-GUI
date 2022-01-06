@@ -9,6 +9,7 @@ import sys
 import json
 import time
 from typing import Union
+from pathlib import Path
 import fitz
 from PyQt5 import (
     QtGui,
@@ -843,9 +844,11 @@ def find_font(font_dirs: list) -> (dict, dict):
             )
             try:
                 font_name = fitz.Font(fontfile=full_name).name
-                name_dict[font_name] = full_name
-                dir_dict[full_name] = font_name
+                name_dict[font_name] = str(Path(full_name))
+                dir_dict[str(Path(full_name))] = font_name
             except RuntimeError:
+                pass
+            except TypeError:
                 pass
     return name_dict, dir_dict
 

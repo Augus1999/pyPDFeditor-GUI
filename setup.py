@@ -15,9 +15,8 @@ long_description = long_description.replace(
 
 setup(
     name="pyPDFeditor-GUI",
-    version="2.0.1",
-    description="""A desktop application to merge, split, add watermark, 
-    rotate and rearrange pages, and set password to PDF files.""",
+    version="2.0.2",
+    description="A desktop application to edit PDF files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Nianze A. TAO",
@@ -29,4 +28,5 @@ setup(
     license="MIT",
     python_requires='>=3.7',
     install_requires=["PyMuPDF>=1.19.2", "PyQt5>=5.15.4"],
+    url="https://github.com/Augus1999/pyPDFeditor-GUI",
 )
