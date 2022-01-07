@@ -92,6 +92,9 @@ class Main(MainR):
             self.tab3.line1.clear(),
             self.tab3.line2.clear(),
         ))
+        self.tab3.button9.clicked.connect(
+            lambda: os.remove(os.path.join(app_home, 'font_dir_cache.json')),
+        )
         self.tab3.line3.returnPressed.connect(self.preview)
         self.tab3.line4.returnPressed.connect(self.preview)
         self.tab3.line5.returnPressed.connect(self.preview)

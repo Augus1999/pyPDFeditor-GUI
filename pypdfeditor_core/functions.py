@@ -387,7 +387,7 @@ def save(main: QWidget,
     )
     if state and main.dir_store_state:
         main.o_dir = os.path.dirname(f_name)
-    return f_name, state
+    return f_name.replace('\\', '/'), state
 
 
 def delete(index: int,
@@ -434,35 +434,35 @@ def generate_menu(pos,
     if 0 <= index < len(widget.book_list):
         menu = QtWidgets.QMenu()
         item1 = menu.addAction(
-            QtGui.QIcon(os.path.join(app_home, 'ico/delete.svg')),
+            QtGui.QIcon(os.path.join(app_home, 'ico', 'delete.svg')),
             MENU_L[main.language][0],
         )
         item2, item3, item4, item5, item6, item7 = None, None, None, None, None, None
         if select in (0, 2,):
             item3 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico/view.svg')),
+                QtGui.QIcon(os.path.join(app_home, 'ico', 'view.svg')),
                 MENU_L[main.language][1],
             )
         if select == 1:
             item2 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico/down.svg')),
+                QtGui.QIcon(os.path.join(app_home, 'ico', 'down.svg')),
                 MENU_L[main.language][2],
             )
             item4 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico/Photo.svg')),
+                QtGui.QIcon(os.path.join(app_home, 'ico', 'Photo.svg')),
                 MENU_L[main.language][3],
             )
             item5 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico/rotate_clockwise.svg')),
+                QtGui.QIcon(os.path.join(app_home, 'ico', 'rotate_clockwise.svg')),
                 MENU_L[main.language][4],
             )
             item6 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico/rotate_anticlockwise.svg')),
+                QtGui.QIcon(os.path.join(app_home, 'ico', 'rotate_anticlockwise.svg')),
                 MENU_L[main.language][5],
             )
         if select in (1, 2,):
             item7 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico/move_page.svg')),
+                QtGui.QIcon(os.path.join(app_home, 'ico', 'move_page.svg')),
                 MENU_L[main.language][6],
             )
         action = menu.exec_(

@@ -11,9 +11,9 @@ TAB_L = {
     "日本語": ['ファイル結合', 'ページオルガナイズ', '電子透かし', 'メタデータ']
 }
 TIP_L = {
-    "English": ['Open', 'Save', 'Settings', 'Clean', 'colours', 'preview', 'more', 'font'],
-    "中文": ['開啓檔案', '保存', '設定', '清除', '顔色', '預覽', '更多', '字體'],
-    "日本語": ['開く', '保存する', '設定', '全て閉じる', '色選ぶ', 'プレビュー', '詳細設定', '字体']
+    "English": ['Open', 'Save', 'Settings', 'Clean', 'colours', 'preview', 'more', 'font', 'update font'],
+    "中文": ['開啓檔案', '保存', '設定', '清除', '顔色', '預覽', '更多', '字體', '更新字體庫'],
+    "日本語": ['開く', '保存する', '設定', '全て閉じる', '色選ぶ', 'プレビュー', '詳細設定', '字体', '字体を更新']
 }
 LAB_L3 = {
     "English": ['PASSWORD', 'WATERMARK', 'Font Size:', 'Open after saving',
@@ -126,6 +126,7 @@ def set_language(widget: QtWidgets.QWidget) -> None:
     widget.tab3.button6.setToolTip(TIP_L[widget.language][6])
     widget.tab3.button7.setToolTip(TIP_L[widget.language][7])
     widget.tab3.button8.setToolTip(TIP_L[widget.language][3])
+    widget.tab3.button9.setToolTip(TIP_L[widget.language][8])
     widget.tab4.button1.setToolTip(TIP_L[widget.language][0])
     widget.tab4.button2.setToolTip(TIP_L[widget.language][1])
     widget.tab4.button3.setToolTip(TIP_L[widget.language][2])

@@ -4,6 +4,7 @@
 set up the application
 """
 from setuptools import setup
+from pypdfeditor_core import __version__
 
 with open('README.md', mode='r', encoding='utf-8') as f:
     long_description = f.read()
@@ -15,7 +16,7 @@ long_description = long_description.replace(
 
 setup(
     name="pyPDFeditor-GUI",
-    version="2.0.2",
+    version=__version__,
     description="A desktop application to edit PDF files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -23,7 +24,7 @@ setup(
     author_email="Augus_1999@outlook.com",
     packages=["pypdfeditor_core"],
     package_dir={"pypdfeditor_core": "pypdfeditor_core"},
-    scripts=["pdfEditor.pyw"],
+    scripts=["pdfEditor", "pdfEditor.pyw"],
     script_name="pdfEditor",
     license="MIT",
     python_requires='>=3.7',

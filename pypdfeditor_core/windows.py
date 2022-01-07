@@ -3,7 +3,6 @@
 """
 application window forms
 """
-import os
 import re
 from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, QTransform, QCursor
 from PyQt5 import QtCore, QtWidgets
@@ -254,7 +253,7 @@ class MainR(QTabWidget):
         self.setMinimumSize(int(0.47*width), int(0.45*height))
         self.setWindowTitle('PDF Editor')
         self.setWindowIcon(
-            QIcon(os.path.join(app_home, 'ico/pdf icon.svg')),
+            QIcon(os.path.join(app_home, 'ico', 'pdf icon.svg')),
         )
         self.setTabShape(QTabWidget.Rounded)
         self.setTabPosition(QTabWidget.West)
@@ -279,35 +278,35 @@ class MainR(QTabWidget):
         self.addTab(
             self.tab0,
             QIcon(
-                QPixmap(os.path.join(app_home, 'ico/home.svg'),
+                QPixmap(os.path.join(app_home, 'ico', 'home.svg'),
                         ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
             ''
         )
         self.addTab(
             self.tab1,
             QIcon(
-                QPixmap(os.path.join(app_home, 'ico/merge.svg'),
+                QPixmap(os.path.join(app_home, 'ico', 'merge.svg'),
                         ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
         self.addTab(
             self.tab2,
             QIcon(
-                QPixmap(os.path.join(app_home, 'ico/edit.svg'),
+                QPixmap(os.path.join(app_home, 'ico', 'edit.svg'),
                         ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
         self.addTab(
             self.tab3,
             QIcon(
-                QPixmap(os.path.join(app_home, 'ico/lock.svg'),
+                QPixmap(os.path.join(app_home, 'ico', 'lock.svg'),
                         ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
         self.addTab(
             self.tab4,
             QIcon(
-                QPixmap(os.path.join(app_home, 'ico/metadata.svg'),
+                QPixmap(os.path.join(app_home, 'ico', 'metadata.svg'),
                         ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
@@ -694,6 +693,7 @@ class MainR(QTabWidget):
         self.tab3.button6 = QPushButton(self.tab3)
         self.tab3.button7 = QPushButton(self.tab3)
         self.tab3.button8 = QPushButton(self.tab3)
+        self.tab3.button9 = QPushButton(self.tab3)
         self.tab3.button1.setStyleSheet(
             BUTTON_STYLE % ('Add.svg', 'Add_h.svg', 'Add_p.svg'),
         )
@@ -718,6 +718,9 @@ class MainR(QTabWidget):
         self.tab3.button8.setStyleSheet(
             BUTTON_STYLE % ('delete.svg', 'delete_h.svg', 'delete_p.svg'),
         )
+        self.tab3.button9.setStyleSheet(
+            BUTTON_STYLE % ('sync.svg', 'sync_h.svg', 'sync_p.svg'),
+        )
         self.tab3.table.setFixedSize(self.size2 * 20, self.size2 * 27)
         self.tab3.button1.setFixedSize(self.size2 * 2, self.size2)
         self.tab3.button2.setFixedSize(self.size2 * 2, self.size2)
@@ -727,6 +730,7 @@ class MainR(QTabWidget):
         self.tab3.button6.setFixedSize(self.size2, self.size2)
         self.tab3.button7.setFixedSize(self.size2, self.size2)
         self.tab3.button8.setFixedSize(self.size2 * 2, self.size2)
+        self.tab3.button9.setFixedSize(self.size2, self.size2)
         self.tab3.text = QTextEdit(self.tab3)
         self.tab3.line1 = QLineEdit(self.tab3)
         self.tab3.line2 = QLineEdit(self.tab3)
@@ -823,6 +827,7 @@ class MainR(QTabWidget):
         layout.addWidget(self.tab3.label6, 7, 17, 1, 1, QtCore.Qt.AlignLeft)
         layout.addWidget(self.tab3.label10, 8, 17, 1, 1, QtCore.Qt.AlignLeft)
         layout.addWidget(self.tab3.button7, 6, 18, 1, 1, QtCore.Qt.AlignLeft)
+        layout.addWidget(self.tab3.button9, 6, 18, 1, 1, QtCore.Qt.AlignRight)
         layout.addWidget(self.tab3.button4, 7, 18, 1, 1, QtCore.Qt.AlignLeft)
         layout.addWidget(self.tab3.button5, 8, 18, 1, 1, QtCore.Qt.AlignLeft)
         layout.addWidget(self.tab3.label8, 9, 14, 1, 5, QtCore.Qt.AlignCenter)
@@ -893,7 +898,7 @@ class MainR(QTabWidget):
         self.tab4.label4.setStyleSheet(LABEL_STYLE)
         self.tab4.label5.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setPixmap(
-            QPixmap(os.path.join(app_home, 'ico/book2.svg')).scaled(
+            QPixmap(os.path.join(app_home, 'ico', 'book2.svg')).scaled(
                 int(self.height()*0.2),
                 int(self.height()*0.2),
                 QtCore.Qt.IgnoreAspectRatio,
@@ -950,7 +955,7 @@ class SettingR(QWidget):
         self.setFixedSize(width, height)
         self.setWindowTitle('Setting')
         self.setWindowIcon(
-            QIcon(os.path.join(app_home, 'ico/settings.svg')),
+            QIcon(os.path.join(app_home, 'ico', 'settings.svg')),
         )
         self.setWindowFlags(
             QtCore.Qt.CustomizeWindowHint |
@@ -1013,7 +1018,7 @@ class PermMenuR(QWidget):
         grid = QGridLayout(self)
         self.setFixedSize(width, height)
         self.setWindowTitle(' ')
-        self.setWindowIcon(QIcon(os.path.join(app_home, 'ico/lock.svg')))
+        self.setWindowIcon(QIcon(os.path.join(app_home, 'ico', 'lock.svg')))
         self.setStyleSheet('background-color:#ffffff')
         self.setWindowFlags(
             QtCore.Qt.CustomizeWindowHint |
@@ -1096,7 +1101,7 @@ class FontDialogR(QWidget):
         grid = QGridLayout(self)
         self.setFixedSize(width, height)
         self.setWindowTitle('Select Font')
-        self.setWindowIcon(QIcon(os.path.join(app_home, 'ico/font.svg')))
+        self.setWindowIcon(QIcon(os.path.join(app_home, 'ico', 'font.svg')))
         self.setWindowFlags(
             QtCore.Qt.CustomizeWindowHint |
             QtCore.Qt.WindowCloseButtonHint,
