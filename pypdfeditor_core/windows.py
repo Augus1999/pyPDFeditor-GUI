@@ -399,8 +399,8 @@ class MainR(QTabWidget):
             from ctypes.wintypes import MSG
             self.windowEffect = WindowEffect()
             self.msg = MSG
-            self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
-                                    for y in range(int(self.size2 * 2))]
+            self._title_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
+                                   for y in range(int(self.size2 * 2))]
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
             self.windowEffect.addShadowEffect(int(self.winId()))
             self.windowEffect.addWindowStyle(int(self.winId()))
@@ -446,7 +446,7 @@ class MainR(QTabWidget):
         move the frameless window
         """
         if self.__system__ == 'Windows':
-            if event.pos() in self._status_bar_pos and event.buttons() == QtCore.Qt.LeftButton:
+            if event.pos() in self._title_bar_pos and event.buttons() == QtCore.Qt.LeftButton:
                 self.windowEffect.move_window(int(self.winId()))
                 desktop = QApplication.desktop()
                 self.screen_rect = desktop.availableGeometry()
@@ -457,7 +457,7 @@ class MainR(QTabWidget):
         re-write mouseDoubleClickEvent
         """
         if self.__system__ == 'Windows':
-            if event.button() == QtCore.Qt.LeftButton and event.pos() in self._status_bar_pos:
+            if event.button() == QtCore.Qt.LeftButton and event.pos() in self._title_bar_pos:
                 self.windowChange()
         return QTabWidget.mouseDoubleClickEvent(self, event)
 
@@ -497,11 +497,11 @@ class MainR(QTabWidget):
             if msg.message == 131:  # WM_NCCALCSIZE
                 if self.windowEffect.isMaximised(msg.hWnd):
                     self.windowEffect.monitorNCCALCSIZE(msg, self.screen_rect)
-                    self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % 'slide_multiple.svg')
-                    self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % 'slide_multiple.svg')
-                    self.btn_max_2.setStyleSheet(BUTTON_STYLE0 % 'slide_multiple.svg')
-                    self.btn_max_3.setStyleSheet(BUTTON_STYLE0 % 'slide_multiple.svg')
-                    self.btn_max_4.setStyleSheet(BUTTON_STYLE0 % 'slide_multiple.svg')
+                    self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
+                    self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
+                    self.btn_max_2.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
+                    self.btn_max_3.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
+                    self.btn_max_4.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
                 else:
                     self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
                     self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
@@ -520,8 +520,8 @@ class MainR(QTabWidget):
         self.widget3.resize(int(self.width()*0.9), int(self.height()*0.9))
         self.widget4.resize(int(self.width()*0.9), int(self.height()*0.9))
         if self.__system__ == 'Windows':
-            self._status_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
-                                    for y in range(int(self.size2 * 2))]
+            self._title_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
+                                   for y in range(int(self.size2 * 2))]
 
     def windowChange(self) -> None:
         """
