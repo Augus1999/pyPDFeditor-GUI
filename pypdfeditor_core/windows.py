@@ -11,8 +11,6 @@ from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit
 from .style_sheets import *
 from .functions import shadow, app_home
 
-QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # using high-dpi icons
-
 
 class SwitchBtn(QWidget):
     """
@@ -243,21 +241,14 @@ class MainR(QTabWidget):
         super().__init__()
         self.__system__ = system
         self.__version__ = version
-        desktop = QApplication.desktop()
-        self.screen_rect = desktop.availableGeometry()
-        height = int(self.screen_rect.height()*0.88)  # 950
-        width = int(height*1.36)  # 1290
-        self.size1 = int(height * 0.04)
-        self.size2 = int(height * 0.03)
-        self.resize(width, height)
-        self.setMinimumSize(int(0.47*width), int(0.45*height))
+        self.resize(1200, 890)
+        self.setMinimumSize(580, 450)
         self.setWindowTitle('PDF Editor')
         self.setWindowIcon(
             QIcon(os.path.join(app_home, 'ico', 'pdf icon.svg')),
         )
-        self.setTabShape(QTabWidget.Rounded)
         self.setTabPosition(QTabWidget.West)
-        self.setIconSize(QtCore.QSize(self.size1, self.size1))
+        self.setIconSize(QtCore.QSize(35, 35))
         self.setStyleSheet(TAB_STYLE)
         self.tab0 = QWidget()
         self.tab1 = QWidget()
@@ -326,21 +317,21 @@ class MainR(QTabWidget):
             self.btn_min_4 = QPushButton(self.tab4)
             self.btn_max_4 = QPushButton(self.tab4)
             self.btn_ext_4 = QPushButton(self.tab4)
-            self.btn_min_0.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_max_0.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_ext_0.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_min_1.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_max_1.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_ext_1.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_min_2.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_max_2.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_ext_2.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_min_3.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_max_3.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_ext_3.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_min_4.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_max_4.setFixedSize(self.size2 * 2, self.size2)
-            self.btn_ext_4.setFixedSize(self.size2 * 2, self.size2)
+            self.btn_min_0.setFixedSize(52, 26)
+            self.btn_max_0.setFixedSize(52, 26)
+            self.btn_ext_0.setFixedSize(52, 26)
+            self.btn_min_1.setFixedSize(52, 26)
+            self.btn_max_1.setFixedSize(52, 26)
+            self.btn_ext_1.setFixedSize(52, 26)
+            self.btn_min_2.setFixedSize(52, 26)
+            self.btn_max_2.setFixedSize(52, 26)
+            self.btn_ext_2.setFixedSize(52, 26)
+            self.btn_min_3.setFixedSize(52, 26)
+            self.btn_max_3.setFixedSize(52, 26)
+            self.btn_ext_3.setFixedSize(52, 26)
+            self.btn_min_4.setFixedSize(52, 26)
+            self.btn_max_4.setFixedSize(52, 26)
+            self.btn_ext_4.setFixedSize(52, 26)
             self.btn_max_0.setObjectName('max0')
             self.btn_max_1.setObjectName('max1')
             self.btn_max_2.setObjectName('max2')
@@ -399,8 +390,8 @@ class MainR(QTabWidget):
             from ctypes.wintypes import MSG
             self.windowEffect = WindowEffect()
             self.msg = MSG
-            self._title_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
-                                   for y in range(int(self.size2 * 2))]
+            self._title_bar_pos = [QtCore.QPoint(x, y) for x in range(1200)
+                                   for y in range(52)]
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
             self.windowEffect.addShadowEffect(int(self.winId()))
             self.windowEffect.addWindowStyle(int(self.winId()))
@@ -448,8 +439,6 @@ class MainR(QTabWidget):
         if self.__system__ == 'Windows':
             if event.pos() in self._title_bar_pos and event.buttons() == QtCore.Qt.LeftButton:
                 self.windowEffect.move_window(int(self.winId()))
-                desktop = QApplication.desktop()
-                self.screen_rect = desktop.availableGeometry()
         return QTabWidget.mouseMoveEvent(self, event)
 
     def mouseDoubleClickEvent(self, event) -> None:
@@ -496,7 +485,9 @@ class MainR(QTabWidget):
                     return True, 11  # HTRIGHT
             if msg.message == 131:  # WM_NCCALCSIZE
                 if self.windowEffect.isMaximised(msg.hWnd):
-                    self.windowEffect.monitorNCCALCSIZE(msg, self.screen_rect)
+                    desktop = QApplication.desktop()
+                    screen_rect = desktop.availableGeometry()
+                    self.windowEffect.monitorNCCALCSIZE(msg, screen_rect)
                     self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
                     self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
                     self.btn_max_2.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
@@ -521,7 +512,7 @@ class MainR(QTabWidget):
         self.widget4.resize(int(self.width()*0.9), int(self.height()*0.9))
         if self.__system__ == 'Windows':
             self._title_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
-                                   for y in range(int(self.size2 * 2))]
+                                   for y in range(52)]
 
     def windowChange(self) -> None:
         """
@@ -591,10 +582,10 @@ class MainR(QTabWidget):
         self.tab1.button4.setStyleSheet(
             BUTTON_STYLE % ('delete.svg', 'delete_h.svg', 'delete_p.svg'),
         )
-        self.tab1.button1.setFixedSize(self.size2 * 2, self.size2)
-        self.tab1.button2.setFixedSize(self.size2 * 2, self.size2)
-        self.tab1.button3.setFixedSize(self.size2 * 2, self.size2)
-        self.tab1.button4.setFixedSize(self.size2 * 2, self.size2)
+        self.tab1.button1.setFixedSize(52, 26)
+        self.tab1.button2.setFixedSize(52, 26)
+        self.tab1.button3.setFixedSize(52, 26)
+        self.tab1.button4.setFixedSize(52, 26)
         self.tab1.table.setShowGrid(False)
         self.tab1.table.verticalHeader().setVisible(False)
         self.tab1.table.horizontalHeader().setVisible(False)
@@ -636,10 +627,10 @@ class MainR(QTabWidget):
         self.tab2.button4.setStyleSheet(
             BUTTON_STYLE % ('delete.svg', 'delete_h.svg', 'delete_p.svg'),
         )
-        self.tab2.button1.setFixedSize(self.size2 * 2, self.size2)
-        self.tab2.button2.setFixedSize(self.size2 * 2, self.size2)
-        self.tab2.button3.setFixedSize(self.size2 * 2, self.size2)
-        self.tab2.button4.setFixedSize(self.size2 * 2, self.size2)
+        self.tab2.button1.setFixedSize(52, 26)
+        self.tab2.button2.setFixedSize(52, 26)
+        self.tab2.button3.setFixedSize(52, 26)
+        self.tab2.button4.setFixedSize(52, 26)
         self.tab2.table.setShowGrid(False)
         self.tab2.table.verticalHeader().setVisible(False)
         self.tab2.table.horizontalHeader().setVisible(False)
@@ -721,16 +712,16 @@ class MainR(QTabWidget):
         self.tab3.button9.setStyleSheet(
             BUTTON_STYLE % ('sync.svg', 'sync_h.svg', 'sync_p.svg'),
         )
-        self.tab3.table.setFixedSize(self.size2 * 20, self.size2 * 27)
-        self.tab3.button1.setFixedSize(self.size2 * 2, self.size2)
-        self.tab3.button2.setFixedSize(self.size2 * 2, self.size2)
-        self.tab3.button3.setFixedSize(self.size2 * 2, self.size2)
-        self.tab3.button4.setFixedSize(self.size2, self.size2)
-        self.tab3.button5.setFixedSize(self.size2, self.size2)
-        self.tab3.button6.setFixedSize(self.size2, self.size2)
-        self.tab3.button7.setFixedSize(self.size2, self.size2)
-        self.tab3.button8.setFixedSize(self.size2 * 2, self.size2)
-        self.tab3.button9.setFixedSize(self.size2, self.size2)
+        self.tab3.table.setFixedSize(520, 700)
+        self.tab3.button1.setFixedSize(52, 26)
+        self.tab3.button2.setFixedSize(52, 26)
+        self.tab3.button3.setFixedSize(52, 26)
+        self.tab3.button4.setFixedSize(26, 26)
+        self.tab3.button5.setFixedSize(26, 26)
+        self.tab3.button6.setFixedSize(26, 26)
+        self.tab3.button7.setFixedSize(26, 26)
+        self.tab3.button8.setFixedSize(52, 26)
+        self.tab3.button9.setFixedSize(26, 26)
         self.tab3.text = QTextEdit(self.tab3)
         self.tab3.line1 = QLineEdit(self.tab3)
         self.tab3.line2 = QLineEdit(self.tab3)
@@ -749,12 +740,12 @@ class MainR(QTabWidget):
         self.tab3.label10 = QLabel(self.tab3)
         self.tab3.label11 = QLabel(self.tab3)
         self.tab3.label12 = QLabel(self.tab3)
-        self.tab3.text.setFixedWidth(self.size2 * 10)
-        self.tab3.line1.setFixedSize(self.size2 * 10, self.size1)
-        self.tab3.line2.setFixedSize(self.size2 * 10, self.size1)
-        self.tab3.line3.setFixedSize(self.size1, self.size1)
-        self.tab3.line4.setFixedSize(self.size1, self.size1)
-        self.tab3.line5.setFixedSize(self.size1, self.size1)
+        self.tab3.text.setFixedWidth(260)
+        self.tab3.line1.setFixedSize(260, 35)
+        self.tab3.line2.setFixedSize(260, 35)
+        self.tab3.line3.setFixedSize(35, 35)
+        self.tab3.line4.setFixedSize(35, 35)
+        self.tab3.line5.setFixedSize(35, 35)
         self.tab3.line3.setText('90')
         self.tab3.line4.setText('40')
         self.tab3.line5.setText(' 0')
@@ -776,9 +767,9 @@ class MainR(QTabWidget):
         self.tab3.label10.setStyleSheet(LABEL_STYLE)
         self.tab3.label11.setStyleSheet(LABEL_STYLE)
         self.tab3.label12.setStyleSheet(LABEL_STYLE)
-        self.tab3.label3.setFixedSize(self.size1, self.size1)
-        self.tab3.label6.setFixedSize(self.size1, self.size1)
-        self.tab3.label10.setFixedSize(self.size1, self.size1)
+        self.tab3.label3.setFixedSize(35, 35)
+        self.tab3.label6.setFixedSize(35, 35)
+        self.tab3.label10.setFixedSize(35, 35)
         self.tab3.label3.setText('pt')
         self.tab3.label6.setText('%')
         self.tab3.label8.setText('* '*20)
@@ -798,9 +789,9 @@ class MainR(QTabWidget):
         self.tab3.check = SwitchBtn(self.tab3)
         self.tab3.check1 = SwitchBtn(self.tab3)
         self.tab3.check2 = SwitchBtn(self.tab3)
-        self.tab3.check.setFixedSize(self.size1 * 2, self.size2)
-        self.tab3.check1.setFixedSize(self.size1 * 2, self.size2)
-        self.tab3.check2.setFixedSize(self.size1 * 2, self.size2)
+        self.tab3.check.setFixedSize(70, 26)
+        self.tab3.check1.setFixedSize(70, 26)
+        self.tab3.check2.setFixedSize(70, 26)
         self.tab3.check.setChecked(True)
         self.tab3.check1.setChecked(False)
         self.tab3.check2.setChecked(False)
@@ -865,10 +856,10 @@ class MainR(QTabWidget):
         self.tab4.button4.setStyleSheet(
             BUTTON_STYLE % ('delete.svg', 'delete_h.svg', 'delete_p.svg'),
         )
-        self.tab4.button1.setFixedSize(self.size2 * 2, self.size2)
-        self.tab4.button2.setFixedSize(self.size2 * 2, self.size2)
-        self.tab4.button3.setFixedSize(self.size2 * 2, self.size2)
-        self.tab4.button4.setFixedSize(self.size2 * 2, self.size2)
+        self.tab4.button1.setFixedSize(52, 26)
+        self.tab4.button2.setFixedSize(52, 26)
+        self.tab4.button3.setFixedSize(52, 26)
+        self.tab4.button4.setFixedSize(52, 26)
         self.tab4.table = TableWidget(self.tab4)
         self.tab4.table.setShowGrid(False)
         self.tab4.table.verticalHeader().setVisible(False)
@@ -899,8 +890,8 @@ class MainR(QTabWidget):
         self.tab4.label5.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setPixmap(
             QPixmap(os.path.join(app_home, 'ico', 'book2.svg')).scaled(
-                int(self.height()*0.2),
-                int(self.height()*0.2),
+                180,
+                180,
                 QtCore.Qt.IgnoreAspectRatio,
                 QtCore.Qt.SmoothTransformation,
             ),
@@ -913,11 +904,11 @@ class MainR(QTabWidget):
         self.tab4.line2.setStyleSheet(LINE_EDIT_STYLE)
         self.tab4.line3.setStyleSheet(LINE_EDIT_STYLE)
         self.tab4.line4.setStyleSheet(LINE_EDIT_STYLE)
-        self.tab4.line1.setFixedSize(self.size2 * 12, self.size1)
-        self.tab4.line2.setFixedSize(self.size2 * 12, self.size1)
-        self.tab4.line3.setFixedSize(self.size2 * 12, self.size1)
-        self.tab4.line4.setFixedSize(self.size2 * 12, self.size1)
-        self.tab4.text.setFixedSize(self.size2 * 12, int(self.height()*0.5))
+        self.tab4.line1.setFixedSize(312, 35)
+        self.tab4.line2.setFixedSize(312, 35)
+        self.tab4.line3.setFixedSize(312, 35)
+        self.tab4.line4.setFixedSize(312, 35)
+        self.tab4.text.setFixedSize(312, 450)
         self.tab4.line1.setAlignment(QtCore.Qt.AlignCenter)
         self.tab4.line2.setAlignment(QtCore.Qt.AlignCenter)
         self.tab4.line3.setAlignment(QtCore.Qt.AlignCenter)
@@ -946,13 +937,8 @@ class SettingR(QWidget):
     """
     def __init__(self):
         super().__init__()
-        desktop = QApplication.desktop()
-        screen_rect = desktop.screenGeometry()
-        height = int(screen_rect.height()*0.26)  # 280
-        width = int(height*2.14)  # 600
-        fixed_h = int(width*2//30)
         grid = QGridLayout(self)
-        self.setFixedSize(width, height)
+        self.setFixedSize(600, 280)
         self.setWindowTitle('Setting')
         self.setWindowIcon(
             QIcon(os.path.join(app_home, 'ico', 'settings.svg')),
@@ -985,12 +971,12 @@ class SettingR(QWidget):
         self.label1.setAlignment(QtCore.Qt.AlignVCenter)
         self.label2.setAlignment(QtCore.Qt.AlignVCenter)
         self.label3.setAlignment(QtCore.Qt.AlignVCenter)
-        self.check.setFixedSize(fixed_h * 2, int(fixed_h*0.75))
-        self.line1.setFixedSize(fixed_h * 10, fixed_h)
-        self.line2.setFixedSize(fixed_h * 10, fixed_h)
-        self.button1.setFixedSize(int(fixed_h*0.7), int(fixed_h*0.7))
-        self.button2.setFixedSize(int(fixed_h*0.7), int(fixed_h*0.7))
-        self.combobox.setFixedSize(int(fixed_h*4.25), fixed_h)
+        self.check.setFixedSize(80, 30)
+        self.line1.setFixedSize(400, 40)
+        self.line2.setFixedSize(400, 40)
+        self.button1.setFixedSize(28, 28)
+        self.button2.setFixedSize(28, 28)
+        self.combobox.setFixedSize(170, 40)
         grid.addWidget(self.label1, 0, 0, 1, 5, QtCore.Qt.AlignLeft)
         grid.addWidget(self.label2, 1, 0, 1, 5, QtCore.Qt.AlignLeft)
         grid.addWidget(self.label3, 2, 0, 1, 7, QtCore.Qt.AlignLeft)
@@ -1009,14 +995,8 @@ class PermMenuR(QWidget):
     """
     def __init__(self):
         super().__init__()
-        desktop = QApplication.desktop()
-        screen_rect = desktop.screenGeometry()
-        height = int(screen_rect.height()*0.37)  # 400
-        width = int(height*1.2)  # 480
-        x = int(height/5)
-        y = int(width/16)
         grid = QGridLayout(self)
-        self.setFixedSize(width, height)
+        self.setFixedSize(480, 400)
         self.setWindowTitle(' ')
         self.setWindowIcon(QIcon(os.path.join(app_home, 'ico', 'lock.svg')))
         self.setStyleSheet('background-color:#ffffff')
@@ -1041,14 +1021,14 @@ class PermMenuR(QWidget):
         self.label6 = QLabel(self)
         self.label7 = QLabel(self)
         self.label8 = QLabel(self)
-        self.check1.setFixedSize(x, y)
-        self.check2.setFixedSize(x, y)
-        self.check3.setFixedSize(x, y)
-        self.check4.setFixedSize(x, y)
-        self.check5.setFixedSize(x, y)
-        self.check6.setFixedSize(x, y)
-        self.check7.setFixedSize(x, y)
-        self.check8.setFixedSize(x, y)
+        self.check1.setFixedSize(80, 30)
+        self.check2.setFixedSize(80, 30)
+        self.check3.setFixedSize(80, 30)
+        self.check4.setFixedSize(80, 30)
+        self.check5.setFixedSize(80, 30)
+        self.check6.setFixedSize(80, 30)
+        self.check7.setFixedSize(80, 30)
+        self.check8.setFixedSize(80, 30)
         grid.addWidget(self.label1, 0, 0, QtCore.Qt.AlignLeft)
         grid.addWidget(self.label2, 1, 0, QtCore.Qt.AlignLeft)
         grid.addWidget(self.label3, 2, 0, QtCore.Qt.AlignLeft)
@@ -1094,12 +1074,8 @@ class FontDialogR(QWidget):
     """
     def __init__(self):
         super().__init__()
-        desktop = QApplication.desktop()
-        screen_rect = desktop.screenGeometry()
-        height = int(screen_rect.height()*0.3)
-        width = int(height*1.5)
         grid = QGridLayout(self)
-        self.setFixedSize(width, height)
+        self.setFixedSize(486, 324)
         self.setWindowTitle('Select Font')
         self.setWindowIcon(QIcon(os.path.join(app_home, 'ico', 'font.svg')))
         self.setWindowFlags(
@@ -1109,7 +1085,7 @@ class FontDialogR(QWidget):
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.combobox = QComboBox(self)
         self.combobox.setStyleSheet(COMBO_BOX_STYLE)
-        self.combobox.setFixedHeight(int(height/7))
+        self.combobox.setFixedHeight(45)
         self.label = QLabel(self)
         self.label.setAlignment(QtCore.Qt.AlignTop)
         grid.addWidget(self.combobox, 0, 0, QtCore.Qt.AlignCenter)

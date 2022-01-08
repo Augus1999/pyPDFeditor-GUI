@@ -277,8 +277,8 @@ class Main(MainR):
                         garbage=1,
                         permissions=self.perm_int,
                         encryption=fitz.PDF_ENCRYPT_AES_256,
-                        user_pw=u_password,
-                        owner_pw=o_password,
+                        user_pw=u_password if u_password != '' else None,
+                        owner_pw=o_password if o_password != '' else None,
                     )
                     if self.tab3.check.isChecked():
                         self.view(f_name=file_name)
@@ -695,14 +695,7 @@ class FontDialog(FontDialogR):
         )
         shape.commit()
         cover = render_pdf_page(page)
-        self.label.setPixmap(
-            QPixmap(cover).scaled(
-                380,
-                220,
-                QtCore.Qt.IgnoreAspectRatio,
-                QtCore.Qt.SmoothTransformation,
-            ),
-        )
+        self.label.setPixmap(QPixmap(cover))
         doc.close()
         fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
         del cover, shape, page, r1, doc
@@ -726,9 +719,15 @@ def __main__(system: str,
     :param debug: whether display mupdf errors or not
     :return: None
     """
+    a = QApplication([])
+    s = a.desktop().screenGeometry()
+    screen_w, screen_h = s.width(), s.width()  # get screen info
+    del s, a  # delete QApplication object so that it won't affect the following codes
+    if screen_w > 1920 and screen_h > 1080:
+        QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+        QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
     fitz.TOOLS.mupdf_display_errors(debug)
-    arg = sys.argv
-    app = QApplication(arg)
+    app = QApplication(sys.argv)
     main = Main(system, version)
     main.show()
     sys.exit(app.exec())
