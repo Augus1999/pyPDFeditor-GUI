@@ -288,13 +288,13 @@ def page_icon(page: fitz.Page,
     widget = QWidget(None)
     layout.addWidget(label, alignment=QtCore.Qt.AlignCenter)
     widget.setLayout(layout)
-    scaled_width, scaled_height = int(), int()
     if _cover.height() / _cover.width() > 4 / 3:
-        scaled_height = width // w_col * 4 / 3 * _scaled
-        scaled_width = scaled_height * (_cover.width() / _cover.height())
-    if _cover.height() / _cover.width() <= 4 / 3:
-        scaled_width = width // w_col * _scaled
-        scaled_height = scaled_width * (_cover.height() / _cover.width())
+        scaled_height = int(width // w_col * 4 / 3 * _scaled)
+        scaled_width = int(scaled_height * (_cover.width() / _cover.height()))
+    # if _cover.height() / _cover.width() <= 4 / 3:
+    else:
+        scaled_width = int(width // w_col * _scaled)
+        scaled_height = int(scaled_width * (_cover.height() / _cover.width()))
     label.setPixmap(
         QtGui.QPixmap(_cover).scaled(
             scaled_width * _scaled_,
