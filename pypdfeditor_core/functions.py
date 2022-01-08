@@ -270,8 +270,7 @@ def shadow(widget,
 def page_icon(page: fitz.Page,
               width: int,
               w_col: int,
-              _scaled: float,
-              _scaled_=1) -> QWidget:
+              _scaled: float) -> QWidget:
     """
     insert image to a QLabel
 
@@ -279,7 +278,6 @@ def page_icon(page: fitz.Page,
     :param width: width of the table cell
     :param w_col: column count of the table
     :param _scaled: scaled coefficient of label
-    :param _scaled_: scaled coefficient of image in label
     :return: shadowed QWidget()
     """
     _cover = render_pdf_page(page)
@@ -297,8 +295,8 @@ def page_icon(page: fitz.Page,
         scaled_height = int(scaled_width * (_cover.height() / _cover.width()))
     label.setPixmap(
         QtGui.QPixmap(_cover).scaled(
-            scaled_width * _scaled_,
-            scaled_height * _scaled_,
+            scaled_width,
+            scaled_height,
             QtCore.Qt.IgnoreAspectRatio,
             QtCore.Qt.SmoothTransformation,
         ),
@@ -314,15 +312,13 @@ def page_icon(page: fitz.Page,
 
 def set_icon(widget: QWidget,
              doc: Union[Doc, fitz.Document, None] = None,
-             _scaled: float = 0.95,
-             _scaled_=1) -> None:
+             _scaled: float = 0.95) -> None:
     """
     add image of first page into table element
 
     :param widget: widget
     :param doc: doc
     :param _scaled: scaled coefficient of label
-    :param _scaled_: scaled coefficient of image in label
     :return: None
     """
     x, y = 0, 0
@@ -335,7 +331,6 @@ def set_icon(widget: QWidget,
             widget.table.width(),
             widget.w_col,
             _scaled,
-            _scaled_
         )
         widget.table.setCellWidget(x, y, label)
         del label  # delete label (important)

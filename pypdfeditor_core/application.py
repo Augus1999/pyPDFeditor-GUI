@@ -417,7 +417,7 @@ class Main(MainR):
                 self.tab4.book_list = b_l
                 book_len = len(self.tab4.book_list)
                 reset_table(book_len, self.tab4)
-                set_icon(widget=self.tab4, _scaled=0.9, _scaled_=1)
+                set_icon(widget=self.tab4, _scaled=0.9)
                 self.tab4.metadata = doc.metadata
                 plaintext = toc2plaintext(doc.get_toc())
                 self.tab4.text.setPlainText(plaintext)
