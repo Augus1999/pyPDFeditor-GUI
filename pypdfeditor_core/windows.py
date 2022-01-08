@@ -241,7 +241,7 @@ class MainR(QTabWidget):
         super().__init__()
         self.__system__ = system
         self.__version__ = version
-        self.resize(1200, 890)
+        self.resize(1200, 890)  # 1200 890
         self.setMinimumSize(580, 450)
         self.setWindowTitle('PDF Editor')
         self.setWindowIcon(

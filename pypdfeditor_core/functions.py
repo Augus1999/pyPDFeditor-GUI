@@ -518,16 +518,12 @@ def reset_table(book_len: int,
     widget.w_row = w_row
     widget.table.setColumnCount(widget.w_col)
     widget.table.setRowCount(widget.w_row)
+    width = int(widget.table.width()/widget.w_col)
+    height = int(width*4/3)
     for i in range(widget.w_col):
-        widget.table.setColumnWidth(
-            i,
-            widget.table.width()//widget.w_col,
-        )
+        widget.table.setColumnWidth(i, width)
     for i in range(widget.w_row):
-        widget.table.setRowHeight(
-            i,
-            (widget.table.width()//widget.w_col)*4//3,
-        )
+        widget.table.setRowHeight(i, height)
 
 
 def save_as(index: int,

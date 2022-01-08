@@ -3,6 +3,7 @@
 """
 create icon_contents.py file
 """
+import re
 import os
 
 ico_home = 'icons'
@@ -14,7 +15,7 @@ for _, __, file_names in os.walk(ico_home):
         if file_name.endswith(end):
             with open(os.path.join(ico_home, file_name)) as f:
                 data = f.read()
-            files[file_name] = data
+            files[file_name] = re.sub(r'\s+', ' ', data)
 
 print(files)
 

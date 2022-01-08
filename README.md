@@ -2,7 +2,7 @@
 
 This project is based on PyQt5 and PyMuPDF and tested on Python 3.8.6 & 3.9.7 on Windows 10 & 11.
 
-Current version is v2.0.4 ⌛
+Current version is v2.0.5 ⌛
 
 ## Welcome 🎃🎉
 
@@ -78,8 +78,8 @@ on Windows 11
 
 ## Others
 
-Icons and setting files are stored in the directory `\user\...\.pyPDFeditor-GUI` (Windows)
-or `\home\...\.pyPDFeditor-GUI` (Linux like). Remember to delete them after upgrading if necessary.
+Icons and setting files are stored in the directory `\user\.\.pyPDFeditor-GUI` (Windows)
+or `\home\.\.pyPDFeditor-GUI` (Linux). Remember to delete them after upgrading if necessary.
 
 I wrote this scripts as robust as possible. If you encountered any crash and could not see any error from PyQt and
 python itself, open the python file [`📄pdfEditor.py`](pdfEditor.py) in IDE, find <u>line 10</u>, change the

@@ -721,7 +721,7 @@ def __main__(system: str,
     """
     a = QApplication([])
     s = a.desktop().screenGeometry()
-    screen_w, screen_h = s.width(), s.width()  # get screen info
+    screen_w, screen_h = s.width(), s.height()  # get screen info
     del s, a  # delete QApplication object so that it won't affect the following codes
     if screen_w > 1920 and screen_h > 1080:
         QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
