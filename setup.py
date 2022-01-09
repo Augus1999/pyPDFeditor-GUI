@@ -24,7 +24,7 @@ setup(
     author_email="Augus_1999@outlook.com",
     packages=["pypdfeditor_core"],
     package_dir={"pypdfeditor_core": "pypdfeditor_core"},
-    scripts=["pdfEditor", "pdfEditor.pyw"],
+    scripts=["pdfEditor", "pdfEditor.py"],
     script_name="pdfEditor",
     license="MIT",
     python_requires='>=3.7',

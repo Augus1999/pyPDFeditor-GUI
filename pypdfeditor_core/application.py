@@ -6,22 +6,24 @@ wrap the whole application to one function
 import os
 import sys
 import json
+import shutil
 import getpass
 import subprocess as sp
 from pathlib import Path
+from argparse import ArgumentParser
 import fitz
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtWidgets import QApplication, QColorDialog
 from .language import set_language, lag_s, lag_p
 from .windows import (MainR, PermMenuR, BUTTON_STYLE,
-                      SettingR, FontDialogR, app_home,)
+                      SettingR, FontDialogR, app_home, )
 from .functions import (setting_warning, toc2plaintext, plaintext2toc,
                         set_metadata0, set_metadata1, generate_menu,
                         reset_table, pdf_split, find_font, _warning,
                         open_pdf, set_icon, add_watermark, choose, clean,
                         add, render_pdf_page, save, copy, read_from_font_cache,
-                        store_font_path,)
+                        store_font_path, )
 
 
 class Main(MainR):
@@ -29,6 +31,7 @@ class Main(MainR):
     main window class
     all app functions are written here
     """
+
     def __init__(self,
                  system: str,
                  version: str):
@@ -36,7 +39,7 @@ class Main(MainR):
         content = setting_warning(
             os.path.join(app_home, 'settings.json'),
             self,
-            )
+        )
         self.Author = getpass.getuser()
         self.move(100, 20)
         self.colour_r = 0.24
@@ -92,9 +95,7 @@ class Main(MainR):
             self.tab3.line1.clear(),
             self.tab3.line2.clear(),
         ))
-        self.tab3.button9.clicked.connect(
-            lambda: os.remove(os.path.join(app_home, 'font_dir_cache.json')),
-        )
+        self.tab3.button9.clicked.connect(self._refresh_font)
         self.tab3.line3.returnPressed.connect(self.preview)
         self.tab3.line4.returnPressed.connect(self.preview)
         self.tab3.line5.returnPressed.connect(self.preview)
@@ -130,9 +131,9 @@ class Main(MainR):
             os.makedirs(app_home)
         if os.path.exists(os.path.join(app_home, 'settings.json')):
             with open(
-                os.path.join(app_home, 'settings.json'),
-                mode='r',
-                encoding='utf-8',
+                    os.path.join(app_home, 'settings.json'),
+                    mode='r',
+                    encoding='utf-8',
             ) as c:
                 states = json.load(c)
             if states == _settings:
@@ -204,6 +205,14 @@ class Main(MainR):
         else:
             sp.Popen([cmd, Path(widget.book_list[index].name)])
 
+    @staticmethod
+    def _refresh_font() -> None:
+        """
+        delete font dir cache file
+        """
+        if os.path.exists(os.path.join(app_home, 'font_dir_cache.json')):
+            os.remove(os.path.join(app_home, 'font_dir_cache.json'))
+
     def save1(self) -> None:
         """
         tab1 save function
@@ -254,7 +263,7 @@ class Main(MainR):
         rotation = int(self.tab3.line5.text())
         font_size = int(self.tab3.line3.text())
         watermark = self.tab3.text.toPlainText()
-        opacity = int(self.tab3.line4.text())/100
+        opacity = int(self.tab3.line4.text()) / 100
         if len(self.tab3.book_list) != 0:
             file_name, ok = save(self, '.pdf')
             if ok:
@@ -461,10 +470,10 @@ class Main(MainR):
         """
         _colour = QColorDialog.getColor(
             initial=QColor(
-                int(255*self.colour_r),
-                int(255*self.colour_g),
-                int(255*self.colour_b),
-                int(255*float(self.tab3.line4.text())/100)),
+                int(255 * self.colour_r),
+                int(255 * self.colour_g),
+                int(255 * self.colour_b),
+                int(255 * float(self.tab3.line4.text()) / 100)),
             options=QColorDialog.ColorDialogOption(
                 QColorDialog.ShowAlphaChannel,
             ),
@@ -514,7 +523,7 @@ class Main(MainR):
         rotation = int(self.tab3.line5.text())
         font_size = int(self.tab3.line3.text())
         watermark = self.tab3.text.toPlainText()
-        opacity = int(self.tab3.line4.text())/100
+        opacity = int(self.tab3.line4.text()) / 100
         if len(self.tab3.book_list) != 0:
             doc = fitz.Document()
             doc.insert_pdf(self.tab3.book_list[0], 0, 0)
@@ -541,7 +550,7 @@ class Main(MainR):
         """
         index = par[0] * widget.w_col + par[1]  # get position
         if len(widget.book_list) != 0:
-            widget.label0.setText(f'📖 page {index+1}')
+            widget.label0.setText(f'📖 page {index + 1}')
 
 
 class Setting(SettingR):
@@ -709,6 +718,31 @@ class FontDialog(FontDialogR):
         del self
 
 
+def reset() -> None:
+    """
+    remove all settings, caches and icons
+    """
+    setting_path = os.path.join(app_home, 'settings.json')
+    cache_path = os.path.join(app_home, 'font_dir_cache.json')
+    if os.path.exists(setting_path):
+        os.remove(setting_path)
+    if os.path.exists(cache_path):
+        os.remove(cache_path)
+    shutil.rmtree(os.path.join(app_home, 'ico'))
+    print('reset finished')
+
+
+def remove() -> None:
+    """
+    remove the whole application
+    """
+    c = input('Are you sure to remove the whole application? n/Y'
+              '\n>>>')
+    if c.lower() == 'y':
+        sp.call('pip uninstall pypdfeditor-gui', shell=True)
+        shutil.rmtree(app_home)
+
+
 def __main__(system: str,
              version: str,
              debug: bool = True) -> None:
@@ -719,6 +753,19 @@ def __main__(system: str,
     :param debug: whether display mupdf errors or not
     :return: None
     """
+    parser = ArgumentParser(description="pyPDFeditor-GUI")
+    parser.add_argument('--reset', action='store_true',
+                        help='only remove all settings, caches and icons; '
+                             'default settings and icons will be created at next launch')
+    parser.add_argument('--remove', action='store_true',
+                        help='remove the whole application')
+    args = parser.parse_args()
+    if args.reset:
+        reset()
+        return
+    if args.remove:
+        remove()
+        return
     a = QApplication([])
     s = a.desktop().screenGeometry()
     screen_w, screen_h = s.width(), s.height()  # get screen info

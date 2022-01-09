@@ -34,6 +34,7 @@ class Doc(fitz.Document):
     """
     a wrapper to fitz.Document class
     """
+
     def __init__(self, *args):
         super().__init__(*args)
         self.pass_word = None
@@ -168,12 +169,12 @@ def add_watermark(doc: any,
         r1 = fitz.Rect(
             10,
             10,
-            page.rect.width-10,
-            page.rect.height-10,
+            page.rect.width - 10,
+            page.rect.height - 10,
         )
         pos0 = fitz.Point(
-            page.rect.width//2,
-            page.rect.height//2,
+            page.rect.width // 2,
+            page.rect.height // 2,
         )
         shape = fitz.utils.Shape(page)
         shape.insert_textbox(
@@ -467,7 +468,7 @@ def generate_menu(pos,
             delete(
                 index=index,
                 widget=widget,
-             )
+            )
         if action == item2 and select == 1:
             save_as(
                 index=index,
@@ -512,14 +513,14 @@ def reset_table(book_len: int,
     :return: None
     """
     if book_len % widget.w_col == 0:
-        w_row = book_len//widget.w_col
+        w_row = book_len // widget.w_col
     else:
-        w_row = book_len//widget.w_col + 1
+        w_row = book_len // widget.w_col + 1
     widget.w_row = w_row
     widget.table.setColumnCount(widget.w_col)
     widget.table.setRowCount(widget.w_row)
-    width = int(widget.table.width()/widget.w_col)
-    height = int(width*4/3)
+    width = int(widget.table.width() / widget.w_col)
+    height = int(width * 4 / 3)
     for i in range(widget.w_col):
         widget.table.setColumnWidth(i, width)
     for i in range(widget.w_row):
@@ -540,7 +541,7 @@ def save_as(index: int,
     doc.insert_pdf(widget.book, widget.book_list[index], widget.book_list[index])
     f_name = os.path.splitext(
         os.path.basename(widget.book.name),
-    )[0]+f'-{widget.book_list[index]+1}.pdf'
+    )[0] + f'-{widget.book_list[index] + 1}.pdf'
     file_name, ok = QFileDialog.getSaveFileName(
         main,
         "save",
@@ -600,7 +601,7 @@ def extract_img(index: int,
     for key, inf in enumerate(img_inf):
         f_name = os.path.splitext(
             os.path.basename(widget.book.name),
-        )[0] + f'-{widget.book_list[index]+1}-image-{key+1}.png'
+        )[0] + f'-{widget.book_list[index] + 1}-image-{key + 1}.png'
         img_name = os.path.join(main.s_dir, f_name)
         # xref is inf[0]
         img = fitz.Pixmap(
@@ -661,7 +662,7 @@ def rearrange_page(index: int,
         parent,
         ' ',
         f'Move to page: (from 1 to {book_length})',
-        value=index+1,
+        value=index + 1,
         min=1,
         max=book_length,
         step=1,
@@ -672,7 +673,7 @@ def rearrange_page(index: int,
     page_index = widget.book_list[index]
     widget.book_list[index] = None
     if value <= index:
-        widget.book_list.insert(value-1, page_index)
+        widget.book_list.insert(value - 1, page_index)
     else:
         widget.book_list.insert(value, page_index)
     widget.book_list.remove(None)
@@ -778,7 +779,7 @@ def set_metadata1(metadata: dict,
         str(_time[4]).zfill(2),
         str(_time[5]).zfill(2),
         time.strftime('%z')[:3],
-        '\''+time.strftime('%z')[3:]+'\'',
+        '\'' + time.strftime('%z')[3:] + '\'',
     ))
     metadata["title"] = title
     metadata["author"] = author
@@ -795,7 +796,7 @@ def toc2plaintext(toc: list) -> str:
     """
     plaintext = []
     for content in toc:
-        head = f'{int(content[0])*"*"}-->{content[1]}-->{content[2]}'
+        head = f'{int(content[0]) * "*"}-->{content[1]}-->{content[2]}'
         plaintext.append(head)
     plaintext = '\n'.join(plaintext)
     return plaintext
@@ -853,9 +854,9 @@ def store_font_path(name_dict: dict,
     :param cache_file_name: stored directory
     """
     with open(
-        file=cache_file_name,
-        mode='w',
-        encoding='utf-8',
+            file=cache_file_name,
+            mode='w',
+            encoding='utf-8',
     ) as f:
         json.dump(
             name_dict,
@@ -876,9 +877,9 @@ def read_from_font_cache(cache_file_name: str) -> (dict, dict):
     """
     dir_dict = {}
     with open(
-        file=cache_file_name,
-        mode='r',
-        encoding='utf-8',
+            file=cache_file_name,
+            mode='r',
+            encoding='utf-8',
     ) as f:
         name_dict = json.load(f)
     for font_name in name_dict:

@@ -7,7 +7,7 @@ import re
 from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, QTransform, QCursor
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit, QScrollArea,
-                             QComboBox, QLineEdit, QPushButton, QTableWidget, QApplication)
+                             QComboBox, QLineEdit, QPushButton, QTableWidget, QApplication, )
 from .style_sheets import *
 from .functions import shadow, app_home
 
@@ -237,6 +237,7 @@ class MainR(QTabWidget):
     main window
     all window functions that define the appearance and behaviours are written here
     """
+
     def __init__(self, system: str, version: str):
         super().__init__()
         self.__system__ = system
@@ -424,10 +425,10 @@ class MainR(QTabWidget):
         painter = QPainter(self)
         painter.setPen(QtCore.Qt.NoPen)
         painter.setBrush(QColor(MAIN_COLOUR))
-        painter.drawRect(QtCore.QRect(0, 0, self.width()-2, self.height()-2))
+        painter.drawRect(QtCore.QRect(0, 0, self.width() - 2, self.height() - 2))
         painter.setBrush(QColor(LIGHT_COLOUR))
-        painter.drawRect(QtCore.QRect(0, self.height()-2, self.width(), 2))
-        painter.drawRect(QtCore.QRect(self.width()-2, 0, 2, self.height()))
+        painter.drawRect(QtCore.QRect(0, self.height() - 2, self.width(), 2))
+        painter.drawRect(QtCore.QRect(self.width() - 2, 0, 2, self.height()))
 
     # -------well, why do the following ugly codes exist?-------
     # -------they are used to re-enable the window animations under Windows platform-------
@@ -465,7 +466,7 @@ class MainR(QTabWidget):
                 rx = x_pos > self.width() - 5
                 ty = y_pos < 5
                 by = y_pos > self.height() - 5
-                if QtCore.QPoint(x_pos-btn.width(), y_pos) in btn.geometry():
+                if QtCore.QPoint(x_pos - btn.width(), y_pos) in btn.geometry():
                     return True, 9  # HTMAXBUTTON
                 if lx and ty:
                     return True, 13  # HTTOPLEFT
@@ -501,6 +502,7 @@ class MainR(QTabWidget):
                     self.btn_max_4.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
                 return True, 0  # HTNOWHERE
         return QTabWidget.nativeEvent(self, event_type, message)
+
     # -------here ends the ugly code-------
 
     def resizeEvent(self, event) -> None:
@@ -508,8 +510,8 @@ class MainR(QTabWidget):
         re-write resizeEvent
         """
         super().resizeEvent(event)
-        self.widget3.resize(int(self.width()*0.9), int(self.height()*0.9))
-        self.widget4.resize(int(self.width()*0.9), int(self.height()*0.9))
+        self.widget3.resize(int(self.width() * 0.9), int(self.height() * 0.9))
+        self.widget4.resize(int(self.width() * 0.9), int(self.height() * 0.9))
         if self.__system__ == 'Windows':
             self._title_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
                                    for y in range(52)]
@@ -656,7 +658,7 @@ class MainR(QTabWidget):
         """
         scroll_area = QScrollArea()
         scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
-        self.widget3.setMinimumSize(int(self.width()*0.8), int(self.height()*0.8))
+        self.widget3.setMinimumSize(int(self.width() * 0.8), int(self.height() * 0.8))
         layout = QGridLayout(self.widget3)
         scroll_area.setWidget(self.widget3)
         self.tab3.grid = QGridLayout(self.tab3)
@@ -772,7 +774,7 @@ class MainR(QTabWidget):
         self.tab3.label10.setFixedSize(35, 35)
         self.tab3.label3.setText('pt')
         self.tab3.label6.setText('%')
-        self.tab3.label8.setText('* '*20)
+        self.tab3.label8.setText('* ' * 20)
         self.tab3.label10.setText('°')
         self.tab3.label1.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label2.setAlignment(QtCore.Qt.AlignCenter)
@@ -836,7 +838,7 @@ class MainR(QTabWidget):
         """
         scroll_area = QScrollArea()
         scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
-        self.widget4.setMinimumSize(int(self.width()*0.8), int(self.height()*0.8))
+        self.widget4.setMinimumSize(int(self.width() * 0.8), int(self.height() * 0.8))
         layout = QGridLayout(self.widget4)
         scroll_area.setWidget(self.widget4)
         self.tab4.grid = QGridLayout(self.tab4)
@@ -935,6 +937,7 @@ class SettingR(QWidget):
     """
     setting window
     """
+
     def __init__(self):
         super().__init__()
         grid = QGridLayout(self)
@@ -993,6 +996,7 @@ class PermMenuR(QWidget):
     """
     permission setting menu window
     """
+
     def __init__(self):
         super().__init__()
         grid = QGridLayout(self)
@@ -1072,6 +1076,7 @@ class FontDialogR(QWidget):
     """
     font menu window
     """
+
     def __init__(self):
         super().__init__()
         grid = QGridLayout(self)
