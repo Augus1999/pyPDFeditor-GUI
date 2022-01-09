@@ -52,24 +52,31 @@ PyMuPDF>=1.19.2
 
 ### install from source
 
+you will need `setuptools` and `wheel` installed
+
 ```bash
+$ pip install -r requirements.txt
 $ python setup.py bdist_wheel
-$ python setup.py install
+$ cd dist\
+$ pip install pyPDFdgitor_GUI-x.y.z-py3-none-any.whl
 ```
+
+where `x.y.z` is the version.
 
 ### install from PyPi
 
 [![Downloads](https://static.pepy.tech/personalized-badge/pyPDFeditor-GUI?period=total&units=international_system&left_color=black&right_color=green&left_text=Downloads)](https://pepy.tech/project/pyPDFeditor-GUI)
 
 ```bash
-$ pip install pyPDFeditor-GUI
+$ pip install -U pyPDFeditor-GUI
 ```
 
 ### Run
 
-`$ pdfEditor` to open the application window.
+`$ pdfEditor` to launch the application.
 
-`$ pdfEditor --reset` to reset the application; this will delete all settings, caches and icons.
+`$ pdfEditor --reset` to reset the application; this will delete all settings, caches and icons. Default settings and
+icons will be created at next launch.
 
 `$ pdfEditor --remove` to remove the whole application.
 
