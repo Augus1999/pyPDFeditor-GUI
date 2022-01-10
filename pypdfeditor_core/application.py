@@ -760,6 +760,9 @@ def __main__(system: str,
     parser.add_argument('--remove', action='store_true',
                         help='remove the whole application')
     args = parser.parse_args()
+    if args.reset and args.remove:
+        print('reset or remove?')
+        return
     if args.reset:
         reset()
         return
