@@ -54,14 +54,17 @@ PyMuPDF>=1.19.2
 
 you will need `setuptools` and `wheel` installed
 
+* first `cd` to where `setup.py` locates
+
 ```bash
-$ pip install -r requirements.txt
-$ python setup.py bdist_wheel
-$ cd dist\
-$ pip install pyPDFdgitor_GUI-x.y.z-py3-none-any.whl
+$ cd <path>
 ```
 
-where `x.y.z` is the version.
+* then run
+
+```bash
+$ pip install .\
+```
 
 ### install from PyPi
 
