@@ -74,14 +74,20 @@ $ pip install .\
 $ pip install -U pyPDFeditor-GUI
 ```
 
+### build thy own package
+
+this requires `build`, `setuptools` and `wheel` installed
+
+* run `$ python -m build -n` on Windows; run `$ python3 -m build -n` on macOS and Linux
+
 ### Run
 
-`$ pdfEditor` to launch the application.
+* `$ pdfEditor` to launch the application.
 
-`$ pdfEditor --reset` to reset the application; this will delete all settings, caches and icons. Default settings and
-icons will be created at next launch.
+* `$ pdfEditor --reset` to reset the application; this will delete all settings, caches and icons. Default settings and
+  icons will be created at next launch.
 
-`$ pdfEditor --remove` to remove the whole application.
+* `$ pdfEditor --remove` to remove the whole application.
 
 ## Screenshot 🎞️
 
@@ -94,8 +100,8 @@ on Windows 11
 
 ## Others
 
-Icons and setting files are stored in the directory `\user\.\.pyPDFeditor-GUI` (Windows)
-or `\home\.\.pyPDFeditor-GUI` (Linux). Please reset the application if icons display incorrectly after upgrading.
+Icons and setting files are stored in the directory `C:\User\USER\.pyPDFeditor-GUI` (Windows)
+or `home/USER/.pyPDFeditor-GUI` (Linux). Please reset the application if icons display incorrectly after upgrading.
 
 I wrote this scripts as robust as possible. If you encountered any crash and could not see any error from PyQt and
 python itself, open the python file [`📄pdfEditor.py`](pdfEditor.py) in IDE, find <u>line 10</u>, change the
