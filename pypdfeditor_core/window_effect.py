@@ -57,10 +57,11 @@ class WindowEffect:
         self._SendMessage = self._user32.SendMessageA
         self.isMaximised = self._user32.IsZoomed
 
-    def addShadowEffect(self, h_wnd: int) -> None:
+    def add_shadow_effect(self, h_wnd: int) -> None:
         """
-        add shadow to the window
-        :param h_wnd: winID
+        add shadow to the window (extend the client area)
+
+        :param h_wnd: window ID
         :return: None
         """
         margins = MARGINS(-1)
@@ -70,6 +71,10 @@ class WindowEffect:
     def monitorNCCALCSIZE(_msg: MSG, geometry) -> None:
         """
         resize the window to fit the screen
+
+        :param _msg: MSG
+        :param geometry: QRect() object
+        :return: None
         """
         params = cast(_msg.lParam, POINTER(NCCalcSizePARAMS)).contents
         params.rgrc[0].left = geometry.x()
@@ -77,7 +82,13 @@ class WindowEffect:
         params.rgrc[0].right = geometry.width()
         params.rgrc[0].bottom = geometry.height()
 
-    def addWindowStyle(self, h_wnd: int) -> None:
+    def add_window_style(self, h_wnd: int) -> None:
+        """
+        add native window behaviour
+
+        :param h_wnd: window ID
+        :return: None
+        """
         style = self._GetWindowLong(h_wnd, -16)
         self._SetWindowLong(
             h_wnd,
@@ -92,10 +103,34 @@ class WindowEffect:
         )
 
     def move_window(self, h_wnd: int) -> None:
+        """
+        send message to system the window is moving
+
+        :param h_wnd: window ID
+        :return: None
+        """
         self._user32.ReleaseCapture()
         self._SendMessage(
             h_wnd,
             0x0112,  # WM_SYSCOMMAND
             0xF010 + 2,  # SC_MOVE + HTCAPTION
             0,
+        )
+
+    def screen_change(self, h_wnd: int) -> None:
+        """
+        reset window position after screen changed;
+        this method probably can solve displaying problem
+        after moving into another screen with different dpi
+
+        :param h_wnd: window ID
+        :return: None
+        """
+        self._user32.SetWindowPos(
+            h_wnd,
+            None,
+            0, 0, 0, 0,  # left top right bottom
+            0x0002 |  # SWP_NOMOVE
+            0x0001 |  # SWP_NOSIZE
+            0x0020,  # SWP_FRAMECHANGED
         )

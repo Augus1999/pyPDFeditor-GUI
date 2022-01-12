@@ -394,8 +394,11 @@ class MainR(QTabWidget):
             self._title_bar_pos = [QtCore.QPoint(x, y) for x in range(1200)
                                    for y in range(52)]
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-            self.windowEffect.addShadowEffect(int(self.winId()))
-            self.windowEffect.addWindowStyle(int(self.winId()))
+            self.windowEffect.add_shadow_effect(int(self.winId()))
+            self.windowEffect.add_window_style(int(self.winId()))
+            self.windowHandle().screenChanged.connect(
+                lambda: self.windowEffect.screen_change(int(self.winId())),
+            )
         else:
             self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
             self.tab2.grid.addWidget(self.tab2.button3, 0, 20)
