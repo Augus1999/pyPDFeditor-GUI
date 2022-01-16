@@ -15,7 +15,9 @@ for _, __, file_names in os.walk(ico_home):
         if file_name.endswith(end):
             with open(os.path.join(ico_home, file_name)) as f:
                 data = f.read()
-            files[file_name] = re.sub(r'\s+', ' ', data)
+            data = re.sub(r'\s+', ' ', data)
+            data = re.sub(r'>\s+?<', '><', data)
+            files[file_name] = data
 
 print(files)
 
