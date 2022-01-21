@@ -30,6 +30,6 @@ setup(
     license="MIT",
     python_requires='>=3.7',
     install_requires=["PyMuPDF>=1.19.2", "PyQt5>=5.15.4"],
-    url="https://github.com/Augus1999/pyPDFeditor-GUI",
+    url="https://augus1999.github.io/pyPDFeditor-GUI/",
 )
 rmtree('pyPDFeditor_GUI.egg-info')  # remove egg-info dir
