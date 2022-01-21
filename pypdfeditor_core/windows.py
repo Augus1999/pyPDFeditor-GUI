@@ -546,7 +546,7 @@ class MainR(QTabWidget):
             designed to work on simple PDF handling.</p>
             <p style='color:#333;font-family:Verdana'>Out [3]: User manual is on
             <a style='color:#a3b5b3'>
-            https://github.com/Augus1999/pyPDFeditor-GUI#readme</a></p>
+            https://augus1999.github.io/pyPDFeditor-GUI/</a></p>
             <p style='color:#333;font-family:Verdana'>Out [4]: ...</p>
             """
         )
@@ -554,8 +554,8 @@ class MainR(QTabWidget):
         label_w = QLabel(self.tab0)
         label_w.setStyleSheet(LABEL_STYLE)
         label_w.setText(
-            "<a href='https://github.com/Augus1999/pyPDFeditor-GUI' style='color:#a3b5b3'>"
-            "<small>https://github.com/Augus1999/pyPDFeditor-GUI</small></a>",
+            "<a href='https://augus1999.github.io/pyPDFeditor-GUI/' style='color:#a3b5b3'>"
+            "<small>https://augus1999.github.io/pyPDFeditor-GUI/</small></a>",
         )
         label_w.setOpenExternalLinks(True)
         self.tab0.label_v = QLabel(self.tab0)
