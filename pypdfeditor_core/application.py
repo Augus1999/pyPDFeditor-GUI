@@ -95,7 +95,13 @@ class Main(MainR):
             self.tab3.line1.clear(),
             self.tab3.line2.clear(),
         ))
-        self.tab3.button9.clicked.connect(self._refresh_font)
+        self.tab3.button9.clicked.connect(
+            lambda: os.remove(
+                os.path.join(app_home, 'font_dir_cache.json'),
+            ) if os.path.exists(
+                os.path.join(app_home, 'font_dir_cache.json'),
+            ) else None
+        )  # delete font dir cache
         self.tab3.line3.returnPressed.connect(self.preview)
         self.tab3.line4.returnPressed.connect(self.preview)
         self.tab3.line5.returnPressed.connect(self.preview)
@@ -204,14 +210,6 @@ class Main(MainR):
             sp.Popen([cmd, Path(f_name)])
         else:
             sp.Popen([cmd, Path(widget.book_list[index].name)])
-
-    @staticmethod
-    def _refresh_font() -> None:
-        """
-        delete font dir cache file
-        """
-        if os.path.exists(os.path.join(app_home, 'font_dir_cache.json')):
-            os.remove(os.path.join(app_home, 'font_dir_cache.json'))
 
     def save1(self) -> None:
         """

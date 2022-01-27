@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Author: Nianze A. TAO
 """
-initialise the module
+core of pyPDFeditor-GUI
 """
 import os
 import platform
@@ -26,6 +26,6 @@ if not os.path.exists(os.path.join(app_home, 'ico')):
 
 __system__ = platform.system()
 __author__ = 'Nianze A. TAO (Omozawa SUENO)'
-__version__ = '2.0.7'
+__version__ = '2.0.77'
 __all__ = ['__main__', '__system__', '__version__']
 # --------------完成！2021年八月十日に--------------

@@ -1,8 +1,8 @@
 # pyPDFeditor-GUI
 
-This project is based on PyQt5 and PyMuPDF and tested on Python 3.8.6 & 3.9.7 on Windows 10 & 11.
+This project is based on PyQt5 and PyMuPDF and tested on Python 3.8 & 3.9 on Windows 10 & 11.
 
-Current version is v2.0.7 ⌛
+Current version is v2.0.77 ⌛
 
 ## Welcome 🎃🎉
 

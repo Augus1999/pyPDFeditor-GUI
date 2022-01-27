@@ -387,8 +387,7 @@ class MainR(QTabWidget):
             self.btn_ext_2.clicked.connect(self.close)
             self.btn_ext_3.clicked.connect(self.close)
             self.btn_ext_4.clicked.connect(self.close)
-            from .window_effect import WindowEffect
-            from ctypes.wintypes import MSG
+            from .window_effect import WindowEffect, MSG
             self.windowEffect = WindowEffect()
             self.msg = MSG
             self._title_bar_pos = [QtCore.QPoint(x, y) for x in range(1200)
@@ -410,12 +409,6 @@ class MainR(QTabWidget):
         self.tab3.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
         self.tab4.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
         return
-
-    def close(self) -> None:
-        """
-        re-write close
-        """
-        QTabWidget.close(self)
 
     def paintEvent(self, event) -> None:
         """

@@ -3,7 +3,7 @@
 """
 run the application
 """
-from scripts import __main__, __system__, __version__
+from pypdfeditor_core import __main__, __system__, __version__
 
 
 if __name__ == '__main__':

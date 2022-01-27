@@ -3,6 +3,7 @@
 """
 set up the application
 """
+import os
 from shutil import rmtree
 from setuptools import setup
 from pypdfeditor_core import __version__
@@ -31,5 +32,26 @@ setup(
     python_requires='>=3.7',
     install_requires=["PyMuPDF>=1.19.2", "PyQt5>=5.15.4"],
     url="https://augus1999.github.io/pyPDFeditor-GUI/",
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: End Users/Desktop",
+        "License :: OSI Approved :: MIT License",
+        "Natural Language :: Chinese (Traditional)",
+        "Natural Language :: English",
+        "Natural Language :: Japanese",
+        "Operating System :: MacOS",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Topic :: Office/Business",
+    ],
 )
-rmtree('pyPDFeditor_GUI.egg-info')  # remove egg-info dir
+
+if os.path.exists('build'):
+    rmtree('build')
+if os.path.exists('pyPDFeditor_GUI.egg-info'):
+    rmtree('pyPDFeditor_GUI.egg-info')  # remove egg-info dir
