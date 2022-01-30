@@ -4,9 +4,21 @@
 set up the application
 """
 import os
+import re
+from pathlib import Path
 from shutil import rmtree
 from setuptools import setup
-from pypdfeditor_core import __version__
+init_file = Path('pypdfeditor_core') / '__init__.py'
+
+with open(init_file, mode='r', encoding='utf-8') as fh:
+    lines = fh.readlines()
+    for line in lines:
+        if '__version__' in line:
+            version = re.findall(r'[0-9]+\.[0-9]+\.[0-9]+', line)
+            if len(version) != 0:
+                version = version[0]
+                print("version:", version)
+                break
 
 with open('README.md', mode='r', encoding='utf-8') as f:
     long_description = f.read()
@@ -18,7 +30,7 @@ long_description = long_description.replace(
 
 setup(
     name="pyPDFeditor-GUI",
-    version=__version__,
+    version=version,
     description="A desktop application to edit PDF files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
