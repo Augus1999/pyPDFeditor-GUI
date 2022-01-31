@@ -287,10 +287,9 @@ def page_icon(page: fitz.Page,
     widget = QWidget(None)
     layout.addWidget(label, alignment=QtCore.Qt.AlignCenter)
     widget.setLayout(layout)
-    if _cover.height() / _cover.width() > 4 / 3:
+    if _cover.height() / _cover.width() >= 4 / 3:
         scaled_height = int(width // w_col * 4 / 3 * _scaled)
         scaled_width = int(scaled_height * (_cover.width() / _cover.height()))
-    # if _cover.height() / _cover.width() <= 4 / 3:
     else:
         scaled_width = int(width // w_col * _scaled)
         scaled_height = int(scaled_width * (_cover.height() / _cover.width()))
@@ -532,6 +531,7 @@ def save_as(index: int,
             main: QWidget) -> None:
     """
     save the selected page as PDF file
+
     :param index: position index
     :param widget: widget
     :param main: main
@@ -566,6 +566,7 @@ def save_as(index: int,
 def clean(widget: QWidget) -> None:
     """
     clear the table contents
+
     :param widget: widget
     :return: None
     """
@@ -652,6 +653,7 @@ def rearrange_page(index: int,
                    parent: QWidget) -> None:
     """
     rearrange pages
+
     :param index: position index of the selected page
     :param widget: widget
     :param parent: parent widget
@@ -690,6 +692,7 @@ def choose(widget: QtWidgets.QLineEdit,
            c_dir: str) -> None:
     """
     choose folder
+
     :param widget: widget
     :param c_dir: from where to choose
     :return: None
@@ -762,6 +765,7 @@ def set_metadata1(metadata: dict,
                   keywords: str) -> dict:
     """
     set metadata to pdf document
+
     :param metadata: the metadata table from pdf file
     :param title: title
     :param author: author

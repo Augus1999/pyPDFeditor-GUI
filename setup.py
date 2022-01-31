@@ -38,12 +38,12 @@ setup(
     author_email="Augus_1999@outlook.com",
     packages=["pypdfeditor_core"],
     package_dir={"pypdfeditor_core": "pypdfeditor_core"},
-    scripts=["pdfEditor", "pdfEditor.py"],
     script_name="pdfEditor",
     license="MIT",
     python_requires='>=3.7',
     install_requires=["PyMuPDF>=1.19.2", "PyQt5>=5.15.4"],
     url="https://augus1999.github.io/pyPDFeditor-GUI/",
+    project_urls={"Source": "https://github.com/Augus1999/pyPDFeditor-GUI"},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: End Users/Desktop",
@@ -61,6 +61,9 @@ setup(
         "Programming Language :: Python :: 3.11",
         "Topic :: Office/Business",
     ],
+    entry_points={
+        "console_scripts": ['pdfeditor=pypdfeditor_core:main']
+    }
 )
 
 if os.path.exists('build'):

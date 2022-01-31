@@ -4,17 +4,15 @@
 wrap the whole application to one function
 """
 import os
-import sys
 import json
 import shutil
 import getpass
 import subprocess as sp
 from pathlib import Path
-from argparse import ArgumentParser
 import fitz
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
-from PyQt5.QtWidgets import QApplication, QColorDialog
+from PyQt5.QtWidgets import QColorDialog
 from .language import set_language, lag_s, lag_p
 from .windows import (MainR, PermMenuR, BUTTON_STYLE,
                       SettingR, FontDialogR, app_home, )
@@ -29,6 +27,7 @@ from .functions import (setting_warning, toc2plaintext, plaintext2toc,
 class Main(MainR):
     """
     main window class
+
     all app functions are written here
     """
 
@@ -739,43 +738,3 @@ def remove() -> None:
     if c.lower() == 'y':
         sp.call('pip uninstall pypdfeditor-gui', shell=True)
         shutil.rmtree(app_home)
-
-
-def __main__(system: str,
-             version: str,
-             debug: bool = True) -> None:
-    """
-    main function
-    :param system: system name
-    :param version: version name
-    :param debug: whether display mupdf errors or not
-    :return: None
-    """
-    parser = ArgumentParser(description="pyPDFeditor-GUI")
-    parser.add_argument('--reset', action='store_true',
-                        help='only remove all settings, caches and icons; '
-                             'default settings and icons will be created at next launch')
-    parser.add_argument('--remove', action='store_true',
-                        help='remove the whole application')
-    args = parser.parse_args()
-    if args.reset and args.remove:
-        print('reset or remove?')
-        return
-    if args.reset:
-        reset()
-        return
-    if args.remove:
-        remove()
-        return
-    a = QApplication([])
-    s = a.desktop().screenGeometry()
-    screen_w, screen_h = s.width(), s.height()  # get screen info
-    del s, a  # delete QApplication object so that it won't affect the following codes
-    if screen_w > 1920 and screen_h > 1080:
-        QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-        QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
-    fitz.TOOLS.mupdf_display_errors(debug)
-    app = QApplication(sys.argv)
-    main = Main(system, version)
-    main.show()
-    sys.exit(app.exec())
