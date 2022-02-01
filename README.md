@@ -2,7 +2,7 @@
 
 This project is based on PyQt5 and PyMuPDF and tested on Python 3.8 & 3.9 & 3.10 on Windows 10 & 11.
 
-Current version is v2.1.0 ⌛
+Current version is v2.1.1 ⌛
 
 ## Welcome 🎃🎉
 
@@ -63,7 +63,7 @@ $ cd <path>
 * then run
 
 ```bash
-$ pip install .\
+$ pip install .
 ```
 
 ### install from PyPi

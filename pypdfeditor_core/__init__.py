@@ -30,7 +30,7 @@ if not os.path.exists(os.path.join(app_home, 'ico')):
 
 __system__ = platform.system()
 __author__ = 'Nianze A. TAO (Omozawa SUENO)'
-__version__ = '2.1.0'
+__version__ = '2.1.1'
 
 
 def main(system: str = __system__,

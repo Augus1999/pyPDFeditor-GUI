@@ -737,4 +737,6 @@ def remove() -> None:
               '\n>>>')
     if c.lower() == 'y':
         sp.call('pip uninstall pypdfeditor-gui', shell=True)
-        shutil.rmtree(app_home)
+        if os.path.exists(app_home):
+            shutil.rmtree(app_home)
+        print('removed successfully')

@@ -24,6 +24,5 @@ if __name__ == '__main__':
         sys.exit(0)
     if args.remove:
         remove()
-        print('removed successfully')
         sys.exit(0)
     main()
