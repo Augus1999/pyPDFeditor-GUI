@@ -729,7 +729,6 @@ def reset() -> None:
         os.remove(setting_path)
     if os.path.exists(cache_path):
         os.remove(cache_path)
-    shutil.rmtree(os.path.join(app_home, 'ico'))
     print('reset finished')
 
 
@@ -743,4 +742,4 @@ def remove() -> None:
         sp.call('pip uninstall pypdfeditor-gui', shell=True)
         if os.path.exists(app_home):
             shutil.rmtree(app_home)
-        print('removed successfully')
+        print('process finished')
