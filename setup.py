@@ -44,6 +44,8 @@ setup(
     install_requires=["PyMuPDF>=1.19.2", "PyQt5>=5.15.4"],
     url="https://augus1999.github.io/pyPDFeditor-GUI/",
     project_urls={"Source": "https://github.com/Augus1999/pyPDFeditor-GUI"},
+    include_package_data=True,
+    package_data={"pypdfeditor_core": ["icons/*.svg", "icons/*.py"]},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: End Users/Desktop",

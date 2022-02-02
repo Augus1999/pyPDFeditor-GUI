@@ -2,7 +2,7 @@
 
 This project is based on PyQt5 and PyMuPDF and tested on Python 3.8 & 3.9 & 3.10 on Windows 10 & 11.
 
-Current version is v2.1.1 ⌛
+Current version is v2.1.2 ⌛
 
 ## Welcome 🎃🎉
 
@@ -84,8 +84,8 @@ this requires `build`, `setuptools` and `wheel` installed
 
 * `$ pdfeditor` to launch the application.
 
-* `$ python -m pypdfeditor_core --reset` to reset the application; this will delete all settings, caches and icons. Default settings and
-  icons will be created at next launch.
+* `$ python -m pypdfeditor_core --reset` to reset the application; this will delete all settings, caches and icons.
+  Default settings and icons will be created at next launch.
 
 * `$ python -m pypdfeditor_core --remove` to remove the whole application.
 
@@ -100,7 +100,7 @@ on Windows 11
 
 ## Others
 
-Icons and setting files are stored in the directory `C:\User\USER\.pyPDFeditor-GUI` (Windows)
-or `home/USER/.pyPDFeditor-GUI` (Linux). Please reset the application if icons display incorrectly after upgrading.
+Setting files are stored in the directory `C:\User\USER\.pyPDFeditor-GUI` (Windows) or `home/USER/.pyPDFeditor-GUI`
+(Linux). Please reset the application if icons display incorrectly after upgrading.
 
 Please report any errors to [Issues](https://github.com/Augus1999/pyPDFeditor-GUI/issues). Thank you!

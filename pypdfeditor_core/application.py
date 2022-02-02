@@ -15,13 +15,17 @@ from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtWidgets import QColorDialog
 from .language import set_language, lag_s, lag_p
 from .windows import (MainR, PermMenuR, BUTTON_STYLE,
-                      SettingR, FontDialogR, app_home, )
+                      SettingR, FontDialogR, )
 from .functions import (setting_warning, toc2plaintext, plaintext2toc,
                         set_metadata0, set_metadata1, generate_menu,
                         reset_table, pdf_split, find_font, _warning,
                         open_pdf, set_icon, add_watermark, choose, clean,
                         add, render_pdf_page, save, copy, read_from_font_cache,
                         store_font_path, )
+
+
+user_home = os.path.expanduser('~')
+app_home = os.path.join(user_home, '.pyPDFeditor-GUI')
 
 
 class Main(MainR):

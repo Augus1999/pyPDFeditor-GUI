@@ -3,7 +3,6 @@
 """
 core of pyPDFeditor-GUI
 """
-import os
 import sys
 import platform
 import fitz
@@ -11,26 +10,9 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
 from .application import reset, remove, Main
 
-user_home = os.path.expanduser('~')
-app_home = os.path.join(user_home, '.pyPDFeditor-GUI')
-
-if not os.path.exists(app_home):
-    os.makedirs(app_home)
-
-if not os.path.exists(os.path.join(app_home, 'ico')):
-    os.makedirs(os.path.join(app_home, 'ico'))
-    from .icon_contents import data
-    for icon_name in data:
-        with open(
-                os.path.join(app_home, 'ico', icon_name),
-                mode='w',
-                encoding='utf-8',
-        ) as i:
-            i.write(data[icon_name])
-
 __system__ = platform.system()
 __author__ = 'Nianze A. TAO (Omozawa SUENO)'
-__version__ = '2.1.1'
+__version__ = '2.1.2'
 
 
 def main(system: str = __system__,

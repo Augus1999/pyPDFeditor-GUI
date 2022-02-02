@@ -9,7 +9,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit, QScrollArea,
                              QComboBox, QLineEdit, QPushButton, QTableWidget, QApplication, )
 from .style_sheets import *
-from .functions import shadow, app_home
+from .functions import shadow
 
 
 class SwitchBtn(QWidget):
@@ -245,9 +245,7 @@ class MainR(QTabWidget):
         self.resize(1200, 890)  # 1200 890
         self.setMinimumSize(580, 450)
         self.setWindowTitle('PDF Editor')
-        self.setWindowIcon(
-            QIcon(os.path.join(app_home, 'ico', 'pdf icon.svg')),
-        )
+        self.setWindowIcon(QIcon(str(icon_path / 'pdf icon.svg')))
         self.setTabPosition(QTabWidget.West)
         self.setIconSize(QtCore.QSize(35, 35))
         self.setStyleSheet(TAB_STYLE)
@@ -270,35 +268,35 @@ class MainR(QTabWidget):
         self.addTab(
             self.tab0,
             QIcon(
-                QPixmap(os.path.join(app_home, 'ico', 'home.svg'),
+                QPixmap(str(icon_path / 'home.svg'),
                         ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
             ''
         )
         self.addTab(
             self.tab1,
             QIcon(
-                QPixmap(os.path.join(app_home, 'ico', 'merge.svg'),
+                QPixmap(str(icon_path / 'merge.svg'),
                         ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
         self.addTab(
             self.tab2,
             QIcon(
-                QPixmap(os.path.join(app_home, 'ico', 'edit.svg'),
+                QPixmap(str(icon_path / 'edit.svg'),
                         ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
         self.addTab(
             self.tab3,
             QIcon(
-                QPixmap(os.path.join(app_home, 'ico', 'lock.svg'),
+                QPixmap(str(icon_path / 'lock.svg'),
                         ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
         self.addTab(
             self.tab4,
             QIcon(
-                QPixmap(os.path.join(app_home, 'ico', 'metadata.svg'),
+                QPixmap(str(icon_path / 'metadata.svg'),
                         ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
             '',
         )
@@ -514,7 +512,7 @@ class MainR(QTabWidget):
 
     def windowChange(self) -> None:
         """
-        maximise or normalise the window
+        maximize or normalize the window
         """
         if self.isMaximized():
             self.showNormal()
@@ -523,7 +521,7 @@ class MainR(QTabWidget):
 
     def tab0_init(self) -> None:
         """
-        initialise tab0
+        initialize tab0
         """
         self.tab0.grid = QGridLayout(self.tab0)
         text = QTextEdit(self.tab0)
@@ -560,7 +558,7 @@ class MainR(QTabWidget):
 
     def tab1_init(self) -> None:
         """
-        initialise tab1
+        initialize tab1
         """
         self.tab1.grid = QGridLayout(self.tab1)
         self.tab1.table = QTableWidget(self.tab1)
@@ -605,7 +603,7 @@ class MainR(QTabWidget):
 
     def tab2_init(self) -> None:
         """
-        initialise tab2
+        initialize tab2
         """
         self.tab2.grid = QGridLayout(self.tab2)
         self.tab2.table = QTableWidget(self.tab2)
@@ -650,7 +648,7 @@ class MainR(QTabWidget):
 
     def tab3_init(self) -> None:
         """
-        initialise tab3
+        initialize tab3
         """
         scroll_area = QScrollArea()
         scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
@@ -830,7 +828,7 @@ class MainR(QTabWidget):
 
     def tab4_init(self) -> None:
         """
-        initialise tab4
+        initialize tab4
         """
         scroll_area = QScrollArea()
         scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
@@ -887,7 +885,7 @@ class MainR(QTabWidget):
         self.tab4.label4.setStyleSheet(LABEL_STYLE)
         self.tab4.label5.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setPixmap(
-            QPixmap(os.path.join(app_home, 'ico', 'book2.svg')).scaled(
+            QPixmap(str(icon_path / 'book2.svg')).scaled(
                 180,
                 180,
                 QtCore.Qt.IgnoreAspectRatio,
@@ -939,9 +937,7 @@ class SettingR(QWidget):
         grid = QGridLayout(self)
         self.setFixedSize(600, 280)
         self.setWindowTitle('Setting')
-        self.setWindowIcon(
-            QIcon(os.path.join(app_home, 'ico', 'settings.svg')),
-        )
+        self.setWindowIcon(QIcon(str(icon_path / 'settings.svg')))
         self.setWindowFlags(
             QtCore.Qt.CustomizeWindowHint |
             QtCore.Qt.WindowCloseButtonHint,
@@ -998,7 +994,7 @@ class PermMenuR(QWidget):
         grid = QGridLayout(self)
         self.setFixedSize(480, 400)
         self.setWindowTitle(' ')
-        self.setWindowIcon(QIcon(os.path.join(app_home, 'ico', 'lock.svg')))
+        self.setWindowIcon(QIcon(str(icon_path / 'lock.svg')))
         self.setStyleSheet('background-color:#ffffff')
         self.setWindowFlags(
             QtCore.Qt.CustomizeWindowHint |
@@ -1078,7 +1074,7 @@ class FontDialogR(QWidget):
         grid = QGridLayout(self)
         self.setFixedSize(486, 324)
         self.setWindowTitle('Select Font')
-        self.setWindowIcon(QIcon(os.path.join(app_home, 'ico', 'font.svg')))
+        self.setWindowIcon(QIcon(str(icon_path / 'font.svg')))
         self.setWindowFlags(
             QtCore.Qt.CustomizeWindowHint |
             QtCore.Qt.WindowCloseButtonHint,

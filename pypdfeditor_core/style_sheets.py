@@ -3,9 +3,9 @@
 """
 all style sheets
 """
-import os
-user_home = os.path.expanduser('~')
-app_home = os.path.join(user_home, '.pyPDFeditor-GUI').replace('\\', '/')
+from .icons import icon_path
+
+icon_path_ = str(icon_path).replace('\\', '/')
 
 MAIN_COLOUR = '#6272a4'  # main colour of the theme
 COMP_COLOUR = '#b7cbc9'  # complementary colour of MAIN_COLOUR
@@ -53,9 +53,9 @@ COMBO_BOX_STYLE = f'''
         border-left-style:solid;
         border-top-right-radius:3px;
         border-bottom-right-radius:3px;	
-        background-image:url({app_home}/ico/chevron_down.svg);
+        background-image:url({icon_path_}/chevron_down.svg);
         background-position:center;
-        background-repeat:no-reperat}}
+        background-repeat:no-repeat}}
         QScrollBar:vertical{{
         background-color:{LIGHT_COLOUR};
         border:none;
@@ -111,17 +111,17 @@ BUTTON_STYLE = f'''
         QPushButton{{
         border-radius:0px;
         background-color:transparent;
-        image:url({app_home}/ico/%s)}}
+        image:url({icon_path_}/%s)}}
         QPushButton:hover{{
-        image:url({app_home}/ico/%s)}}
+        image:url({icon_path_}/%s)}}
         QPushButton:pressed{{
-        image:url({app_home}/ico/%s)}}
+        image:url({icon_path_}/%s)}}
         '''
 BUTTON_STYLE0 = f'''
         QPushButton{{
         border-radius:10px;
         background-color:transparent;
-        image:url({app_home}/ico/%s)}}
+        image:url({icon_path_}/%s)}}
         QPushButton:hover{{
         background-color:#e2e2dd}}
         '''
@@ -129,10 +129,10 @@ BUTTON_STYLE1 = f'''
         QPushButton{{
         border-radius:10px;
         background-color:transparent;
-        image:url({app_home}/ico/%s)}}
+        image:url({icon_path_}/%s)}}
         QPushButton:hover{{
         background-color:#f25355;
-        image:url({app_home}/ico/%s)}}
+        image:url({icon_path_}/%s)}}
         '''
 TABLE_STYLE1 = f'''
         QTableWidget{{

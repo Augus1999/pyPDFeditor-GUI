@@ -24,10 +24,8 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QWidget,
 )
+from .icons import icon_path
 from .language import MENU_L, MESSAGE
-
-user_home = os.path.expanduser('~')
-app_home = os.path.join(user_home, '.pyPDFeditor-GUI')
 
 
 class Doc(fitz.Document):
@@ -429,35 +427,35 @@ def generate_menu(pos,
     if 0 <= index < len(widget.book_list):
         menu = QtWidgets.QMenu()
         item1 = menu.addAction(
-            QtGui.QIcon(os.path.join(app_home, 'ico', 'delete.svg')),
+            QtGui.QIcon(os.path.join(icon_path, 'delete.svg')),
             MENU_L[main.language][0],
         )
         item2, item3, item4, item5, item6, item7 = None, None, None, None, None, None
         if select in (0, 2,):
             item3 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico', 'view.svg')),
+                QtGui.QIcon(str(icon_path / 'view.svg')),
                 MENU_L[main.language][1],
             )
         if select == 1:
             item2 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico', 'down.svg')),
+                QtGui.QIcon(str(icon_path / 'down.svg')),
                 MENU_L[main.language][2],
             )
             item4 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico', 'Photo.svg')),
+                QtGui.QIcon(str(icon_path / 'Photo.svg')),
                 MENU_L[main.language][3],
             )
             item5 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico', 'rotate_clockwise.svg')),
+                QtGui.QIcon(str(icon_path / 'rotate_clockwise.svg')),
                 MENU_L[main.language][4],
             )
             item6 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico', 'rotate_anticlockwise.svg')),
+                QtGui.QIcon(str(icon_path / 'rotate_anticlockwise.svg')),
                 MENU_L[main.language][5],
             )
         if select in (1, 2,):
             item7 = menu.addAction(
-                QtGui.QIcon(os.path.join(app_home, 'ico', 'move_page.svg')),
+                QtGui.QIcon(str(icon_path / 'move_page.svg')),
                 MENU_L[main.language][6],
             )
         action = menu.exec_(
