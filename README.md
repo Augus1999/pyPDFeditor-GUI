@@ -2,7 +2,7 @@
 
 This project is based on PyQt5 and PyMuPDF and tested on Python 3.8 & 3.9 & 3.10 on Windows 10 & 11.
 
-Current version is v2.1.2 ⌛
+Current version is v2.1.5 ⌛
 
 ## Welcome 🎃🎉
 
@@ -76,9 +76,12 @@ $ pip install -U pyPDFeditor-GUI
 
 ### build thy own package
 
-this requires `build`, `setuptools` and `wheel` installed
+this requires `setuptools` and `wheel` installed
+> `build` doesn't work, alas
 
-* run `$ python -m build -n` on Windows; run `$ python3 -m build -n` on macOS and Linux
+```bash
+$ python setup.py bdist_wheel
+```
 
 ### Run
 

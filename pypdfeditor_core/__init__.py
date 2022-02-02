@@ -3,16 +3,20 @@
 """
 core of pyPDFeditor-GUI
 """
+import os
 import sys
 import platform
 import fitz
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
-from .application import reset, remove, Main
+from .application import reset, remove, Main, app_home
+
+if not os.path.exists(app_home):
+    os.makedirs(app_home)
 
 __system__ = platform.system()
 __author__ = 'Nianze A. TAO (Omozawa SUENO)'
-__version__ = '2.1.2'
+__version__ = '2.1.5'
 
 
 def main(system: str = __system__,

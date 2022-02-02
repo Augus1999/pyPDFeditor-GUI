@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 from shutil import rmtree
 from setuptools import setup
+
 init_file = Path('pypdfeditor_core') / '__init__.py'
 
 with open(init_file, mode='r', encoding='utf-8') as fh:
@@ -38,7 +39,6 @@ setup(
     author_email="Augus_1999@outlook.com",
     packages=["pypdfeditor_core"],
     package_dir={"pypdfeditor_core": "pypdfeditor_core"},
-    script_name="pdfEditor",
     license="MIT",
     python_requires='>=3.7',
     install_requires=["PyMuPDF>=1.19.2", "PyQt5>=5.15.4"],
