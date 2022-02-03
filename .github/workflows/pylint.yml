@@ -18,4 +18,4 @@ jobs:
         pip install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
-        pylint --unsafe-load-any-extension=y pypdfeditor_core
+        pylint --unsafe-load-any-extension=y --disable=invalid-name $(git ls-files '*.py')
