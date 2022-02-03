@@ -18,4 +18,4 @@ jobs:
         pip install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
-        pylint --unsafe-load-any-extension=y --disable=invalid-name $(git ls-files '*.py')
+        pylint --unsafe-load-any-extension=y --disable=all --enable=no-name-in-module $(git ls-files '*.py')
