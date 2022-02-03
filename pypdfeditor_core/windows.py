@@ -8,7 +8,10 @@ from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, Q
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit, QScrollArea,
                              QComboBox, QLineEdit, QPushButton, QTableWidget, QApplication, )
-from .style_sheets import *
+from .style_sheets import (icon_path, LIGHT_COLOUR, MAIN_COLOUR, BGC_STYLE, TAB_STYLE,
+                           LABEL_STYLE, LINE_EDIT_STYLE, TEXTEDIT_STYlE, SWITCH_STYLE,
+                           COMBO_BOX_STYLE, SCROLL_AREA_STYlE, TABLE_STYLE1, TABLE_STYLE2,
+                           BUTTON_STYLE, BUTTON_STYLE0, BUTTON_STYLE1, )
 from .functions import shadow
 
 
