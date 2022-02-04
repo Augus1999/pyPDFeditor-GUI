@@ -1,8 +1,9 @@
 # pyPDFeditor-GUI
 
-This project is based on PyQt5 and PyMuPDF and tested on Python 3.8 & 3.9 & 3.10 on Windows 10 & 11.
+[![PyPI](https://img.shields.io/pypi/v/pyPDFeditor-GUI?color=ff69b4)]()
+[![Downloads](https://static.pepy.tech/personalized-badge/pyPDFeditor-GUI?period=total&units=international_system&left_color=black&right_color=green&left_text=Downloads)](https://pepy.tech/project/pyPDFeditor-GUI)
 
-Current version is v2.1.6 ⌛
+This project is based on PyQt5 and PyMuPDF and tested on Python 3.8 & 3.9 & 3.10 on Windows 10 & 11.
 
 ## Welcome 🎃🎉
 
@@ -62,8 +63,6 @@ $ pip install .
 where `<path>` is the directory `setup.py` locates.
 
 ### install from PyPi
-
-[![Downloads](https://static.pepy.tech/personalized-badge/pyPDFeditor-GUI?period=total&units=international_system&left_color=black&right_color=green&left_text=Downloads)](https://pepy.tech/project/pyPDFeditor-GUI)
 
 ```bash
 $ pip install -U pyPDFeditor-GUI
