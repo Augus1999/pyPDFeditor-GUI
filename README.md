@@ -86,8 +86,8 @@ $ python -m build
 
 * `$ pdfeditor` to launch the application.
 
-* `$ python -m pypdfeditor_core --reset` to reset the application; this will delete all settings, caches and icons.
-  Default settings and icons will be created at next launch.
+* `$ python -m pypdfeditor_core --reset` to reset the application; this will delete all settings and caches.
+  Default settings will be created at next launch.
 
 * `$ python -m pypdfeditor_core --remove` to remove the whole application.
 
