@@ -9,12 +9,15 @@ from pypdfeditor_core import main, reset, remove
 
 
 if __name__ == '__main__':
+    debug = False
     parser = ArgumentParser(description="pyPDFeditor-GUI")
     parser.add_argument('--reset', action='store_true',
                         help='only remove all settings, caches and icons; '
                              'default settings and icons will be created at next launch')
     parser.add_argument('--remove', action='store_true',
                         help='remove the whole application')
+    parser.add_argument('--debug', action='store_true',
+                        help='enable debug mode')
     args = parser.parse_args()
     if args.reset and args.remove:
         print('reset or remove?')
@@ -25,4 +28,6 @@ if __name__ == '__main__':
     if args.remove:
         remove()
         sys.exit(0)
-    main()
+    if args.debug:
+        debug = True
+    main(debug=debug)

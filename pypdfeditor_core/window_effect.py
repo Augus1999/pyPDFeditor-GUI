@@ -27,7 +27,7 @@ class NCCalcSizePARAMS(Structure):
     NCCalcSizePARAMS
     """
     _fields_ = [
-        ('rgrc', RECT*3),
+        ('rgrc', RECT * 3),
         ('lppos', POINTER(PWindowPOS))
     ]
 
@@ -48,6 +48,7 @@ class WindowEffect:
     """
     use Windows api to re-enable Windows type window-effects
     """
+
     def __init__(self):
         self._dwm_api = WinDLL("dwmapi")
         self._user32 = WinDLL("user32")
@@ -80,7 +81,7 @@ class WindowEffect:
         params.rgrc[0].left = geometry.x()
         params.rgrc[0].top = geometry.y()
         params.rgrc[0].right = geometry.width()
-        params.rgrc[0].bottom = geometry.height()
+        params.rgrc[0].bottom = geometry.height() - 1  # enable to show taskbar when it is set to auto-hide
 
     def add_window_style(self, h_wnd: int) -> None:
         """

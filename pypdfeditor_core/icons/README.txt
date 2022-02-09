@@ -1,1 +1,1 @@
-This folder contains all icon files needed.
+This package contains all icon files needed.
