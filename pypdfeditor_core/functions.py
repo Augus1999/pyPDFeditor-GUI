@@ -8,7 +8,7 @@ import gc
 import sys
 import json
 import time
-from typing import Union
+from typing import Union, Optional
 from pathlib import Path
 import fitz
 from PyQt5 import (
@@ -27,16 +27,17 @@ from PyQt5.QtWidgets import (
 from .icons import icon_path
 from .language import MENU_L, MESSAGE
 
+SUPPORT_IMG_FORMAT = ('.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.svg')
+SUPPORT_FORMAT = ('.pdf', '.epub', '.xps', '.fb2', '.cbz') + SUPPORT_IMG_FORMAT
+SUPPORT_OUT_FORMAT = ('.pdf',)
+
 
 class Doc(fitz.Document):
     """
     a wrapper to fitz.Document class
     """
-
-    def __init__(self, *args):
-        super().__init__(*args)
-        self.pass_word = None
-        self.rotatedPages = {}
+    pass_word: Optional[str] = None
+    rotatedPages = {}
 
 
 def copy(doc: Doc) -> Doc:
@@ -69,8 +70,8 @@ def open_pdf(file_name: str,
     :param parent: parent
     :return (doc, bool)
     """
-    try:
-        doc = Doc(file_name)
+    try:  # handle wrong format except images
+        doc = Doc(filename=file_name)
     except RuntimeError:
         QMessageBox.critical(
             parent,
@@ -79,6 +80,22 @@ def open_pdf(file_name: str,
             QMessageBox.Yes,
         )
         return None, False
+    if not doc.is_pdf:
+        if file_name.endswith(SUPPORT_IMG_FORMAT):
+            try:  # handle wrong image formats
+                pdf_bites = fitz.Pixmap(file_name).tobytes()
+                doc = Doc('png', pdf_bites)
+            except RuntimeError:
+                QMessageBox.critical(
+                    parent,
+                    'Oops',
+                    MESSAGE[parent.language][0],
+                    QMessageBox.Yes,
+                )
+                return None, False
+        pdf_bites = doc.convert_to_pdf()  # convert to pdf
+        doc = Doc('pdf', pdf_bites)
+        doc.name = file_name
     if doc.needs_pass:
         while doc.is_encrypted:
             value, _ = QInputDialog.getText(
@@ -95,10 +112,6 @@ def open_pdf(file_name: str,
                 return None, False
             doc.authenticate(value)
             doc.pass_word = value
-    if not doc.is_pdf:
-        pdf_bites = doc.convert_to_pdf()
-        doc = Doc('pdf', pdf_bites)
-        doc.name = file_name
     return doc, True
 
 
@@ -358,6 +371,8 @@ def add(main: QWidget,
         main.s_dir,
         _format,
     )
+    if state and not f_name.endswith(SUPPORT_FORMAT):
+        return "", False
     if state and main.dir_store_state:
         main.s_dir = os.path.dirname(f_name)
     return f_name, state
@@ -378,6 +393,8 @@ def save(main: QWidget,
         os.path.join(main.o_dir, "new.pdf"),
         _format,
     )
+    if state and not f_name.endswith(SUPPORT_OUT_FORMAT):
+        return "", False
     if state and main.dir_store_state:
         main.o_dir = os.path.dirname(f_name)
     return f_name.replace('\\', '/'), state
