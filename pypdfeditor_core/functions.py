@@ -27,7 +27,7 @@ from PyQt5.QtWidgets import (
 from .icons import icon_path
 from .language import MENU_L, MESSAGE
 
-SUPPORT_IMG_FORMAT = ('.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.svg')
+SUPPORT_IMG_FORMAT = ('.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.svg')  # list .svg at the end!
 SUPPORT_FORMAT = ('.pdf', '.epub', '.xps', '.fb2', '.cbz') + SUPPORT_IMG_FORMAT
 SUPPORT_OUT_FORMAT = ('.pdf',)
 
@@ -70,7 +70,7 @@ def open_pdf(file_name: str,
     :param parent: parent
     :return (doc, bool)
     """
-    try:  # handle wrong format except images
+    try:  # handle wrong format (svg included) except images
         doc = Doc(filename=file_name)
     except RuntimeError:
         QMessageBox.critical(
@@ -81,7 +81,7 @@ def open_pdf(file_name: str,
         )
         return None, False
     if not doc.is_pdf:
-        if file_name.endswith(SUPPORT_IMG_FORMAT):
+        if file_name.endswith(SUPPORT_IMG_FORMAT[:-1]):
             try:  # handle wrong image formats
                 pdf_bites = fitz.Pixmap(file_name).tobytes()
                 doc = Doc('png', pdf_bites)
