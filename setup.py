@@ -26,7 +26,8 @@ with open('README.md', mode='r', encoding='utf-8') as f:
 
 long_description = long_description.replace(
     '<img src="./screenshots/tab2.png" width="400" alt="tab2 win11"/>',
-    '<img src="https://user-images.githubusercontent.com/39725660/149351062-323c8688-9739-4072-b070-d6c15bd7dbd8.png" width="400" alt="tab2 win11"/>',
+    '<img src="https://user-images.githubusercontent.com/39725660/149351062-323c8688-9739-4072-b070-d6c15bd7dbd8.png"'
+    ' width="400" alt="tab2 win11"/>',
 )
 
 setup(

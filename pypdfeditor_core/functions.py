@@ -10,20 +10,12 @@ import json
 import time
 from typing import Union, Optional
 from pathlib import Path
-import fitz
-from PyQt5 import (
-    QtGui,
-    QtCore,
-    QtWidgets,
-)
-from PyQt5.QtWidgets import (
-    QInputDialog,
-    QHBoxLayout,
-    QFileDialog,
-    QMessageBox,
-    QLineEdit,
-    QWidget,
-)
+from fitz import Document, Page, Pixmap, Rect, Point, Font
+from fitz.utils import get_pixmap, set_metadata, Shape
+from fitz import TOOLS, Matrix, Identity
+from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5.QtWidgets import (QInputDialog, QHBoxLayout, QWidget,
+                             QFileDialog, QMessageBox, QLineEdit, )
 from .icons import icon_path
 from .language import MENU_L, MESSAGE
 
@@ -32,7 +24,7 @@ SUPPORT_FORMAT = ('.pdf', '.epub', '.xps', '.fb2', '.cbz') + SUPPORT_IMG_FORMAT
 SUPPORT_OUT_FORMAT = ('.pdf',)
 
 
-class Doc(fitz.Document):
+class Doc(Document):
     """
     a wrapper to fitz.Document class
     """
@@ -62,7 +54,7 @@ def copy(doc: Doc) -> Doc:
 
 
 def open_pdf(file_name: str,
-             parent: QWidget) -> (Union[Doc, None], bool):
+             parent: QWidget) -> (Optional[Doc], bool):
     """
     open pdf file and return a fitz object if applied
 
@@ -83,7 +75,7 @@ def open_pdf(file_name: str,
     if not doc.is_pdf:
         if file_name.endswith(SUPPORT_IMG_FORMAT[:-1]):
             try:  # handle wrong image formats
-                pdf_bites = fitz.Pixmap(file_name).tobytes()
+                pdf_bites = Pixmap(file_name).tobytes()
                 doc = Doc('png', pdf_bites)
             except RuntimeError:
                 QMessageBox.critical(
@@ -122,9 +114,9 @@ def render_pdf_page(page_data: Doc.load_page) -> QtGui.QPixmap:
     :param page_data: page data
     :return: a QPixmap
     """
-    page_pixmap = fitz.utils.get_pixmap(
+    page_pixmap = get_pixmap(
         page_data,
-        matrix=fitz.Identity,
+        matrix=Identity,
         clip=True,
     )
     if page_pixmap.alpha:
@@ -157,13 +149,13 @@ def pdf_split(doc: Doc) -> list:
     return book_list
 
 
-def add_watermark(doc: any,
+def add_watermark(doc: Union[Doc, Document],
                   text: str,
                   rotate: int,
                   colour: tuple,
                   font_size: int,
                   font_file: str,
-                  opacity=0.5) -> any:
+                  opacity=0.5) -> Union[Doc, Document]:
     """
     add watermark
 
@@ -177,17 +169,17 @@ def add_watermark(doc: any,
     :return: fitz.Document or Doc
     """
     for page in doc:
-        r1 = fitz.Rect(
+        r1 = Rect(
             10,
             10,
             page.rect.width - 10,
             page.rect.height - 10,
         )
-        pos0 = fitz.Point(
+        pos0 = Point(
             page.rect.width // 2,
             page.rect.height // 2,
         )
-        shape = fitz.utils.Shape(page)
+        shape = Shape(page)
         shape.insert_textbox(
             r1,
             text,
@@ -201,7 +193,7 @@ def add_watermark(doc: any,
             fontname=os.path.basename(font_file),
             morph=(
                 pos0,
-                fitz.Matrix(rotate)
+                Matrix(rotate)
             ),
         )
         shape.commit()
@@ -279,7 +271,7 @@ def shadow(widget,
     widget.setGraphicsEffect(_shadow)
 
 
-def page_icon(page: fitz.Page,
+def page_icon(page: Page,
               width: int,
               w_col: int,
               _scaled: float) -> QWidget:
@@ -322,7 +314,7 @@ def page_icon(page: fitz.Page,
 
 
 def set_icon(widget: QWidget,
-             doc: Union[Doc, fitz.Document, None] = None,
+             doc: Union[Doc, Document, None] = None,
              _scaled: float = 0.95) -> None:
     """
     add image of first page into table element
@@ -353,11 +345,11 @@ def set_icon(widget: QWidget,
             x += 1
             y -= (widget.w_col - 1)
         # --------------------------------------------------------------
-    fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
+    TOOLS.store_shrink(100)  # delete MuPDF cache
 
 
 def add(main: QWidget,
-        _format: str) -> (str, bool):
+        _format: str) -> tuple[str, str]:
     """
     add a file
 
@@ -372,14 +364,14 @@ def add(main: QWidget,
         _format,
     )
     if state and not f_name.endswith(SUPPORT_FORMAT):
-        return "", False
+        return "", ""
     if state and main.dir_store_state:
         main.s_dir = os.path.dirname(f_name)
     return f_name, state
 
 
 def save(main: QWidget,
-         _format: str) -> (str, bool):
+         _format: str) -> tuple[str, str]:
     """
     save a file
 
@@ -394,7 +386,7 @@ def save(main: QWidget,
         _format,
     )
     if state and not f_name.endswith(SUPPORT_OUT_FORMAT):
-        return "", False
+        return "", ""
     if state and main.dir_store_state:
         main.o_dir = os.path.dirname(f_name)
     return f_name.replace('\\', '/'), state
@@ -552,7 +544,7 @@ def save_as(index: int,
     :param main: main
     :return: None
     """
-    doc = fitz.Document()
+    doc = Document()
     doc.insert_pdf(widget.book, widget.book_list[index], widget.book_list[index])
     f_name = os.path.splitext(
         os.path.basename(widget.book.name),
@@ -567,13 +559,13 @@ def save_as(index: int,
         if file_name.endswith('.pdf'):
             doc.save(file_name)
         if file_name.endswith(('.psd', '.png', '.ppm',)):
-            pix = fitz.utils.get_pixmap(
+            pix = get_pixmap(
                 doc[0],
                 dpi=220,
                 alpha=False if file_name.endswith('.ppm') else True,
             )
             pix.save(file_name)
-            fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
+            TOOLS.store_shrink(100)  # delete MuPDF cache
     doc.close()
     del doc
 
@@ -586,7 +578,7 @@ def clean(widget: QWidget) -> None:
     :return: None
     """
     if len(widget.book_list) != 0:
-        if isinstance(widget.book_list[0], (Doc, fitz.Document,)):
+        if isinstance(widget.book_list[0], (Doc, Document,)):
             for item in widget.book_list:
                 item.close()
         else:
@@ -620,10 +612,7 @@ def extract_img(index: int,
         )[0] + f'-{widget.book_list[index] + 1}-image-{key + 1}.png'
         img_name = os.path.join(main.s_dir, f_name)
         # xref is inf[0]
-        img = fitz.Pixmap(
-            doc,
-            inf[0],
-        )
+        img = Pixmap(doc, inf[0])
         img.save(img_name)
     QMessageBox.information(
         main,
@@ -634,7 +623,7 @@ def extract_img(index: int,
         ),
         QMessageBox.Yes,
     )
-    fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
+    TOOLS.store_shrink(100)  # delete MuPDF cache
 
 
 def rotate_page(index: int,
@@ -744,8 +733,8 @@ def remove_invalid_xref_key(metadata: dict) -> dict:
     return metadata
 
 
-def set_metadata0(doc: fitz.fitz,
-                  author: Union[str, None]) -> None:
+def set_metadata0(doc: Doc,
+                  author: Optional[str]) -> None:
     """
     set defeat metadata
 
@@ -757,20 +746,18 @@ def set_metadata0(doc: fitz.fitz,
     metadata = doc.metadata
     metadata["producer"] = "pyPDFEditor-GUI"
     metadata["modDate"] = "D:" + "".join((
-        str(_time[0]),
-        str(_time[1]).zfill(2),
-        str(_time[2]).zfill(2),
-        str(_time[3]).zfill(2),
-        str(_time[4]).zfill(2),
-        str(_time[5]).zfill(2),
-        time.strftime('%z'),
-        '\'' + time.strftime('%z')[3:] + '\'',
+        str(_time[0]),  # YYYY
+        str(_time[1]).zfill(2),  # MM
+        str(_time[2]).zfill(2),  # DD
+        str(_time[3]).zfill(2),  # hh
+        str(_time[4]).zfill(2),  # mm
+        str(_time[5]).zfill(2),  # ss
+        time.strftime('%z')[:3],  # UTC +/- hh
+        '\'' + time.strftime('%z')[3:] + '\'',  # UTC +/- 'mm'
     ))
     metadata["author"] = author
     doc.xref_set_key(-1, "Info", "null")  # remove all original xref
-    doc.set_metadata(
-        remove_invalid_xref_key(metadata),
-    )
+    set_metadata(doc, remove_invalid_xref_key(metadata))
 
 
 def set_metadata1(metadata: dict,
@@ -791,14 +778,14 @@ def set_metadata1(metadata: dict,
     _time = time.localtime(time.time())
     metadata["producer"] = "pyPDFEditor-GUI"
     metadata["modDate"] = "D:" + "".join((
-        str(_time[0]),
-        str(_time[1]).zfill(2),
-        str(_time[2]).zfill(2),
-        str(_time[3]).zfill(2),
-        str(_time[4]).zfill(2),
-        str(_time[5]).zfill(2),
-        time.strftime('%z')[:3],
-        '\'' + time.strftime('%z')[3:] + '\'',
+        str(_time[0]),  # YYYY
+        str(_time[1]).zfill(2),  # MM
+        str(_time[2]).zfill(2),  # DD
+        str(_time[3]).zfill(2),  # hh
+        str(_time[4]).zfill(2),  # mm
+        str(_time[5]).zfill(2),  # ss
+        time.strftime('%z')[:3],  # UTC +/- hh
+        '\'' + time.strftime('%z')[3:] + '\'',  # UTC +/- 'mm'
     ))
     metadata["title"] = title
     metadata["author"] = author
@@ -821,7 +808,7 @@ def toc2plaintext(toc: list) -> str:
     return plaintext
 
 
-def plaintext2toc(plaintext: str) -> list:
+def plaintext2toc(plaintext: str) -> list[list[int, str, int]]:
     """
     :param plaintext: plaintext
     :return: table of content -> DOCUMENT.get_toc()
@@ -836,7 +823,7 @@ def plaintext2toc(plaintext: str) -> list:
     return toc
 
 
-def find_font(font_dirs: list) -> (dict, dict):
+def find_font(font_dirs: list) -> tuple[dict, dict]:
     """
     find all TrueType font files (.ttf): all their font name and file addresses
     then write their directories to a json file
@@ -854,7 +841,7 @@ def find_font(font_dirs: list) -> (dict, dict):
                 file_name,
             )
             try:
-                font_name = fitz.Font(fontfile=full_name).name
+                font_name = Font(fontfile=full_name).name
                 name_dict[font_name] = str(Path(full_name))
                 dir_dict[str(Path(full_name))] = font_name
             except RuntimeError:
@@ -886,7 +873,7 @@ def store_font_path(name_dict: dict,
         )
 
 
-def read_from_font_cache(cache_file_name: str) -> (dict, dict):
+def read_from_font_cache(cache_file_name: str) -> tuple[dict, dict]:
     """
     read font directories from json file
 
