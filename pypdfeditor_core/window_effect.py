@@ -11,14 +11,15 @@ class PWindowPOS(Structure):
     """
     PWindowPOS
     """
+
     _fields_ = [
-        ('hWnd', HWND),
-        ('hwndInsertAfter', HWND),
-        ('x', c_int),
-        ('y', c_int),
-        ('cx', c_int),
-        ('cy', c_int),
-        ('flags', UINT)
+        ("hWnd", HWND),
+        ("hwndInsertAfter", HWND),
+        ("x", c_int),
+        ("y", c_int),
+        ("cx", c_int),
+        ("cy", c_int),
+        ("flags", UINT),
     ]
 
 
@@ -26,16 +27,15 @@ class NCCalcSizePARAMS(Structure):
     """
     NCCalcSizePARAMS
     """
-    _fields_ = [
-        ('rgrc', RECT * 3),
-        ('lppos', POINTER(PWindowPOS))
-    ]
+
+    _fields_ = [("rgrc", RECT * 3), ("lppos", POINTER(PWindowPOS))]
 
 
 class MARGINS(Structure):
     """
     MARGINS
     """
+
     _fields_ = [
         ("cxLeftWidth", c_int),
         ("cxRightWidth", c_int),
@@ -81,7 +81,9 @@ class WindowEffect:
         params.rgrc[0].left = geometry.x()
         params.rgrc[0].top = geometry.y()
         params.rgrc[0].right = geometry.width()
-        params.rgrc[0].bottom = geometry.height() - 1  # enable to show taskbar when it is set to auto-hide
+        params.rgrc[0].bottom = (
+            geometry.height() - 1
+        )  # enable to show taskbar when it is set to auto-hide
 
     def add_window_style(self, h_wnd: int) -> None:
         """
@@ -94,13 +96,13 @@ class WindowEffect:
         self._SetWindowLong(
             h_wnd,
             -16,  # GWL_STYLE
-            style |
-            0x00C00000 |  # WS_CAPTION
-            0x00010000 |  # WS_MAXIMIZEBOX
-            0x00020000 |  # WS_MINIMIZEBOX
-            0x0008 |  # CS_DBLCLKS
-            0x00040000 |  # WS_SIZEBOX
-            0x00080000,  # WS_SYSMENU
+            style
+            | 0x00C00000
+            | 0x00010000  # WS_CAPTION
+            | 0x00020000  # WS_MAXIMIZEBOX
+            | 0x0008  # WS_MINIMIZEBOX
+            | 0x00040000  # CS_DBLCLKS
+            | 0x00080000,  # WS_SIZEBOX  # WS_SYSMENU
         )
 
     def move_window(self, h_wnd: int) -> None:
@@ -130,8 +132,9 @@ class WindowEffect:
         self._user32.SetWindowPos(
             h_wnd,
             None,
-            0, 0, 0, 0,  # left top right bottom
-            0x0002 |  # SWP_NOMOVE
-            0x0001 |  # SWP_NOSIZE
-            0x0020,  # SWP_FRAMECHANGED
+            0,
+            0,
+            0,
+            0,  # left top right bottom
+            0x0002 | 0x0001 | 0x0020,  # SWP_NOMOVE  # SWP_NOSIZE  # SWP_FRAMECHANGED
         )

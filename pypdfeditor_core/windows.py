@@ -4,14 +4,48 @@
 application window forms
 """
 import re
-from PyQt5.QtGui import QIcon, QPainter, QPainterPath, QColor, QFont, QPixmap, QTransform, QCursor
+from PyQt5.QtGui import (
+    QIcon,
+    QPainter,
+    QPainterPath,
+    QColor,
+    QFont,
+    QPixmap,
+    QTransform,
+    QCursor,
+)
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import (QWidget, QGridLayout, QTabWidget, QLabel, QTextEdit, QScrollArea,
-                             QComboBox, QLineEdit, QPushButton, QTableWidget, QApplication, )
-from .style_sheets import (icon_path, LIGHT_COLOUR, MAIN_COLOUR, BGC_STYLE, TAB_STYLE,
-                           LABEL_STYLE, LINE_EDIT_STYLE, TEXTEDIT_STYlE, SWITCH_STYLE,
-                           COMBO_BOX_STYLE, SCROLL_AREA_STYlE, TABLE_STYLE1, TABLE_STYLE2,
-                           BUTTON_STYLE, BUTTON_STYLE0, BUTTON_STYLE1, )
+from PyQt5.QtWidgets import (
+    QWidget,
+    QGridLayout,
+    QTabWidget,
+    QLabel,
+    QTextEdit,
+    QScrollArea,
+    QComboBox,
+    QLineEdit,
+    QPushButton,
+    QTableWidget,
+    QApplication,
+)
+from .style_sheets import (
+    icon_path,
+    LIGHT_COLOUR,
+    MAIN_COLOUR,
+    BGC_STYLE,
+    TAB_STYLE,
+    LABEL_STYLE,
+    LINE_EDIT_STYLE,
+    TEXTEDIT_STYlE,
+    SWITCH_STYLE,
+    COMBO_BOX_STYLE,
+    SCROLL_AREA_STYlE,
+    TABLE_STYLE1,
+    TABLE_STYLE2,
+    BUTTON_STYLE,
+    BUTTON_STYLE0,
+    BUTTON_STYLE1,
+)
 from .functions import shadow
 
 
@@ -19,6 +53,7 @@ class SwitchBtn(QWidget):
     """
     switch button
     """
+
     stateChanged = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent=None):
@@ -45,24 +80,24 @@ class SwitchBtn(QWidget):
         """
         define set-style-sheet behaviour
         """
-        style_sheet = re.sub(r'\s+', '', style_sheet)
-        on_style = str(re.findall(r'SwitchBtn:on{.+?}', style_sheet))
-        off_style = str(re.findall(r'SwitchBtn:off{.+?}', style_sheet))
-        bg_colour_on = re.findall(r'background-color:#\w+', on_style)
-        bg_colour_on = ''.join(re.findall(r'#\w+', str(bg_colour_on)))
-        colour_on = re.findall(r'[^-]color:#\w+', on_style)
-        colour_on = ''.join(re.findall(r'#\w+', str(colour_on)))
-        bg_colour_off = re.findall(r'background-color:#\w+', off_style)
-        bg_colour_off = ''.join(re.findall(r'#\w+', str(bg_colour_off)))
-        colour_off = re.findall(r'[^-]color:#\w+', off_style)
-        colour_off = ''.join(re.findall(r'#\w+', str(colour_off)))
-        if bg_colour_on != '':
+        style_sheet = re.sub(r"\s+", "", style_sheet)
+        on_style = str(re.findall(r"SwitchBtn:on{.+?}", style_sheet))
+        off_style = str(re.findall(r"SwitchBtn:off{.+?}", style_sheet))
+        bg_colour_on = re.findall(r"background-color:#\w+", on_style)
+        bg_colour_on = "".join(re.findall(r"#\w+", str(bg_colour_on)))
+        colour_on = re.findall(r"[^-]color:#\w+", on_style)
+        colour_on = "".join(re.findall(r"#\w+", str(colour_on)))
+        bg_colour_off = re.findall(r"background-color:#\w+", off_style)
+        bg_colour_off = "".join(re.findall(r"#\w+", str(bg_colour_off)))
+        colour_off = re.findall(r"[^-]color:#\w+", off_style)
+        colour_off = "".join(re.findall(r"#\w+", str(colour_off)))
+        if bg_colour_on != "":
             self.bgColorOn = QColor(bg_colour_on)
-        if colour_on != '':
+        if colour_on != "":
             self.sliderColorOn = self.textColorOn = QColor(colour_on)
-        if bg_colour_off != '':
+        if bg_colour_off != "":
             self.bgColorOff = QColor(bg_colour_off)
-        if colour_off != '':
+        if colour_off != "":
             self.sliderColorOff = self.textColorOff = QColor(colour_off)
 
     def update_value(self) -> None:
@@ -220,6 +255,7 @@ class TableWidget(QTableWidget):
     """
     a wrapper to QTableWidget
     """
+
     Index = QtCore.pyqtSignal(tuple)
 
     def mousePressEvent(self, event) -> None:
@@ -247,8 +283,8 @@ class MainR(QTabWidget):
         self.__version__ = version
         self.resize(1200, 890)  # 1200 890
         self.setMinimumSize(580, 450)
-        self.setWindowTitle('PDF Editor')
-        self.setWindowIcon(QIcon(str(icon_path / 'pdf icon.svg')))
+        self.setWindowTitle("PDF Editor")
+        self.setWindowIcon(QIcon(str(icon_path / "pdf icon.svg")))
         self.setTabPosition(QTabWidget.West)
         self.setIconSize(QtCore.QSize(35, 35))
         self.setStyleSheet(TAB_STYLE)
@@ -259,8 +295,8 @@ class MainR(QTabWidget):
         self.tab4 = QWidget()
         self.widget3 = QWidget()
         self.widget4 = QWidget()
-        self.widget3.setStyleSheet(BGC_STYLE % 'transparent')
-        self.widget4.setStyleSheet(BGC_STYLE % 'transparent')
+        self.widget3.setStyleSheet(BGC_STYLE % "transparent")
+        self.widget4.setStyleSheet(BGC_STYLE % "transparent")
         self.tab0_init()
         self.tab1_init()
         self.tab2_init()
@@ -271,39 +307,49 @@ class MainR(QTabWidget):
         self.addTab(
             self.tab0,
             QIcon(
-                QPixmap(str(icon_path / 'home.svg'),
-                        ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
-            ''
+                QPixmap(
+                    str(icon_path / "home.svg"),
+                ).transformed(matrix, QtCore.Qt.SmoothTransformation)
+            ),
+            "",
         )
         self.addTab(
             self.tab1,
             QIcon(
-                QPixmap(str(icon_path / 'merge.svg'),
-                        ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
-            '',
+                QPixmap(
+                    str(icon_path / "merge.svg"),
+                ).transformed(matrix, QtCore.Qt.SmoothTransformation)
+            ),
+            "",
         )
         self.addTab(
             self.tab2,
             QIcon(
-                QPixmap(str(icon_path / 'edit.svg'),
-                        ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
-            '',
+                QPixmap(
+                    str(icon_path / "edit.svg"),
+                ).transformed(matrix, QtCore.Qt.SmoothTransformation)
+            ),
+            "",
         )
         self.addTab(
             self.tab3,
             QIcon(
-                QPixmap(str(icon_path / 'lock.svg'),
-                        ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
-            '',
+                QPixmap(
+                    str(icon_path / "lock.svg"),
+                ).transformed(matrix, QtCore.Qt.SmoothTransformation)
+            ),
+            "",
         )
         self.addTab(
             self.tab4,
             QIcon(
-                QPixmap(str(icon_path / 'metadata.svg'),
-                        ).transformed(matrix, QtCore.Qt.SmoothTransformation)),
-            '',
+                QPixmap(
+                    str(icon_path / "metadata.svg"),
+                ).transformed(matrix, QtCore.Qt.SmoothTransformation)
+            ),
+            "",
         )
-        if self.__system__ == 'Windows':
+        if self.__system__ == "Windows":
             self.btn_min_0 = QPushButton(self.tab0)
             self.btn_max_0 = QPushButton(self.tab0)
             self.btn_ext_0 = QPushButton(self.tab0)
@@ -334,26 +380,36 @@ class MainR(QTabWidget):
             self.btn_min_4.setFixedSize(52, 26)
             self.btn_max_4.setFixedSize(52, 26)
             self.btn_ext_4.setFixedSize(52, 26)
-            self.btn_max_0.setObjectName('max0')
-            self.btn_max_1.setObjectName('max1')
-            self.btn_max_2.setObjectName('max2')
-            self.btn_max_3.setObjectName('max3')
-            self.btn_max_4.setObjectName('max4')
-            self.btn_min_0.setStyleSheet(BUTTON_STYLE0 % 'minimize.svg')
-            self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
-            self.btn_ext_0.setStyleSheet(BUTTON_STYLE1 % ('dismiss.svg', 'dismiss_h.svg'))
-            self.btn_min_1.setStyleSheet(BUTTON_STYLE0 % 'minimize.svg')
-            self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
-            self.btn_ext_1.setStyleSheet(BUTTON_STYLE1 % ('dismiss.svg', 'dismiss_h.svg'))
-            self.btn_min_2.setStyleSheet(BUTTON_STYLE0 % 'minimize.svg')
-            self.btn_max_2.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
-            self.btn_ext_2.setStyleSheet(BUTTON_STYLE1 % ('dismiss.svg', 'dismiss_h.svg'))
-            self.btn_min_3.setStyleSheet(BUTTON_STYLE0 % 'minimize.svg')
-            self.btn_max_3.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
-            self.btn_ext_3.setStyleSheet(BUTTON_STYLE1 % ('dismiss.svg', 'dismiss_h.svg'))
-            self.btn_min_4.setStyleSheet(BUTTON_STYLE0 % 'minimize.svg')
-            self.btn_max_4.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
-            self.btn_ext_4.setStyleSheet(BUTTON_STYLE1 % ('dismiss.svg', 'dismiss_h.svg'))
+            self.btn_max_0.setObjectName("max0")
+            self.btn_max_1.setObjectName("max1")
+            self.btn_max_2.setObjectName("max2")
+            self.btn_max_3.setObjectName("max3")
+            self.btn_max_4.setObjectName("max4")
+            self.btn_min_0.setStyleSheet(BUTTON_STYLE0 % "minimize.svg")
+            self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
+            self.btn_ext_0.setStyleSheet(
+                BUTTON_STYLE1 % ("dismiss.svg", "dismiss_h.svg")
+            )
+            self.btn_min_1.setStyleSheet(BUTTON_STYLE0 % "minimize.svg")
+            self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
+            self.btn_ext_1.setStyleSheet(
+                BUTTON_STYLE1 % ("dismiss.svg", "dismiss_h.svg")
+            )
+            self.btn_min_2.setStyleSheet(BUTTON_STYLE0 % "minimize.svg")
+            self.btn_max_2.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
+            self.btn_ext_2.setStyleSheet(
+                BUTTON_STYLE1 % ("dismiss.svg", "dismiss_h.svg")
+            )
+            self.btn_min_3.setStyleSheet(BUTTON_STYLE0 % "minimize.svg")
+            self.btn_max_3.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
+            self.btn_ext_3.setStyleSheet(
+                BUTTON_STYLE1 % ("dismiss.svg", "dismiss_h.svg")
+            )
+            self.btn_min_4.setStyleSheet(BUTTON_STYLE0 % "minimize.svg")
+            self.btn_max_4.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
+            self.btn_ext_4.setStyleSheet(
+                BUTTON_STYLE1 % ("dismiss.svg", "dismiss_h.svg")
+            )
             self.tab0.grid.addWidget(self.btn_min_0, 0, 18)
             self.tab0.grid.addWidget(self.btn_max_0, 0, 19)
             self.tab0.grid.addWidget(self.btn_ext_0, 0, 20)
@@ -389,10 +445,12 @@ class MainR(QTabWidget):
             self.btn_ext_3.clicked.connect(self.close)
             self.btn_ext_4.clicked.connect(self.close)
             from .window_effect import WindowEffect, MSG
+
             self.windowEffect = WindowEffect()
             self.msg = MSG
-            self._title_bar_pos = [QtCore.QPoint(x, y) for x in range(1200)
-                                   for y in range(52)]
+            self._title_bar_pos = [
+                QtCore.QPoint(x, y) for x in range(1200) for y in range(52)
+            ]
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
             self.windowEffect.add_shadow_effect(int(self.winId()))
             self.windowEffect.add_window_style(int(self.winId()))
@@ -434,8 +492,11 @@ class MainR(QTabWidget):
         re-write mouseMoveEvent
         move the frameless window
         """
-        if self.__system__ == 'Windows':
-            if event.pos() in self._title_bar_pos and event.buttons() == QtCore.Qt.LeftButton:
+        if self.__system__ == "Windows":
+            if (
+                event.pos() in self._title_bar_pos
+                and event.buttons() == QtCore.Qt.LeftButton
+            ):
                 self.windowEffect.move_window(int(self.winId()))
         return QTabWidget.mouseMoveEvent(self, event)
 
@@ -443,22 +504,25 @@ class MainR(QTabWidget):
         """
         re-write mouseDoubleClickEvent
         """
-        if self.__system__ == 'Windows':
-            if event.button() == QtCore.Qt.LeftButton and event.pos() in self._title_bar_pos:
+        if self.__system__ == "Windows":
+            if (
+                event.button() == QtCore.Qt.LeftButton
+                and event.pos() in self._title_bar_pos
+            ):
                 self.windowChange()
         return QTabWidget.mouseDoubleClickEvent(self, event)
 
-    def nativeEvent(self, event_type, message) -> (bool, int):
+    def nativeEvent(self, event_type, message) -> tuple[bool, int]:
         """
         re-write nativeEvent
         """
-        if self.__system__ == 'Windows':
+        if self.__system__ == "Windows":
             msg = self.msg.from_address(message.__int__())
             i = self.currentIndex()
             if msg.message == 132:  # WM_NCHITTEST
                 x_pos = QCursor.pos().x() - self.frameGeometry().x()
                 y_pos = QCursor.pos().y() - self.frameGeometry().y()
-                btn = self.findChildren(QPushButton, f'max{i}')[0]
+                btn = self.findChildren(QPushButton, f"max{i}")[0]
                 lx = x_pos < 5
                 rx = x_pos > self.width() - 5
                 ty = y_pos < 5
@@ -486,17 +550,17 @@ class MainR(QTabWidget):
                     desktop = QApplication.desktop()
                     screen_rect = desktop.availableGeometry()
                     self.windowEffect.monitorNCCALCSIZE(msg, screen_rect)
-                    self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
-                    self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
-                    self.btn_max_2.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
-                    self.btn_max_3.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
-                    self.btn_max_4.setStyleSheet(BUTTON_STYLE0 % 'square_multiple.svg')
+                    self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % "square_multiple.svg")
+                    self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % "square_multiple.svg")
+                    self.btn_max_2.setStyleSheet(BUTTON_STYLE0 % "square_multiple.svg")
+                    self.btn_max_3.setStyleSheet(BUTTON_STYLE0 % "square_multiple.svg")
+                    self.btn_max_4.setStyleSheet(BUTTON_STYLE0 % "square_multiple.svg")
                 else:
-                    self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
-                    self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
-                    self.btn_max_2.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
-                    self.btn_max_3.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
-                    self.btn_max_4.setStyleSheet(BUTTON_STYLE0 % 'maximize.svg')
+                    self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
+                    self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
+                    self.btn_max_2.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
+                    self.btn_max_3.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
+                    self.btn_max_4.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
                 return True, 0  # HTNOWHERE
         return QTabWidget.nativeEvent(self, event_type, message)
 
@@ -509,9 +573,10 @@ class MainR(QTabWidget):
         super().resizeEvent(event)
         self.widget3.resize(int(self.width() * 0.9), int(self.height() * 0.9))
         self.widget4.resize(int(self.width() * 0.9), int(self.height() * 0.9))
-        if self.__system__ == 'Windows':
-            self._title_bar_pos = [QtCore.QPoint(x, y) for x in range(int(self.width()))
-                                   for y in range(52)]
+        if self.__system__ == "Windows":
+            self._title_bar_pos = [
+                QtCore.QPoint(x, y) for x in range(int(self.width())) for y in range(52)
+            ]
 
     def windowChange(self) -> None:
         """
@@ -528,7 +593,7 @@ class MainR(QTabWidget):
         """
         self.tab0.grid = QGridLayout(self.tab0)
         text = QTextEdit(self.tab0)
-        text.setStyleSheet('border-radius:15px')
+        text.setStyleSheet("border-radius:15px")
         text.setFocusPolicy(QtCore.Qt.NoFocus)
         text.setReadOnly(True)
         text.setHtml(
@@ -554,7 +619,7 @@ class MainR(QTabWidget):
         label_w.setOpenExternalLinks(True)
         self.tab0.label_v = QLabel(self.tab0)
         self.tab0.label_v.setStyleSheet(LABEL_STYLE)
-        self.tab0.label_v.setText(f'⌛ version {self.__version__}')
+        self.tab0.label_v.setText(f"⌛ version {self.__version__}")
         self.tab0.grid.addWidget(text, 5, 0, 20, 21)
         self.tab0.grid.addWidget(self.tab0.label_v, 31, 0, 1, 5, QtCore.Qt.AlignBottom)
         self.tab0.grid.addWidget(label_w, 31, 17, 1, 4, QtCore.Qt.AlignBottom)
@@ -570,16 +635,16 @@ class MainR(QTabWidget):
         self.tab1.button3 = QPushButton(self.tab1)
         self.tab1.button4 = QPushButton(self.tab1)
         self.tab1.button1.setStyleSheet(
-            BUTTON_STYLE % ('Add.svg', 'Add_h.svg', 'Add_p.svg'),
+            BUTTON_STYLE % ("Add.svg", "Add_h.svg", "Add_p.svg"),
         )
         self.tab1.button2.setStyleSheet(
-            BUTTON_STYLE % ('down.svg', 'down_h.svg', 'down_p.svg'),
+            BUTTON_STYLE % ("down.svg", "down_h.svg", "down_p.svg"),
         )
         self.tab1.button3.setStyleSheet(
-            BUTTON_STYLE % ('settings.svg', 'settings_h.svg', 'settings_p.svg'),
+            BUTTON_STYLE % ("settings.svg", "settings_h.svg", "settings_p.svg"),
         )
         self.tab1.button4.setStyleSheet(
-            BUTTON_STYLE % ('delete.svg', 'delete_h.svg', 'delete_p.svg'),
+            BUTTON_STYLE % ("delete.svg", "delete_h.svg", "delete_p.svg"),
         )
         self.tab1.button1.setFixedSize(52, 26)
         self.tab1.button2.setFixedSize(52, 26)
@@ -615,16 +680,16 @@ class MainR(QTabWidget):
         self.tab2.button3 = QPushButton(self.tab2)
         self.tab2.button4 = QPushButton(self.tab2)
         self.tab2.button1.setStyleSheet(
-            BUTTON_STYLE % ('Add.svg', 'Add_h.svg', 'Add_p.svg'),
+            BUTTON_STYLE % ("Add.svg", "Add_h.svg", "Add_p.svg"),
         )
         self.tab2.button2.setStyleSheet(
-            BUTTON_STYLE % ('down.svg', 'down_h.svg', 'down_p.svg'),
+            BUTTON_STYLE % ("down.svg", "down_h.svg", "down_p.svg"),
         )
         self.tab2.button3.setStyleSheet(
-            BUTTON_STYLE % ('settings.svg', 'settings_h.svg', 'settings_p.svg'),
+            BUTTON_STYLE % ("settings.svg", "settings_h.svg", "settings_p.svg"),
         )
         self.tab2.button4.setStyleSheet(
-            BUTTON_STYLE % ('delete.svg', 'delete_h.svg', 'delete_p.svg'),
+            BUTTON_STYLE % ("delete.svg", "delete_h.svg", "delete_p.svg"),
         )
         self.tab2.button1.setFixedSize(52, 26)
         self.tab2.button2.setFixedSize(52, 26)
@@ -685,31 +750,31 @@ class MainR(QTabWidget):
         self.tab3.button8 = QPushButton(self.tab3)
         self.tab3.button9 = QPushButton(self.tab3)
         self.tab3.button1.setStyleSheet(
-            BUTTON_STYLE % ('Add.svg', 'Add_h.svg', 'Add_p.svg'),
+            BUTTON_STYLE % ("Add.svg", "Add_h.svg", "Add_p.svg"),
         )
         self.tab3.button2.setStyleSheet(
-            BUTTON_STYLE % ('down.svg', 'down_h.svg', 'down_p.svg'),
+            BUTTON_STYLE % ("down.svg", "down_h.svg", "down_p.svg"),
         )
         self.tab3.button3.setStyleSheet(
-            BUTTON_STYLE % ('settings.svg', 'settings_h.svg', 'settings_p.svg'),
+            BUTTON_STYLE % ("settings.svg", "settings_h.svg", "settings_p.svg"),
         )
         self.tab3.button4.setStyleSheet(
-            BUTTON_STYLE % ('color.svg', 'color_h.svg', 'color_p.svg'),
+            BUTTON_STYLE % ("color.svg", "color_h.svg", "color_p.svg"),
         )
         self.tab3.button5.setStyleSheet(
-            BUTTON_STYLE % ('view.svg', 'view_h.svg', 'view_p.svg'),
+            BUTTON_STYLE % ("view.svg", "view_h.svg", "view_p.svg"),
         )
         self.tab3.button6.setStyleSheet(
-            BUTTON_STYLE % ('more_d.svg', 'more_d.svg', 'more_d.svg'),
+            BUTTON_STYLE % ("more_d.svg", "more_d.svg", "more_d.svg"),
         )
         self.tab3.button7.setStyleSheet(
-            BUTTON_STYLE % ('font.svg', 'font_h.svg', 'font_p.svg'),
+            BUTTON_STYLE % ("font.svg", "font_h.svg", "font_p.svg"),
         )
         self.tab3.button8.setStyleSheet(
-            BUTTON_STYLE % ('delete.svg', 'delete_h.svg', 'delete_p.svg'),
+            BUTTON_STYLE % ("delete.svg", "delete_h.svg", "delete_p.svg"),
         )
         self.tab3.button9.setStyleSheet(
-            BUTTON_STYLE % ('sync.svg', 'sync_h.svg', 'sync_p.svg'),
+            BUTTON_STYLE % ("sync.svg", "sync_h.svg", "sync_p.svg"),
         )
         self.tab3.table.setFixedSize(520, 700)
         self.tab3.button1.setFixedSize(52, 26)
@@ -745,9 +810,9 @@ class MainR(QTabWidget):
         self.tab3.line3.setFixedSize(35, 35)
         self.tab3.line4.setFixedSize(35, 35)
         self.tab3.line5.setFixedSize(35, 35)
-        self.tab3.line3.setText('90')
-        self.tab3.line4.setText('40')
-        self.tab3.line5.setText(' 0')
+        self.tab3.line3.setText("90")
+        self.tab3.line4.setText("40")
+        self.tab3.line5.setText(" 0")
         self.tab3.text.setStyleSheet(TEXTEDIT_STYlE)
         self.tab3.line1.setStyleSheet(LINE_EDIT_STYLE)
         self.tab3.line2.setStyleSheet(LINE_EDIT_STYLE)
@@ -769,10 +834,10 @@ class MainR(QTabWidget):
         self.tab3.label3.setFixedSize(35, 35)
         self.tab3.label6.setFixedSize(35, 35)
         self.tab3.label10.setFixedSize(35, 35)
-        self.tab3.label3.setText('pt')
-        self.tab3.label6.setText('%')
-        self.tab3.label8.setText('* ' * 20)
-        self.tab3.label10.setText('°')
+        self.tab3.label3.setText("pt")
+        self.tab3.label6.setText("%")
+        self.tab3.label8.setText("* " * 20)
+        self.tab3.label10.setText("°")
         self.tab3.label1.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label2.setAlignment(QtCore.Qt.AlignCenter)
         self.tab3.label3.setAlignment(QtCore.Qt.AlignCenter)
@@ -844,16 +909,16 @@ class MainR(QTabWidget):
         self.tab4.button3 = QPushButton(self.tab4)
         self.tab4.button4 = QPushButton(self.tab4)
         self.tab4.button1.setStyleSheet(
-            BUTTON_STYLE % ('Add.svg', 'Add_h.svg', 'Add_p.svg'),
+            BUTTON_STYLE % ("Add.svg", "Add_h.svg", "Add_p.svg"),
         )
         self.tab4.button2.setStyleSheet(
-            BUTTON_STYLE % ('down.svg', 'down_h.svg', 'down_p.svg'),
+            BUTTON_STYLE % ("down.svg", "down_h.svg", "down_p.svg"),
         )
         self.tab4.button3.setStyleSheet(
-            BUTTON_STYLE % ('settings.svg', 'settings_h.svg', 'settings_p.svg'),
+            BUTTON_STYLE % ("settings.svg", "settings_h.svg", "settings_p.svg"),
         )
         self.tab4.button4.setStyleSheet(
-            BUTTON_STYLE % ('delete.svg', 'delete_h.svg', 'delete_p.svg'),
+            BUTTON_STYLE % ("delete.svg", "delete_h.svg", "delete_p.svg"),
         )
         self.tab4.button1.setFixedSize(52, 26)
         self.tab4.button2.setFixedSize(52, 26)
@@ -888,7 +953,7 @@ class MainR(QTabWidget):
         self.tab4.label4.setStyleSheet(LABEL_STYLE)
         self.tab4.label5.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setPixmap(
-            QPixmap(str(icon_path / 'book2.svg')).scaled(
+            QPixmap(str(icon_path / "book2.svg")).scaled(
                 180,
                 180,
                 QtCore.Qt.IgnoreAspectRatio,
@@ -927,7 +992,9 @@ class MainR(QTabWidget):
         layout.addWidget(self.tab4.line2, 4, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab4.line3, 6, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(self.tab4.line4, 8, 14, 1, 7, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab4.label0, 19, 0, 1, 3, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        layout.addWidget(
+            self.tab4.label0, 19, 0, 1, 3, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom
+        )
 
 
 class SettingR(QWidget):
@@ -939,13 +1006,12 @@ class SettingR(QWidget):
         super().__init__()
         grid = QGridLayout(self)
         self.setFixedSize(600, 280)
-        self.setWindowTitle('Setting')
-        self.setWindowIcon(QIcon(str(icon_path / 'settings.svg')))
+        self.setWindowTitle("Setting")
+        self.setWindowIcon(QIcon(str(icon_path / "settings.svg")))
         self.setWindowFlags(
-            QtCore.Qt.CustomizeWindowHint |
-            QtCore.Qt.WindowCloseButtonHint,
+            QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowCloseButtonHint,
         )
-        self.setStyleSheet('background-color:#ffffff')
+        self.setStyleSheet("background-color:#ffffff")
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.label1 = QLabel(self)
         self.label2 = QLabel(self)
@@ -956,9 +1022,9 @@ class SettingR(QWidget):
         self.button1 = QPushButton(self)
         self.button2 = QPushButton(self)
         self.combobox = QComboBox(self)
-        self.combobox.addItem('English')
-        self.combobox.addItem('中文')
-        self.combobox.addItem('日本語')
+        self.combobox.addItem("English")
+        self.combobox.addItem("中文")
+        self.combobox.addItem("日本語")
         self.label1.setStyleSheet(LABEL_STYLE)
         self.label2.setStyleSheet(LABEL_STYLE)
         self.label3.setStyleSheet(LABEL_STYLE)
@@ -996,12 +1062,11 @@ class PermMenuR(QWidget):
         super().__init__()
         grid = QGridLayout(self)
         self.setFixedSize(480, 400)
-        self.setWindowTitle(' ')
-        self.setWindowIcon(QIcon(str(icon_path / 'lock.svg')))
-        self.setStyleSheet('background-color:#ffffff')
+        self.setWindowTitle(" ")
+        self.setWindowIcon(QIcon(str(icon_path / "lock.svg")))
+        self.setStyleSheet("background-color:#ffffff")
         self.setWindowFlags(
-            QtCore.Qt.CustomizeWindowHint |
-            QtCore.Qt.WindowCloseButtonHint,
+            QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowCloseButtonHint,
         )
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.check1 = SwitchBtn(self)
@@ -1076,11 +1141,10 @@ class FontDialogR(QWidget):
         super().__init__()
         grid = QGridLayout(self)
         self.setFixedSize(486, 324)
-        self.setWindowTitle('Select Font')
-        self.setWindowIcon(QIcon(str(icon_path / 'font.svg')))
+        self.setWindowTitle("Select Font")
+        self.setWindowIcon(QIcon(str(icon_path / "font.svg")))
         self.setWindowFlags(
-            QtCore.Qt.CustomizeWindowHint |
-            QtCore.Qt.WindowCloseButtonHint,
+            QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowCloseButtonHint,
         )
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.combobox = QComboBox(self)

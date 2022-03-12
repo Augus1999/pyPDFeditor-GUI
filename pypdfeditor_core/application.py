@@ -14,18 +14,40 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtWidgets import QColorDialog
 from .language import set_language, lag_s, lag_p
-from .windows import (MainR, PermMenuR, BUTTON_STYLE,
-                      SettingR, FontDialogR, )
-from .functions import (setting_warning, toc2plaintext, plaintext2toc,
-                        set_metadata0, set_metadata1, generate_menu,
-                        reset_table, pdf_split, find_font, _warning,
-                        open_pdf, set_icon, add_watermark, choose, clean,
-                        add, render_pdf_page, save, copy, read_from_font_cache,
-                        store_font_path, )
+from .windows import (
+    MainR,
+    PermMenuR,
+    BUTTON_STYLE,
+    SettingR,
+    FontDialogR,
+)
+from .functions import (
+    setting_warning,
+    toc2plaintext,
+    plaintext2toc,
+    set_metadata0,
+    set_metadata1,
+    generate_menu,
+    reset_table,
+    pdf_split,
+    find_font,
+    _warning,
+    open_pdf,
+    set_icon,
+    add_watermark,
+    choose,
+    clean,
+    add,
+    render_pdf_page,
+    save,
+    copy,
+    read_from_font_cache,
+    store_font_path,
+)
 
 
-user_home = os.path.expanduser('~')
-app_home = os.path.join(user_home, '.pyPDFeditor-GUI')
+user_home = os.path.expanduser("~")
+app_home = os.path.join(user_home, ".pyPDFeditor-GUI")
 
 
 class Main(MainR):
@@ -35,12 +57,10 @@ class Main(MainR):
     all app functions are written here
     """
 
-    def __init__(self,
-                 system: str,
-                 version: str):
+    def __init__(self, system: str, version: str):
         super().__init__(system, version)
         content = setting_warning(
-            os.path.join(app_home, 'settings.json'),
+            os.path.join(app_home, "settings.json"),
             self,
         )
         self.Author = getpass.getuser()
@@ -92,18 +112,22 @@ class Main(MainR):
         self.tab3.button4.clicked.connect(self.get_colour)
         self.tab3.button5.clicked.connect(self.preview)
         self.tab3.button7.clicked.connect(self.get_font)
-        self.tab3.button8.clicked.connect(lambda: (
-            clean(self.tab3),
-            self.tab3.text.clear(),
-            self.tab3.line1.clear(),
-            self.tab3.line2.clear(),
-        ))
+        self.tab3.button8.clicked.connect(
+            lambda: (
+                clean(self.tab3),
+                self.tab3.text.clear(),
+                self.tab3.line1.clear(),
+                self.tab3.line2.clear(),
+            )
+        )
         self.tab3.button9.clicked.connect(
             lambda: os.remove(
-                os.path.join(app_home, 'font_dir_cache.json'),
-            ) if os.path.exists(
-                os.path.join(app_home, 'font_dir_cache.json'),
-            ) else None
+                os.path.join(app_home, "font_dir_cache.json"),
+            )
+            if os.path.exists(
+                os.path.join(app_home, "font_dir_cache.json"),
+            )
+            else None
         )  # delete font dir cache
         self.tab3.line3.returnPressed.connect(self.preview)
         self.tab3.line4.returnPressed.connect(self.preview)
@@ -113,15 +137,17 @@ class Main(MainR):
         self.tab4.button1.clicked.connect(self.add4)
         self.tab4.button2.clicked.connect(self.save4)
         self.tab4.button3.clicked.connect(self._set)
-        self.tab4.button4.clicked.connect(lambda: (
-            clean(self.tab4),
-            self.tab4.text.clear(),
-            self.tab4.line1.clear(),
-            self.tab4.line2.clear(),
-            self.tab4.line3.clear(),
-            self.tab4.line4.clear(),
-            self.tab4.label0.clear(),
-        ))
+        self.tab4.button4.clicked.connect(
+            lambda: (
+                clean(self.tab4),
+                self.tab4.text.clear(),
+                self.tab4.line1.clear(),
+                self.tab4.line2.clear(),
+                self.tab4.line3.clear(),
+                self.tab4.line4.clear(),
+                self.tab4.label0.clear(),
+            )
+        )
         self.tab4.table.Index.connect(lambda par: self.show_index(par, self.tab4))
         set_language(self)
 
@@ -134,23 +160,23 @@ class Main(MainR):
             "save dir": self.o_dir,
             "dir store": self.dir_store_state,
             "font dir": self.font_dir,
-            "language": self.language
+            "language": self.language,
         }
         if not os.path.exists(app_home):
             os.makedirs(app_home)
-        if os.path.exists(os.path.join(app_home, 'settings.json')):
+        if os.path.exists(os.path.join(app_home, "settings.json")):
             with open(
-                    os.path.join(app_home, 'settings.json'),
-                    mode='r',
-                    encoding='utf-8',
+                os.path.join(app_home, "settings.json"),
+                mode="r",
+                encoding="utf-8",
             ) as c:
                 states = json.load(c)
             if states == _settings:
                 return  # if no new settings do not write
         with open(
-                os.path.join(app_home, 'settings.json'),
-                mode='w',
-                encoding='utf-8',
+            os.path.join(app_home, "settings.json"),
+            mode="w",
+            encoding="utf-8",
         ) as f:  # write new settings
             json.dump(
                 _settings,
@@ -178,19 +204,16 @@ class Main(MainR):
             self.perm_int = 2820
             self.tab3.button6.clicked.connect(self._perm_set)
             self.tab3.button6.setStyleSheet(
-                BUTTON_STYLE % ('more.svg', 'more_h.svg', 'more_p.svg'),
+                BUTTON_STYLE % ("more.svg", "more_h.svg", "more_p.svg"),
             )
         else:
             self.tab3.button6.setStyleSheet(
-                BUTTON_STYLE % ('more_d.svg', 'more_d.svg', 'more_d.svg'),
+                BUTTON_STYLE % ("more_d.svg", "more_d.svg", "more_d.svg"),
             )
             self.tab3.button6.clicked.disconnect()
             self.perm_int = 4028  # value of all permissions
 
-    def view(self,
-             index=None,
-             widget=None,
-             f_name=None) -> None:
+    def view(self, index=None, widget=None, f_name=None) -> None:
         """
         open file outside the application
 
@@ -207,7 +230,7 @@ class Main(MainR):
         }
         cmd = cmds[self.__system__] if self.__system__ in cmds else 0
         if not cmd:
-            print(f'platform \"{self.__system__}\" cannot be recognised')
+            print(f'platform "{self.__system__}" cannot be recognised')
             return
         if f_name is not None:
             sp.Popen([cmd, Path(f_name)])
@@ -223,7 +246,7 @@ class Main(MainR):
             for item in self.tab1.book_list[1:]:
                 doc0.insert_pdf(item)
             set_metadata0(doc=doc0, author=self.Author)
-            file_name, ok = save(self, '.pdf')
+            file_name, ok = save(self, ".pdf")
             if ok:
                 try:
                     doc0.save(file_name, garbage=1)
@@ -242,7 +265,7 @@ class Main(MainR):
         if len(self.tab2.book_list) != 0:
             doc0 = copy(self.tab2.book)
             doc0.select(self.tab2.book_list)
-            file_name, ok = save(self, '.pdf')
+            file_name, ok = save(self, ".pdf")
             set_metadata0(doc=doc0, author=self.Author)
             if ok:
                 try:
@@ -266,16 +289,14 @@ class Main(MainR):
         watermark = self.tab3.text.toPlainText()
         opacity = int(self.tab3.line4.text()) / 100
         if len(self.tab3.book_list) != 0:
-            file_name, ok = save(self, '.pdf')
+            file_name, ok = save(self, ".pdf")
             if ok:
                 doc = copy(self.tab3.book_list[0])
                 doc = add_watermark(
                     doc=doc,
                     text=watermark,
                     rotate=rotation,
-                    colour=(self.colour_r,
-                            self.colour_g,
-                            self.colour_b),
+                    colour=(self.colour_r, self.colour_g, self.colour_b),
                     font_size=font_size,
                     opacity=opacity,
                     font_file=self.font_dir,
@@ -287,8 +308,8 @@ class Main(MainR):
                         garbage=1,
                         permissions=self.perm_int,
                         encryption=fitz.PDF_ENCRYPT_AES_256,
-                        user_pw=u_password if u_password != '' else None,
-                        owner_pw=o_password if o_password != '' else None,
+                        user_pw=u_password if u_password != "" else None,
+                        owner_pw=o_password if o_password != "" else None,
                     )
                     if self.tab3.check.isChecked():
                         self.view(f_name=file_name)
@@ -324,7 +345,7 @@ class Main(MainR):
                 doc.saveIncr()
                 del doc
                 return
-            file_name, ok = save(self, '.pdf')
+            file_name, ok = save(self, ".pdf")
             if ok:
                 try:
                     doc.save(file_name, garbage=1)
@@ -341,14 +362,13 @@ class Main(MainR):
                 "start dir": self.s_dir,
                 "save dir": self.o_dir,
                 "language": self.language,
-                "dir store": self.dir_store_state
+                "dir store": self.dir_store_state,
             },
         )
         self.SettingCD.show()
         self.SettingCD.signal.connect(self.get_data)
 
-    def get_perm_para(self,
-                      par) -> None:
+    def get_perm_para(self, par) -> None:
         """
         obtain permission code
         """
@@ -360,9 +380,9 @@ class Main(MainR):
         """
         f_name, _ = add(
             self,
-            'PDF files (*.pdf);;'
-            'images (*.png *.jpg *.jpeg *.bmp *.tiff *.svg);;'
-            'ebooks (*.epub *.xps *.fb2 *.cbz)',
+            "PDF files (*.pdf);;"
+            "images (*.png *.jpg *.jpeg *.bmp *.tiff *.svg);;"
+            "ebooks (*.epub *.xps *.fb2 *.cbz)",
         )
         if _:
             doc, state = open_pdf(f_name, self)
@@ -380,7 +400,7 @@ class Main(MainR):
         tab2 add function
         """
         if len(self.tab2.book_list) == 0:
-            f_name, _ = add(self, '(*.pdf);;ebooks (*.epub *.xps *.fb2 *.cbz)')
+            f_name, _ = add(self, "(*.pdf);;ebooks (*.epub *.xps *.fb2 *.cbz)")
             if _:
                 doc, state = open_pdf(f_name, self)
                 if state:
@@ -400,7 +420,7 @@ class Main(MainR):
         tab3 add function
         """
         if len(self.tab3.book_list) == 0:
-            f_name, _ = add(self, '(*.pdf)')
+            f_name, _ = add(self, "(*.pdf)")
             if _:
                 doc, state = open_pdf(f_name, self)
                 if state:
@@ -416,7 +436,7 @@ class Main(MainR):
         """
         tab4 add function
         """
-        f_name, _ = add(self, '(*.pdf)')
+        f_name, _ = add(self, "(*.pdf)")
         if _:
             self.tab4.metadata = None
             self.tab4.table.clear()
@@ -440,11 +460,7 @@ class Main(MainR):
             del doc, state
         return
 
-    def get_data(self,
-                 par1,
-                 par2,
-                 par3,
-                 par5) -> None:
+    def get_data(self, par1, par2, par3, par5) -> None:
         """
         obtain settings from setting window
         """
@@ -456,8 +472,7 @@ class Main(MainR):
         set_language(self)
         self.setCurrentIndex(i)
 
-    def get_font_dir(self,
-                     par) -> None:
+    def get_font_dir(self, par) -> None:
         """
         obtain font file directory from font window
         """
@@ -474,18 +489,19 @@ class Main(MainR):
                 int(255 * self.colour_r),
                 int(255 * self.colour_g),
                 int(255 * self.colour_b),
-                int(255 * float(self.tab3.line4.text()) / 100)),
+                int(255 * float(self.tab3.line4.text()) / 100),
+            ),
             options=QColorDialog.ColorDialogOption(
                 QColorDialog.ShowAlphaChannel,
             ),
             parent=self,
-            title='Select Colour',
+            title="Select Colour",
         )
         if _colour.isValid():
             self.colour_r = _colour.getRgbF()[0]
             self.colour_g = _colour.getRgbF()[1]
             self.colour_b = _colour.getRgbF()[2]
-            self.tab3.line4.setText(f'{100 * _colour.getRgbF()[3]:.0f}')
+            self.tab3.line4.setText(f"{100 * _colour.getRgbF()[3]:.0f}")
             if self.tab3.check1.isChecked():
                 self.preview()
         del _colour
@@ -494,16 +510,16 @@ class Main(MainR):
         """
         open font window
         """
-        if os.path.exists(os.path.join(app_home, 'font_dir_cache.json')):
+        if os.path.exists(os.path.join(app_home, "font_dir_cache.json")):
             name_dict, file_dict = read_from_font_cache(
-                os.path.join(app_home, 'font_dir_cache.json'),
+                os.path.join(app_home, "font_dir_cache.json"),
             )
         else:
             font_paths = QtCore.QStandardPaths.standardLocations(
                 QtCore.QStandardPaths.FontsLocation,
             )
             name_dict, file_dict = find_font(font_paths)
-            store_font_path(name_dict, os.path.join(app_home, 'font_dir_cache.json'))
+            store_font_path(name_dict, os.path.join(app_home, "font_dir_cache.json"))
         self.FontDialogCD = FontDialog(
             self.font_dir,
             name_dict,
@@ -532,9 +548,7 @@ class Main(MainR):
                 doc=doc,
                 text=watermark,
                 rotate=rotation,
-                colour=(self.colour_r,
-                        self.colour_g,
-                        self.colour_b),
+                colour=(self.colour_r, self.colour_g, self.colour_b),
                 font_size=font_size,
                 opacity=opacity,
                 font_file=self.font_dir,
@@ -551,13 +565,14 @@ class Main(MainR):
         """
         index = par[0] * widget.w_col + par[1]  # get position
         if len(widget.book_list) != 0:
-            widget.label0.setText(f'📖 page {index + 1}')
+            widget.label0.setText(f"📖 page {index + 1}")
 
 
 class Setting(SettingR):
     """
     setting window
     """
+
     signal = QtCore.pyqtSignal(
         str,
         str,
@@ -585,10 +600,10 @@ class Setting(SettingR):
     def _enable_select(self):
         if self.check.isChecked():
             self.button1.setStyleSheet(
-                BUTTON_STYLE % ('folder_d.svg', 'folder_d.svg', 'folder_d.svg'),
+                BUTTON_STYLE % ("folder_d.svg", "folder_d.svg", "folder_d.svg"),
             )
             self.button2.setStyleSheet(
-                BUTTON_STYLE % ('folder_d.svg', 'folder_d.svg', 'folder_d.svg'),
+                BUTTON_STYLE % ("folder_d.svg", "folder_d.svg", "folder_d.svg"),
             )
             try:
                 self.button1.clicked.disconnect()
@@ -599,10 +614,10 @@ class Setting(SettingR):
             self.line2.setReadOnly(True)
         else:
             self.button1.setStyleSheet(
-                BUTTON_STYLE % ('folder.svg', 'folder_h.svg', 'folder_p.svg'),
+                BUTTON_STYLE % ("folder.svg", "folder_h.svg", "folder_p.svg"),
             )
             self.button2.setStyleSheet(
-                BUTTON_STYLE % ('folder.svg', 'folder_h.svg', 'folder_p.svg'),
+                BUTTON_STYLE % ("folder.svg", "folder_h.svg", "folder_p.svg"),
             )
             self.button1.clicked.connect(lambda: choose(self.line1, self.s_dir))
             self.button2.clicked.connect(lambda: choose(self.line2, self.o_dir))
@@ -627,6 +642,7 @@ class PermMenu(PermMenuR):
     """
     permission setting menu window
     """
+
     signal = QtCore.pyqtSignal(int)
 
     def set_language(self, language: str) -> None:
@@ -665,12 +681,10 @@ class FontDialog(FontDialogR):
     """
     font menu window
     """
+
     signal = QtCore.pyqtSignal(str)
 
-    def __init__(self,
-                 font_dir: str,
-                 name_dict: dict,
-                 file_dict: dict):
+    def __init__(self, font_dir: str, name_dict: dict, file_dict: dict):
         super().__init__()
         self.name_dict = name_dict
         for item in name_dict:
@@ -696,12 +710,12 @@ class FontDialog(FontDialogR):
         shape.finish()
         shape.insert_textbox(
             r1,
-            'Hello\nこんにちは\n你好\n3.14159',
+            "Hello\nこんにちは\n你好\n3.14159",
             color=(0.24, 0.24, 0.24),
             align=1,
             fontsize=25,
             fontfile=self.name_dict[self.combobox.currentText()],
-            fontname='ext_0',
+            fontname="ext_0",
         )
         shape.commit()
         cover = render_pdf_page(page)
@@ -723,23 +737,22 @@ def reset() -> None:
     """
     remove all settings, caches and icons
     """
-    setting_path = os.path.join(app_home, 'settings.json')
-    cache_path = os.path.join(app_home, 'font_dir_cache.json')
+    setting_path = os.path.join(app_home, "settings.json")
+    cache_path = os.path.join(app_home, "font_dir_cache.json")
     if os.path.exists(setting_path):
         os.remove(setting_path)
     if os.path.exists(cache_path):
         os.remove(cache_path)
-    print('reset finished')
+    print("reset finished")
 
 
 def remove() -> None:
     """
     remove the whole application
     """
-    c = input('Are you sure to remove the whole application? n/Y'
-              '\n>>>')
-    if c.lower() == 'y':
-        sp.call('pip uninstall pypdfeditor-gui', shell=True)
+    c = input("Are you sure to remove the whole application? n/Y" "\n>>>")
+    if c.lower() == "y":
+        sp.call("pip uninstall pypdfeditor-gui", shell=True)
         if os.path.exists(app_home):
             shutil.rmtree(app_home)
-        print('process finished')
+        print("process finished")

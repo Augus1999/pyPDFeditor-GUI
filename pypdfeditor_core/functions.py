@@ -14,20 +14,34 @@ from fitz import Document, Page, Pixmap, Rect, Point, Font
 from fitz.utils import get_pixmap, set_metadata, Shape
 from fitz import TOOLS, Matrix, Identity
 from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtWidgets import (QInputDialog, QHBoxLayout, QWidget,
-                             QFileDialog, QMessageBox, QLineEdit, )
+from PyQt5.QtWidgets import (
+    QInputDialog,
+    QHBoxLayout,
+    QWidget,
+    QFileDialog,
+    QMessageBox,
+    QLineEdit,
+)
 from .icons import icon_path
 from .language import MENU_L, MESSAGE
 
-SUPPORT_IMG_FORMAT = ('.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.svg')  # list .svg at the end!
-SUPPORT_FORMAT = ('.pdf', '.epub', '.xps', '.fb2', '.cbz') + SUPPORT_IMG_FORMAT
-SUPPORT_OUT_FORMAT = ('.pdf',)
+SUPPORT_IMG_FORMAT = (
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".bmp",
+    ".tiff",
+    ".svg",
+)  # list .svg at the end!
+SUPPORT_FORMAT = (".pdf", ".epub", ".xps", ".fb2", ".cbz") + SUPPORT_IMG_FORMAT
+SUPPORT_OUT_FORMAT = (".pdf",)
 
 
 class Doc(Document):
     """
     a wrapper to fitz.Document class
     """
+
     pass_word: Optional[str] = None
     rotatedPages = {}
 
@@ -42,7 +56,7 @@ def copy(doc: Doc) -> Doc:
     _doc = Doc(doc.name)
     if not _doc.is_pdf:
         pdf_bites = _doc.convert_to_pdf()
-        _doc = Doc('pdf', pdf_bites)
+        _doc = Doc("pdf", pdf_bites)
     if doc.pass_word is not None:
         _doc.authenticate(doc.pass_word)
     _doc.name = doc.name
@@ -53,8 +67,7 @@ def copy(doc: Doc) -> Doc:
     return _doc
 
 
-def open_pdf(file_name: str,
-             parent: QWidget) -> (Optional[Doc], bool):
+def open_pdf(file_name: str, parent: QWidget) -> tuple[Optional[Doc], bool]:
     """
     open pdf file and return a fitz object if applied
 
@@ -65,37 +78,25 @@ def open_pdf(file_name: str,
     try:  # handle wrong format (svg included) except images
         doc = Doc(filename=file_name)
     except RuntimeError:
-        QMessageBox.critical(
-            parent,
-            'Oops',
-            MESSAGE[parent.language][0],
-            QMessageBox.Yes,
-        )
-        return None, False
+        return _open_warning(parent)
     if not doc.is_pdf:
         if file_name.endswith(SUPPORT_IMG_FORMAT[:-1]):
             try:  # handle wrong image formats
                 pdf_bites = Pixmap(file_name).tobytes()
-                doc = Doc('png', pdf_bites)
+                doc = Doc("png", pdf_bites)
             except RuntimeError:
-                QMessageBox.critical(
-                    parent,
-                    'Oops',
-                    MESSAGE[parent.language][0],
-                    QMessageBox.Yes,
-                )
-                return None, False
+                return _open_warning(parent)
         pdf_bites = doc.convert_to_pdf()  # convert to pdf
-        doc = Doc('pdf', pdf_bites)
+        doc = Doc("pdf", pdf_bites)
         doc.name = file_name
     if doc.needs_pass:
         while doc.is_encrypted:
             value, _ = QInputDialog.getText(
                 parent,
-                ' ',
-                'Password:',
+                " ",
+                "Password:",
                 QLineEdit.Password,
-                '',
+                "",
                 QtCore.Qt.Dialog,
             )
             if not _:
@@ -149,13 +150,15 @@ def pdf_split(doc: Doc) -> list:
     return book_list
 
 
-def add_watermark(doc: Union[Doc, Document],
-                  text: str,
-                  rotate: int,
-                  colour: tuple,
-                  font_size: int,
-                  font_file: str,
-                  opacity=0.5) -> Union[Doc, Document]:
+def add_watermark(
+    doc: Union[Doc, Document],
+    text: str,
+    rotate: int,
+    colour: tuple,
+    font_size: int,
+    font_file: str,
+    opacity=0.5,
+) -> Union[Doc, Document]:
     """
     add watermark
 
@@ -191,17 +194,13 @@ def add_watermark(doc: Union[Doc, Document],
             align=1,
             fontfile=font_file,
             fontname=os.path.basename(font_file),
-            morph=(
-                pos0,
-                Matrix(rotate)
-            ),
+            morph=(pos0, Matrix(rotate)),
         )
         shape.commit()
     return doc
 
 
-def setting_warning(set_file_name: str,
-                    parent: QWidget) -> dict:
+def setting_warning(set_file_name: str, parent: QWidget) -> dict:
     """
     import settings from the JSON file
 
@@ -211,9 +210,9 @@ def setting_warning(set_file_name: str,
     """
     try:
         with open(
-                set_file_name,
-                'r',
-                encoding='utf-8',
+            set_file_name,
+            "r",
+            encoding="utf-8",
         ) as f:
             content = json.load(f)
         if "start dir" not in content:
@@ -235,9 +234,9 @@ def setting_warning(set_file_name: str,
     except FileNotFoundError:
         reply = QMessageBox.warning(
             parent,
-            'Error',
-            f'Cannot find {os.path.basename(set_file_name)}\n\n'
-            f'Create an empty setting file?',
+            "Error",
+            f"Cannot find {os.path.basename(set_file_name)}\n\n"
+            f"Create an empty setting file?",
             QMessageBox.Yes | QMessageBox.No,
         )
         if reply == QMessageBox.No:
@@ -248,14 +247,12 @@ def setting_warning(set_file_name: str,
                 "save dir": "",
                 "language": "English",
                 "font dir": "",
-                "dir store": False
+                "dir store": False,
             }
             return content
 
 
-def shadow(widget,
-           colour: QtGui.QColor,
-           radius: int) -> None:
+def shadow(widget, colour: QtGui.QColor, radius: int) -> None:
     """
     add shadow
 
@@ -271,10 +268,7 @@ def shadow(widget,
     widget.setGraphicsEffect(_shadow)
 
 
-def page_icon(page: Page,
-              width: int,
-              w_col: int,
-              _scaled: float) -> QWidget:
+def page_icon(page: Page, width: int, w_col: int, _scaled: float) -> QWidget:
     """
     insert image to a QLabel
 
@@ -313,9 +307,9 @@ def page_icon(page: Page,
     return widget
 
 
-def set_icon(widget: QWidget,
-             doc: Union[Doc, Document, None] = None,
-             _scaled: float = 0.95) -> None:
+def set_icon(
+    widget: QWidget, doc: Union[Doc, Document, None] = None, _scaled: float = 0.95
+) -> None:
     """
     add image of first page into table element
 
@@ -327,10 +321,12 @@ def set_icon(widget: QWidget,
     x, y = 0, 0
     for i in widget.book_list:
         label = page_icon(
-            widget.book[i] if isinstance(
+            widget.book[i]
+            if isinstance(
                 widget.book_list[0],
                 int,
-            ) else (i[0] if doc is None else doc[0]),
+            )
+            else (i[0] if doc is None else doc[0]),
             widget.table.width(),
             widget.w_col,
             _scaled,
@@ -343,13 +339,12 @@ def set_icon(widget: QWidget,
             y += 1
         else:
             x += 1
-            y -= (widget.w_col - 1)
+            y -= widget.w_col - 1
         # --------------------------------------------------------------
     TOOLS.store_shrink(100)  # delete MuPDF cache
 
 
-def add(main: QWidget,
-        _format: str) -> tuple[str, str]:
+def add(main: QWidget, _format: str) -> tuple[str, str]:
     """
     add a file
 
@@ -359,7 +354,7 @@ def add(main: QWidget,
     """
     f_name, state = QFileDialog.getOpenFileName(
         main,
-        'Open files',
+        "Open files",
         main.s_dir,
         _format,
     )
@@ -370,8 +365,7 @@ def add(main: QWidget,
     return f_name, state
 
 
-def save(main: QWidget,
-         _format: str) -> tuple[str, str]:
+def save(main: QWidget, _format: str) -> tuple[str, str]:
     """
     save a file
 
@@ -389,11 +383,10 @@ def save(main: QWidget,
         return "", ""
     if state and main.dir_store_state:
         main.o_dir = os.path.dirname(f_name)
-    return f_name.replace('\\', '/'), state
+    return f_name.replace("\\", "/"), state
 
 
-def delete(index: int,
-           widget: QWidget) -> None:
+def delete(index: int, widget: QWidget) -> None:
     """
     delete select file/page
 
@@ -413,10 +406,7 @@ def delete(index: int,
         set_icon(widget)
 
 
-def generate_menu(pos,
-                  widget: QWidget,
-                  main: QWidget,
-                  select: int = 0) -> None:
+def generate_menu(pos, widget: QWidget, main: QWidget, select: int = 0) -> None:
     """
     generate menu
 
@@ -436,35 +426,41 @@ def generate_menu(pos,
     if 0 <= index < len(widget.book_list):
         menu = QtWidgets.QMenu()
         item1 = menu.addAction(
-            QtGui.QIcon(os.path.join(icon_path, 'delete.svg')),
+            QtGui.QIcon(os.path.join(icon_path, "delete.svg")),
             MENU_L[main.language][0],
         )
         item2, item3, item4, item5, item6, item7 = None, None, None, None, None, None
-        if select in (0, 2,):
+        if select in (
+            0,
+            2,
+        ):
             item3 = menu.addAction(
-                QtGui.QIcon(str(icon_path / 'view.svg')),
+                QtGui.QIcon(str(icon_path / "view.svg")),
                 MENU_L[main.language][1],
             )
         if select == 1:
             item2 = menu.addAction(
-                QtGui.QIcon(str(icon_path / 'down.svg')),
+                QtGui.QIcon(str(icon_path / "down.svg")),
                 MENU_L[main.language][2],
             )
             item4 = menu.addAction(
-                QtGui.QIcon(str(icon_path / 'Photo.svg')),
+                QtGui.QIcon(str(icon_path / "Photo.svg")),
                 MENU_L[main.language][3],
             )
             item5 = menu.addAction(
-                QtGui.QIcon(str(icon_path / 'rotate_clockwise.svg')),
+                QtGui.QIcon(str(icon_path / "rotate_clockwise.svg")),
                 MENU_L[main.language][4],
             )
             item6 = menu.addAction(
-                QtGui.QIcon(str(icon_path / 'rotate_anticlockwise.svg')),
+                QtGui.QIcon(str(icon_path / "rotate_anticlockwise.svg")),
                 MENU_L[main.language][5],
             )
-        if select in (1, 2,):
+        if select in (
+            1,
+            2,
+        ):
             item7 = menu.addAction(
-                QtGui.QIcon(str(icon_path / 'move_page.svg')),
+                QtGui.QIcon(str(icon_path / "move_page.svg")),
                 MENU_L[main.language][6],
             )
         action = menu.exec_(
@@ -481,7 +477,10 @@ def generate_menu(pos,
                 widget=widget,
                 main=main,
             )
-        if action == item3 and select in (0, 2,):
+        if action == item3 and select in (
+            0,
+            2,
+        ):
             main.view(index, widget)
         if action == item4 and select == 1:
             extract_img(
@@ -501,7 +500,10 @@ def generate_menu(pos,
                 degree=-90,
                 widget=widget,
             )
-        if action == item7 and select in (1, 2,):
+        if action == item7 and select in (
+            1,
+            2,
+        ):
             rearrange_page(
                 index=index,
                 widget=widget,
@@ -509,8 +511,7 @@ def generate_menu(pos,
             )
 
 
-def reset_table(book_len: int,
-                widget: QWidget) -> None:
+def reset_table(book_len: int, widget: QWidget) -> None:
     """
     reset the table element
 
@@ -533,9 +534,7 @@ def reset_table(book_len: int,
         widget.table.setRowHeight(i, height)
 
 
-def save_as(index: int,
-            widget: QWidget,
-            main: QWidget) -> None:
+def save_as(index: int, widget: QWidget, main: QWidget) -> None:
     """
     save the selected page as PDF file
 
@@ -546,9 +545,12 @@ def save_as(index: int,
     """
     doc = Document()
     doc.insert_pdf(widget.book, widget.book_list[index], widget.book_list[index])
-    f_name = os.path.splitext(
-        os.path.basename(widget.book.name),
-    )[0] + f'-{widget.book_list[index] + 1}.pdf'
+    f_name = (
+        os.path.splitext(
+            os.path.basename(widget.book.name),
+        )[0]
+        + f"-{widget.book_list[index] + 1}.pdf"
+    )
     file_name, ok = QFileDialog.getSaveFileName(
         main,
         "save",
@@ -556,13 +558,19 @@ def save_as(index: int,
         "PDF file (*.pdf);;images (*.png *.psd *ppm)",
     )
     if ok:
-        if file_name.endswith('.pdf'):
+        if file_name.endswith(".pdf"):
             doc.save(file_name)
-        if file_name.endswith(('.psd', '.png', '.ppm',)):
+        if file_name.endswith(
+            (
+                ".psd",
+                ".png",
+                ".ppm",
+            )
+        ):
             pix = get_pixmap(
                 doc[0],
                 dpi=220,
-                alpha=False if file_name.endswith('.ppm') else True,
+                alpha=False if file_name.endswith(".ppm") else True,
             )
             pix.save(file_name)
             TOOLS.store_shrink(100)  # delete MuPDF cache
@@ -578,7 +586,13 @@ def clean(widget: QWidget) -> None:
     :return: None
     """
     if len(widget.book_list) != 0:
-        if isinstance(widget.book_list[0], (Doc, Document,)):
+        if isinstance(
+            widget.book_list[0],
+            (
+                Doc,
+                Document,
+            ),
+        ):
             for item in widget.book_list:
                 item.close()
         else:
@@ -593,9 +607,7 @@ def clean(widget: QWidget) -> None:
     gc.collect(2)
 
 
-def extract_img(index: int,
-                widget: QWidget,
-                main: QWidget) -> None:
+def extract_img(index: int, widget: QWidget, main: QWidget) -> None:
     """
     extract images from pdf page.
 
@@ -607,16 +619,19 @@ def extract_img(index: int,
     doc = widget.book
     img_inf = doc[widget.book_list[index]].get_images()
     for key, inf in enumerate(img_inf):
-        f_name = os.path.splitext(
-            os.path.basename(widget.book.name),
-        )[0] + f'-{widget.book_list[index] + 1}-image-{key + 1}.png'
+        f_name = (
+            os.path.splitext(
+                os.path.basename(widget.book.name),
+            )[0]
+            + f"-{widget.book_list[index] + 1}-image-{key + 1}.png"
+        )
         img_name = os.path.join(main.s_dir, f_name)
         # xref is inf[0]
         img = Pixmap(doc, inf[0])
         img.save(img_name)
     QMessageBox.information(
         main,
-        'Saved',
+        "Saved",
         MESSAGE[main.language][1].format(
             len(img_inf),
             main.s_dir,
@@ -626,9 +641,7 @@ def extract_img(index: int,
     TOOLS.store_shrink(100)  # delete MuPDF cache
 
 
-def rotate_page(index: int,
-                degree: int,
-                widget: QWidget) -> None:
+def rotate_page(index: int, degree: int, widget: QWidget) -> None:
     """
     rotate page
 
@@ -652,9 +665,7 @@ def rotate_page(index: int,
     set_icon(widget)
 
 
-def rearrange_page(index: int,
-                   widget: QWidget,
-                   parent: QWidget) -> None:
+def rearrange_page(index: int, widget: QWidget, parent: QWidget) -> None:
     """
     rearrange pages
 
@@ -666,8 +677,8 @@ def rearrange_page(index: int,
     book_length = len(widget.book_list)
     value, _ = QInputDialog.getInt(
         parent,
-        ' ',
-        f'Move to page: (from 1 to {book_length})',
+        " ",
+        f"Move to page: (from 1 to {book_length})",
         value=index + 1,
         min=1,
         max=book_length,
@@ -692,8 +703,7 @@ def rearrange_page(index: int,
     return None
 
 
-def choose(widget: QtWidgets.QLineEdit,
-           c_dir: str) -> None:
+def choose(widget: QtWidgets.QLineEdit, c_dir: str) -> None:
     """
     choose folder
 
@@ -715,17 +725,17 @@ def remove_invalid_xref_key(metadata: dict) -> dict:
     remove invalid xref key(s)
     """
     valid_keys = (
-        'author',
-        'producer',
-        'creator',
-        'title',
-        'format',
-        'encryption',
-        'creationDate',
-        'modDate',
-        'subject',
-        'keywords',
-        'trapped',
+        "author",
+        "producer",
+        "creator",
+        "title",
+        "format",
+        "encryption",
+        "creationDate",
+        "modDate",
+        "subject",
+        "keywords",
+        "trapped",
     )
     for key in metadata:
         if key not in valid_keys:
@@ -733,8 +743,7 @@ def remove_invalid_xref_key(metadata: dict) -> dict:
     return metadata
 
 
-def set_metadata0(doc: Doc,
-                  author: Optional[str]) -> None:
+def set_metadata0(doc: Doc, author: Optional[str]) -> None:
     """
     set defeat metadata
 
@@ -745,26 +754,26 @@ def set_metadata0(doc: Doc,
     _time = time.localtime(time.time())
     metadata = doc.metadata
     metadata["producer"] = "pyPDFEditor-GUI"
-    metadata["modDate"] = "D:" + "".join((
-        str(_time[0]),  # YYYY
-        str(_time[1]).zfill(2),  # MM
-        str(_time[2]).zfill(2),  # DD
-        str(_time[3]).zfill(2),  # hh
-        str(_time[4]).zfill(2),  # mm
-        str(_time[5]).zfill(2),  # ss
-        time.strftime('%z')[:3],  # UTC +/- hh
-        '\'' + time.strftime('%z')[3:] + '\'',  # UTC +/- 'mm'
-    ))
+    metadata["modDate"] = "D:" + "".join(
+        (
+            str(_time[0]),  # YYYY
+            str(_time[1]).zfill(2),  # MM
+            str(_time[2]).zfill(2),  # DD
+            str(_time[3]).zfill(2),  # hh
+            str(_time[4]).zfill(2),  # mm
+            str(_time[5]).zfill(2),  # ss
+            time.strftime("%z")[:3],  # UTC +/- hh
+            "'" + time.strftime("%z")[3:] + "'",  # UTC +/- 'mm'
+        )
+    )
     metadata["author"] = author
     doc.xref_set_key(-1, "Info", "null")  # remove all original xref
     set_metadata(doc, remove_invalid_xref_key(metadata))
 
 
-def set_metadata1(metadata: dict,
-                  title: str,
-                  author: str,
-                  subject: str,
-                  keywords: str) -> dict:
+def set_metadata1(
+    metadata: dict, title: str, author: str, subject: str, keywords: str
+) -> dict:
     """
     set metadata to pdf document
 
@@ -777,16 +786,18 @@ def set_metadata1(metadata: dict,
     """
     _time = time.localtime(time.time())
     metadata["producer"] = "pyPDFEditor-GUI"
-    metadata["modDate"] = "D:" + "".join((
-        str(_time[0]),  # YYYY
-        str(_time[1]).zfill(2),  # MM
-        str(_time[2]).zfill(2),  # DD
-        str(_time[3]).zfill(2),  # hh
-        str(_time[4]).zfill(2),  # mm
-        str(_time[5]).zfill(2),  # ss
-        time.strftime('%z')[:3],  # UTC +/- hh
-        '\'' + time.strftime('%z')[3:] + '\'',  # UTC +/- 'mm'
-    ))
+    metadata["modDate"] = "D:" + "".join(
+        (
+            str(_time[0]),  # YYYY
+            str(_time[1]).zfill(2),  # MM
+            str(_time[2]).zfill(2),  # DD
+            str(_time[3]).zfill(2),  # hh
+            str(_time[4]).zfill(2),  # mm
+            str(_time[5]).zfill(2),  # ss
+            time.strftime("%z")[:3],  # UTC +/- hh
+            "'" + time.strftime("%z")[3:] + "'",  # UTC +/- 'mm'
+        )
+    )
     metadata["title"] = title
     metadata["author"] = author
     metadata["subject"] = subject
@@ -804,7 +815,7 @@ def toc2plaintext(toc: list) -> str:
     for content in toc:
         head = f'{int(content[0]) * "*"}-->{content[1]}-->{content[2]}'
         plaintext.append(head)
-    plaintext = '\n'.join(plaintext)
+    plaintext = "\n".join(plaintext)
     return plaintext
 
 
@@ -814,10 +825,10 @@ def plaintext2toc(plaintext: str) -> list[list[int, str, int]]:
     :return: table of content -> DOCUMENT.get_toc()
     """
     toc = []
-    contents = plaintext.split('\n')
+    contents = plaintext.split("\n")
     for content in contents:
         if len(content) != 0:
-            c = content.split('-->')
+            c = content.split("-->")
             t = [len(c[0]), c[1], int(c[2])]
             toc.append(t)
     return toc
@@ -851,8 +862,7 @@ def find_font(font_dirs: list) -> tuple[dict, dict]:
     return name_dict, dir_dict
 
 
-def store_font_path(name_dict: dict,
-                    cache_file_name: str) -> None:
+def store_font_path(name_dict: dict, cache_file_name: str) -> None:
     """
     store the font file dict
 
@@ -860,9 +870,9 @@ def store_font_path(name_dict: dict,
     :param cache_file_name: stored directory
     """
     with open(
-            file=cache_file_name,
-            mode='w',
-            encoding='utf-8',
+        file=cache_file_name,
+        mode="w",
+        encoding="utf-8",
     ) as f:
         json.dump(
             name_dict,
@@ -883,9 +893,9 @@ def read_from_font_cache(cache_file_name: str) -> tuple[dict, dict]:
     """
     dir_dict = {}
     with open(
-            file=cache_file_name,
-            mode='r',
-            encoding='utf-8',
+        file=cache_file_name,
+        mode="r",
+        encoding="utf-8",
     ) as f:
         name_dict = json.load(f)
     for font_name in name_dict:
@@ -900,7 +910,23 @@ def _warning(parent) -> None:
     """
     QMessageBox.warning(
         parent,
-        'Oops',
+        "Oops",
         MESSAGE[parent.language][2],
         QMessageBox.Yes,
     )
+
+
+def _open_warning(parent: QWidget) -> tuple[None, bool]:
+    """
+    raise warning pop-up window when encountering an incorrect file
+
+    :param parent: parent
+    :return: (None, False)
+    """
+    QMessageBox.critical(
+        parent,
+        "Oops",
+        MESSAGE[parent.language][0],
+        QMessageBox.Yes,
+    )
+    return None, False

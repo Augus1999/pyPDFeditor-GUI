@@ -15,13 +15,13 @@ if not os.path.exists(app_home):
     os.makedirs(app_home)
 
 __system__ = platform.system()
-__author__ = 'Nianze A. TAO (Omozawa SUENO)'
-__version__ = '2.2.2'
+__author__ = "Nianze A. TAO (Omozawa SUENO)"
+__version__ = "2.2.2"
 
 
-def main(system: str = __system__,
-         version: str = __version__,
-         debug: bool = False) -> None:
+def main(
+    system: str = __system__, version: str = __version__, debug: bool = False
+) -> None:
     """
     main function
 
@@ -42,4 +42,6 @@ def main(system: str = __system__,
     main_app = Main(system, version)
     main_app.show()
     sys.exit(app.exec())
+
+
 # --------------完成！2021年八月十日に--------------

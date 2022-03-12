@@ -5,15 +5,15 @@ all style sheets
 """
 from .icons import icon_path
 
-icon_path_ = str(icon_path).replace('\\', '/')
+icon_path_ = str(icon_path).replace("\\", "/")
 
-MAIN_COLOUR = '#6272a4'  # main colour of the theme
-COMP_COLOUR = '#b7cbc9'  # complementary colour of MAIN_COLOUR
-COMP_COLOUR_2 = '#ca8fc0'
-LIGHT_COLOUR = '#f8f8f2'  # #f8f8f2
-DARK_COLOUR = '#4f5c84'
-TEXT_COLOUR = '#1b124b'
-TAB_STYLE = f'''
+MAIN_COLOUR = "#6272a4"  # main colour of the theme
+COMP_COLOUR = "#b7cbc9"  # complementary colour of MAIN_COLOUR
+COMP_COLOUR_2 = "#ca8fc0"
+LIGHT_COLOUR = "#f8f8f2"  # #f8f8f2
+DARK_COLOUR = "#4f5c84"
+TEXT_COLOUR = "#1b124b"
+TAB_STYLE = f"""
         QTabBar::tab{{
         border-left:4px solid {MAIN_COLOUR};
         padding:3ex;
@@ -34,8 +34,8 @@ TAB_STYLE = f'''
         border:none;
         border-radius:5px;
         background-color:{MAIN_COLOUR}}}
-        '''
-COMBO_BOX_STYLE = f'''
+        """
+COMBO_BOX_STYLE = f"""
         QComboBox{{
         font-size:11pt;
         font-family:Verdana,Microsoft YaHei UI,PingFang SC;
@@ -64,8 +64,8 @@ COMBO_BOX_STYLE = f'''
         background-color:{MAIN_COLOUR};
         border-radius:3px;
         min-height:45px}}
-        '''
-TEXTEDIT_STYlE = f'''
+        """
+TEXTEDIT_STYlE = f"""
         QTextEdit{{font-size:11pt;
         border-top-left-radius:5px;
         border-top-right-radius:5px;
@@ -95,8 +95,8 @@ TEXTEDIT_STYlE = f'''
         background-color:{MAIN_COLOUR};
         border-radius:4px;
         min-width:45px}}
-        '''
-LINE_EDIT_STYLE = f'''
+        """
+LINE_EDIT_STYLE = f"""
         QLineEdit{{
         border:none;
         font-size:10pt;
@@ -106,8 +106,8 @@ LINE_EDIT_STYLE = f'''
         font-family:Verdana,Microsoft YaHei UI,PingFang SC}}
         QLineEdit:focus{{
         border:2px solid {COMP_COLOUR}}}
-        '''
-BUTTON_STYLE = f'''
+        """
+BUTTON_STYLE = f"""
         QPushButton{{
         border-radius:0px;
         background-color:transparent;
@@ -116,16 +116,16 @@ BUTTON_STYLE = f'''
         image:url({icon_path_}/%s)}}
         QPushButton:pressed{{
         image:url({icon_path_}/%s)}}
-        '''
-BUTTON_STYLE0 = f'''
+        """
+BUTTON_STYLE0 = f"""
         QPushButton{{
         border-radius:10px;
         background-color:transparent;
         image:url({icon_path_}/%s)}}
         QPushButton:hover{{
         background-color:#e2e2dd}}
-        '''
-BUTTON_STYLE1 = f'''
+        """
+BUTTON_STYLE1 = f"""
         QPushButton{{
         border-radius:10px;
         background-color:transparent;
@@ -133,8 +133,8 @@ BUTTON_STYLE1 = f'''
         QPushButton:hover{{
         background-color:#f25355;
         image:url({icon_path_}/%s)}}
-        '''
-TABLE_STYLE1 = f'''
+        """
+TABLE_STYLE1 = f"""
         QTableWidget{{
         border:none;
         background-color:transparent}}
@@ -148,8 +148,8 @@ TABLE_STYLE1 = f'''
         background-color:#939393;
         border-radius:2px;
         min-height:45px}}
-        '''
-TABLE_STYLE2 = f'''
+        """
+TABLE_STYLE2 = f"""
         QTableWidget{{
         border-radius:10px;
         border:none;
@@ -166,8 +166,8 @@ TABLE_STYLE2 = f'''
         background-color:#939393;
         border-radius:2px;
         min-height:45px}}
-        '''
-LABEL_STYLE = f'''
+        """
+LABEL_STYLE = f"""
         QLabel{{
         border:none;
         border-radius:10px;
@@ -175,8 +175,8 @@ LABEL_STYLE = f'''
         font-family:Verdana,Microsoft YaHei UI,PingFang SC;
         color:{TEXT_COLOUR};
         background-color:transparent}}
-        '''
-BGC_STYLE = f'''
+        """
+BGC_STYLE = f"""
         QWidget{{
         border:none;
         border-radius:0px;
@@ -187,16 +187,16 @@ BGC_STYLE = f'''
         background-color:{LIGHT_COLOUR};
         font-size:9pt;
         font-family:Verdana,Microsoft YaHei UI,PingFang SC}}
-        '''
-SWITCH_STYLE = f'''
+        """
+SWITCH_STYLE = f"""
         SwitchBtn:on{{
         background-color:{MAIN_COLOUR};
         color:{LIGHT_COLOUR}}}
         SwitchBtn:off{{
         background-color:#e2e2dd;
         color:#8d90a4}}
-        '''
-SCROLL_AREA_STYlE = f'''
+        """
+SCROLL_AREA_STYlE = f"""
         QScrollArea{{
         border:none;
         background-color:transparent}}
@@ -260,4 +260,4 @@ SCROLL_AREA_STYlE = f'''
         background:none}}
         QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical{{
         background:none}}
-        '''
+        """
