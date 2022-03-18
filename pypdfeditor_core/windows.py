@@ -606,9 +606,10 @@ class MainR(QTabWidget):
             <p style='color:#333;font-family:Verdana'>Out [3]: User manual is on
             <a style='color:#a3b5b3'>
             https://augus1999.github.io/pyPDFeditor-GUI/</a></p>
-            <p style='color:#333;font-family:Verdana'>Out [4]: ...</p>
+            <p style='color:#333;font-family:Verdana'>Out [4]: STAND WITH UKRAINE 🇺🇦</p>
+            <p style='color:#333;font-family:Verdana'>Out [5]: ...</p>
             """
-        )
+        ) 
         shadow(text, QColor(0, 0, 0, 90), 10)
         label_w = QLabel(self.tab0)
         label_w.setStyleSheet(LABEL_STYLE)

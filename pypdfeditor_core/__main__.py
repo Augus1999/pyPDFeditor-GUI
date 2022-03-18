@@ -14,8 +14,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--reset",
         action="store_true",
-        help="only remove all settings, caches and icons; "
-        "default settings and icons will be created at next launch",
+        help="remove all settings and caches; "
+        "default settings will be created at next launch",
     )
     parser.add_argument(
         "--remove", action="store_true", help="remove the whole application"
