@@ -85,6 +85,7 @@ class Main(MainR):
         self.tab2.book = None
         self.tab4.book = None
         self.tab4.metadata = None
+        self.tab3.xy = (0, 0,)
         self.tab1.w_col, self.tab1.w_row = 4, 1
         self.tab2.w_row, self.tab2.w_col = 2, 4
         self.tab3.w_row, self.tab3.w_col = 1, 1
@@ -300,6 +301,7 @@ class Main(MainR):
                     font_size=font_size,
                     opacity=opacity,
                     font_file=self.font_dir,
+                    position=self.tab3.xy,
                 )
                 set_metadata0(doc=doc, author=self.Author)
                 try:
@@ -552,6 +554,7 @@ class Main(MainR):
                 font_size=font_size,
                 opacity=opacity,
                 font_file=self.font_dir,
+                position=self.tab3.xy,
             )
             self.tab3.table.clearContents()
             set_icon(widget=self.tab3, doc=doc)

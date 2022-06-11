@@ -157,7 +157,8 @@ def add_watermark(
     colour: tuple,
     font_size: int,
     font_file: str,
-    opacity=0.5,
+    opacity: float = 0.5,
+    position: tuple[int] = (0, 0),
 ) -> Union[Doc, Document]:
     """
     add watermark
@@ -168,19 +169,22 @@ def add_watermark(
     :param colour: colour of watermark; in form of (a, b, c,)
     :param font_size: font size of letter in watermark
     :param font_file: font file location
-    :param opacity: opacity of the watermark; range from 0 to 100
+    :param opacity: opacity of the watermark; range from 0.0 to 1.0
+    :param position: position of the watermark
     :return: fitz.Document or Doc
     """
+    x, y = position
+    x, y = int(x), int(y)
     for page in doc:
         r1 = Rect(
-            10,
-            10,
-            page.rect.width - 10,
-            page.rect.height - 10,
+            10 + x,
+            10 + y,
+            page.rect.width - 10 + x,
+            page.rect.height - 10 + y,
         )
         pos0 = Point(
-            page.rect.width // 2,
-            page.rect.height // 2,
+            page.rect.width // 2 + x,
+            page.rect.height // 2 + y,
         )
         shape = Shape(page)
         shape.insert_textbox(
@@ -411,8 +415,8 @@ def generate_menu(pos, widget: QWidget, main: QWidget, select: int = 0) -> None:
     generate menu
 
     :param pos: position
-    :param select: select=0 => only delete and view;
-                   select=1 => with all other functionalities;
+    :param select: select=0 => delete, view and set watermark pos;
+                   select=1 => with all other functionalities (except set watermark pos);
                    select=2 => delete, view and rearrange
     :param widget: widget
     :param main: main
@@ -429,7 +433,15 @@ def generate_menu(pos, widget: QWidget, main: QWidget, select: int = 0) -> None:
             QtGui.QIcon(os.path.join(icon_path, "delete.svg")),
             MENU_L[main.language][0],
         )
-        item2, item3, item4, item5, item6, item7 = None, None, None, None, None, None
+        item2, item3, item4, item5, item6, item7, item8 = (
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
         if select in (
             0,
             2,
@@ -462,6 +474,11 @@ def generate_menu(pos, widget: QWidget, main: QWidget, select: int = 0) -> None:
             item7 = menu.addAction(
                 QtGui.QIcon(str(icon_path / "move_page.svg")),
                 MENU_L[main.language][6],
+            )
+        if select == 0:
+            item8 = menu.addAction(
+                QtGui.QIcon(str(icon_path / "arrow_move.svg")),
+                MENU_L[main.language][7],
             )
         action = menu.exec_(
             widget.table.mapToGlobal(pos),
@@ -509,6 +526,8 @@ def generate_menu(pos, widget: QWidget, main: QWidget, select: int = 0) -> None:
                 widget=widget,
                 parent=main,
             )
+        if action == item8 and select == 0:
+            _set_watermark_pos(main)
 
 
 def reset_table(book_len: int, widget: QWidget) -> None:
@@ -701,6 +720,32 @@ def rearrange_page(index: int, widget: QWidget, parent: QWidget) -> None:
     )
     set_icon(widget)
     return None
+
+
+def _set_watermark_pos(main: QWidget) -> None:
+    """
+    set watermark position in the page
+
+    :param main: main widget
+    :return: None
+    """
+    pos_str, _ = QInputDialog.getText(
+        main,
+        " ",
+        "Set watermark position: x,y",
+        flags=QtCore.Qt.Dialog,
+    )
+    if _:
+        pos = pos_str.strip().split(",")
+        try:
+            main.tab3.xy = (
+                int(pos[0]),
+                int(pos[1]),
+            )
+        except ValueError:
+            pass
+    if len(main.tab3.book_list) != 0:
+        main.preview()
 
 
 def choose(widget: QtWidgets.QLineEdit, c_dir: str) -> None:

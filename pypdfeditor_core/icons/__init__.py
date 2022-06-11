@@ -2,6 +2,8 @@
 # Author: Nianze A. TAO
 """
 icons path
+
+icons can be found in https://fluenticons.co/
 """
 from pathlib import Path
 
