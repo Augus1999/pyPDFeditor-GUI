@@ -8,7 +8,7 @@ import gc
 import sys
 import json
 import time
-from typing import Union, Optional
+from typing import Union, Optional, Tuple, List
 from pathlib import Path
 from fitz import Document, Page, Pixmap, Rect, Point, Font
 from fitz.utils import get_pixmap, set_metadata, Shape
@@ -67,7 +67,7 @@ def copy(doc: Doc) -> Doc:
     return _doc
 
 
-def open_pdf(file_name: str, parent: QWidget) -> tuple[Optional[Doc], bool]:
+def open_pdf(file_name: str, parent: QWidget) -> Tuple[Optional[Doc], bool]:
     """
     open pdf file and return a fitz object if applied
 
@@ -137,7 +137,7 @@ def render_pdf_page(page_data: Doc.load_page) -> QtGui.QPixmap:
     return pixmap
 
 
-def pdf_split(doc: Doc) -> list:
+def pdf_split(doc: Doc) -> List:
     """
     split the selected PDF file into pages;
 
@@ -154,11 +154,11 @@ def add_watermark(
     doc: Union[Doc, Document],
     text: str,
     rotate: int,
-    colour: tuple,
+    colour: Tuple,
     font_size: int,
     font_file: str,
     opacity: float = 0.5,
-    position: tuple[int] = (0, 0),
+    position: Tuple[int] = (0, 0),
 ) -> Union[Doc, Document]:
     """
     add watermark
@@ -348,7 +348,7 @@ def set_icon(
     TOOLS.store_shrink(100)  # delete MuPDF cache
 
 
-def add(main: QWidget, _format: str) -> tuple[str, str]:
+def add(main: QWidget, _format: str) -> Tuple[str]:
     """
     add a file
 
@@ -369,7 +369,7 @@ def add(main: QWidget, _format: str) -> tuple[str, str]:
     return f_name, state
 
 
-def save(main: QWidget, _format: str) -> tuple[str, str]:
+def save(main: QWidget, _format: str) -> Tuple[str]:
     """
     save a file
 
@@ -422,7 +422,7 @@ def generate_menu(pos, widget: QWidget, main: QWidget, select: int = 0) -> None:
     :param main: main
     :return: None
     """
-    row_num = col_num = int()
+    row_num = col_num = -1  # set to a negative value!
     for i in widget.table.selectionModel().selection().indexes():
         row_num = i.row()
         col_num = i.column()
@@ -851,7 +851,7 @@ def set_metadata1(
     return metadata
 
 
-def toc2plaintext(toc: list) -> str:
+def toc2plaintext(toc: List) -> str:
     """
     :param toc: table of content <- DOCUMENT.get_toc()
     :return: plaintext
@@ -864,7 +864,7 @@ def toc2plaintext(toc: list) -> str:
     return plaintext
 
 
-def plaintext2toc(plaintext: str) -> list[list[int, str, int]]:
+def plaintext2toc(plaintext: str) -> List[List]:
     """
     :param plaintext: plaintext
     :return: table of content -> DOCUMENT.get_toc()
@@ -879,7 +879,7 @@ def plaintext2toc(plaintext: str) -> list[list[int, str, int]]:
     return toc
 
 
-def find_font(font_dirs: list) -> tuple[dict, dict]:
+def find_font(font_dirs: List) -> Tuple[dict]:
     """
     find all TrueType font files (.ttf): all their font name and file addresses
     then write their directories to a json file
@@ -928,7 +928,7 @@ def store_font_path(name_dict: dict, cache_file_name: str) -> None:
         )
 
 
-def read_from_font_cache(cache_file_name: str) -> tuple[dict, dict]:
+def read_from_font_cache(cache_file_name: str) -> Tuple[dict]:
     """
     read font directories from json file
 
@@ -948,7 +948,7 @@ def read_from_font_cache(cache_file_name: str) -> tuple[dict, dict]:
     return name_dict, dir_dict
 
 
-def _warning(parent) -> None:
+def warning(parent) -> None:
     """
     :param parent: parent
     :return: None
@@ -961,7 +961,7 @@ def _warning(parent) -> None:
     )
 
 
-def _open_warning(parent: QWidget) -> tuple[None, bool]:
+def _open_warning(parent: QWidget) -> Tuple[None, bool]:
     """
     raise warning pop-up window when encountering an incorrect file
 

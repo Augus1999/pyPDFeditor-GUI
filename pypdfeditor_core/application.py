@@ -31,7 +31,7 @@ from .functions import (
     reset_table,
     pdf_split,
     find_font,
-    _warning,
+    warning,
     open_pdf,
     set_icon,
     add_watermark,
@@ -253,9 +253,9 @@ class Main(MainR):
                     doc0.save(file_name, garbage=1)
                     self.view(f_name=file_name)
                 except RuntimeError:
-                    _warning(self)
+                    warning(self)
                 except ValueError:
-                    _warning(self)
+                    warning(self)
             doc0.close()
             del doc0
 
@@ -273,9 +273,9 @@ class Main(MainR):
                     doc0.save(file_name, garbage=1)
                     self.view(f_name=file_name)
                 except RuntimeError:
-                    _warning(self)
+                    warning(self)
                 except ValueError:
-                    _warning(self)
+                    warning(self)
             doc0.close()
             del doc0
 
@@ -316,9 +316,9 @@ class Main(MainR):
                     if self.tab3.check.isChecked():
                         self.view(f_name=file_name)
                 except RuntimeError:
-                    _warning(self)
+                    warning(self)
                 except ValueError:
-                    _warning(self)
+                    warning(self)
                 doc.close()
             del doc
 
@@ -352,9 +352,9 @@ class Main(MainR):
                 try:
                     doc.save(file_name, garbage=1)
                 except RuntimeError:
-                    _warning(self)
+                    warning(self)
                 except ValueError:
-                    _warning(self)
+                    warning(self)
             del doc
             return
 
