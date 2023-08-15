@@ -9,6 +9,7 @@ import shutil
 import getpass
 import subprocess as sp
 from pathlib import Path
+from typing import Dict
 import fitz
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap
@@ -85,7 +86,10 @@ class Main(MainR):
         self.tab2.book = None
         self.tab4.book = None
         self.tab4.metadata = None
-        self.tab3.xy = (0, 0,)
+        self.tab3.xy = (
+            0,
+            0,
+        )
         self.tab1.w_col, self.tab1.w_row = 4, 1
         self.tab2.w_row, self.tab2.w_col = 2, 4
         self.tab3.w_row, self.tab3.w_col = 1, 1
@@ -687,7 +691,9 @@ class FontDialog(FontDialogR):
 
     signal = QtCore.pyqtSignal(str)
 
-    def __init__(self, font_dir: str, name_dict: dict, file_dict: dict):
+    def __init__(
+        self, font_dir: str, name_dict: Dict[str, str], file_dict: Dict[str, str]
+    ):
         super().__init__()
         self.name_dict = name_dict
         for item in name_dict:

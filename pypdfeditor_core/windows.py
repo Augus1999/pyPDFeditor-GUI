@@ -4,6 +4,7 @@
 application window forms
 """
 import re
+from typing import Tuple
 from PyQt5.QtGui import (
     QIcon,
     QPainter,
@@ -512,7 +513,7 @@ class MainR(QTabWidget):
                 self.windowChange()
         return QTabWidget.mouseDoubleClickEvent(self, event)
 
-    def nativeEvent(self, event_type, message) -> tuple[bool, int]:
+    def nativeEvent(self, event_type, message) -> Tuple[bool, int]:
         """
         re-write nativeEvent
         """
