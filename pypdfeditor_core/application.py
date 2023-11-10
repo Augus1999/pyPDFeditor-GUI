@@ -60,10 +60,7 @@ class Main(MainR):
 
     def __init__(self, system: str, version: str):
         super().__init__(system, version)
-        content = setting_warning(
-            os.path.join(app_home, "settings.json"),
-            self,
-        )
+        content = setting_warning(os.path.join(app_home, "settings.json"), self)
         self.Author = getpass.getuser()
         self.move(100, 20)
         self.colour_r = 0.24
@@ -86,10 +83,7 @@ class Main(MainR):
         self.tab2.book = None
         self.tab4.book = None
         self.tab4.metadata = None
-        self.tab3.xy = (
-            0,
-            0,
-        )
+        self.tab3.xy = (0, 0)
         self.tab1.w_col, self.tab1.w_row = 4, 1
         self.tab2.w_row, self.tab2.w_col = 2, 4
         self.tab3.w_row, self.tab3.w_col = 1, 1
@@ -179,9 +173,7 @@ class Main(MainR):
             if states == _settings:
                 return  # if no new settings do not write
         with open(
-            os.path.join(app_home, "settings.json"),
-            mode="w",
-            encoding="utf-8",
+            os.path.join(app_home, "settings.json"), mode="w", encoding="utf-8"
         ) as f:  # write new settings
             json.dump(
                 _settings,
