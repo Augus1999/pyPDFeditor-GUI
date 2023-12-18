@@ -149,11 +149,18 @@ class Main(MainR):
         )
         self.tab4.table.Index.connect(lambda par: self.show_index(par, self.tab4))
         set_language(self)
+        self.settings = QtCore.QSettings("QtProject", "pyPDFEditor-GUI")
+        if not self.settings.value("geometry") == None:
+            self.restoreGeometry(self.settings.value("geometry"))
+        if not self.settings.value("windowState") == None:
+            self.restoreState(self.settings.value("windowState"))
 
     def closeEvent(self, event) -> None:
         """
         write settings to settings.json
         """
+        self.settings.setValue("geometry", self.saveGeometry())
+        self.settings.setValue("windowState", self.saveState())
         _settings = {
             "start dir": self.s_dir,
             "save dir": self.o_dir,
@@ -165,9 +172,7 @@ class Main(MainR):
             os.makedirs(app_home)
         if os.path.exists(os.path.join(app_home, "settings.json")):
             with open(
-                os.path.join(app_home, "settings.json"),
-                mode="r",
-                encoding="utf-8",
+                os.path.join(app_home, "settings.json"), mode="r", encoding="utf-8"
             ) as c:
                 states = json.load(c)
             if states == _settings:
@@ -175,13 +180,7 @@ class Main(MainR):
         with open(
             os.path.join(app_home, "settings.json"), mode="w", encoding="utf-8"
         ) as f:  # write new settings
-            json.dump(
-                _settings,
-                f,
-                sort_keys=True,
-                indent=4,
-                separators=(",", ": "),
-            )
+            json.dump(_settings, f, sort_keys=True, indent=4, separators=(",", ": "))
 
     def enable_preview(self) -> None:
         """
@@ -366,7 +365,7 @@ class Main(MainR):
         self.SettingCD.show()
         self.SettingCD.signal.connect(self.get_data)
 
-    def get_perm_para(self, par) -> None:
+    def get_perm_para(self, par: int) -> None:
         """
         obtain permission code
         """
@@ -572,12 +571,7 @@ class Setting(SettingR):
     setting window
     """
 
-    signal = QtCore.pyqtSignal(
-        str,
-        str,
-        bool,
-        str,
-    )
+    signal = QtCore.pyqtSignal(str, str, bool, str)
 
     def __init__(self, set_dict: dict):
         super().__init__()

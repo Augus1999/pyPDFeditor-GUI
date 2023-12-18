@@ -81,9 +81,8 @@ class WindowEffect:
         params.rgrc[0].left = geometry.x()
         params.rgrc[0].top = geometry.y()
         params.rgrc[0].right = geometry.width()
-        params.rgrc[0].bottom = (
-            geometry.height() - 1
-        )  # enable to show taskbar when it is set to auto-hide
+        # enable to show taskbar when it is set to auto-hide
+        params.rgrc[0].bottom = geometry.height() - 1
 
     def add_window_style(self, h_wnd: int) -> None:
         """
@@ -138,3 +137,7 @@ class WindowEffect:
             0,  # left top right bottom
             0x0002 | 0x0001 | 0x0020,  # SWP_NOMOVE  # SWP_NOSIZE  # SWP_FRAMECHANGED
         )
+
+
+if __name__ == "__main__":
+    ...

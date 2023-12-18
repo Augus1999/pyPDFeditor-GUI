@@ -25,14 +25,8 @@ from PyQt5.QtWidgets import (
 from .icons import icon_path
 from .language import MENU_L, MESSAGE
 
-SUPPORT_IMG_FORMAT = (
-    ".png",
-    ".jpg",
-    ".jpeg",
-    ".bmp",
-    ".tiff",
-    ".svg",
-)  # list .svg at the end!
+# list .svg at the end!
+SUPPORT_IMG_FORMAT = (".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".svg")
 SUPPORT_FORMAT = (".pdf", ".epub", ".xps", ".fb2", ".cbz") + SUPPORT_IMG_FORMAT
 SUPPORT_OUT_FORMAT = (".pdf",)
 
@@ -110,11 +104,7 @@ def render_pdf_page(page_data: Doc.load_page) -> QtGui.QPixmap:
     :param page_data: page data
     :return: a QPixmap
     """
-    page_pixmap = get_pixmap(
-        page_data,
-        matrix=Identity,
-        clip=True,
-    )
+    page_pixmap = get_pixmap(page_data, matrix=Identity, clip=True)
     if page_pixmap.alpha:
         image_format = QtGui.QImage.Format_RGBA8888
     else:
@@ -171,16 +161,8 @@ def add_watermark(
     x, y = position
     x, y = int(x), int(y)
     for page in doc:
-        r1 = Rect(
-            10 + x,
-            10 + y,
-            page.rect.width - 10 + x,
-            page.rect.height - 10 + y,
-        )
-        pos0 = Point(
-            page.rect.width // 2 + x,
-            page.rect.height // 2 + y,
-        )
+        r1 = Rect(10 + x, 10 + y, page.rect.width - 10 + x, page.rect.height - 10 + y)
+        pos0 = Point(page.rect.width // 2 + x, page.rect.height // 2 + y)
         shape = Shape(page)
         shape.insert_textbox(
             r1,
@@ -208,11 +190,7 @@ def setting_warning(set_file_name: str, parent: QWidget) -> dict:
     :return: a dict loaded from JSON file or default values
     """
     try:
-        with open(
-            set_file_name,
-            "r",
-            encoding="utf-8",
-        ) as f:
+        with open(set_file_name, "r", encoding="utf-8") as f:
             content = json.load(f)
         if "start dir" not in content:
             content["start dir"] = ""
@@ -409,23 +387,19 @@ def generate_menu(pos, widget: QWidget, main: QWidget, select: int = 0) -> None:
     if 0 <= index < len(widget.book_list):
         menu = QtWidgets.QMenu()
         item1 = menu.addAction(
-            QtGui.QIcon(os.path.join(icon_path, "delete.svg")),
-            MENU_L[main.language][0],
+            QtGui.QIcon(os.path.join(icon_path, "delete.svg")), MENU_L[main.language][0]
         )
         item2, item3, item4, item5, item6, item7, item8 = (None for _ in range(7))
         if select in (0, 2):
             item3 = menu.addAction(
-                QtGui.QIcon(str(icon_path / "view.svg")),
-                MENU_L[main.language][1],
+                QtGui.QIcon(str(icon_path / "view.svg")), MENU_L[main.language][1]
             )
         if select == 1:
             item2 = menu.addAction(
-                QtGui.QIcon(str(icon_path / "down.svg")),
-                MENU_L[main.language][2],
+                QtGui.QIcon(str(icon_path / "down.svg")), MENU_L[main.language][2]
             )
             item4 = menu.addAction(
-                QtGui.QIcon(str(icon_path / "Photo.svg")),
-                MENU_L[main.language][3],
+                QtGui.QIcon(str(icon_path / "Photo.svg")), MENU_L[main.language][3]
             )
             item5 = menu.addAction(
                 QtGui.QIcon(str(icon_path / "rotate_clockwise.svg")),
@@ -437,13 +411,11 @@ def generate_menu(pos, widget: QWidget, main: QWidget, select: int = 0) -> None:
             )
         if select in (1, 2):
             item7 = menu.addAction(
-                QtGui.QIcon(str(icon_path / "move_page.svg")),
-                MENU_L[main.language][6],
+                QtGui.QIcon(str(icon_path / "move_page.svg")), MENU_L[main.language][6]
             )
         if select == 0:
             item8 = menu.addAction(
-                QtGui.QIcon(str(icon_path / "arrow_move.svg")),
-                MENU_L[main.language][7],
+                QtGui.QIcon(str(icon_path / "arrow_move.svg")), MENU_L[main.language][7]
             )
         action = menu.exec_(widget.table.mapToGlobal(pos))
         if action == item1:
@@ -623,10 +595,7 @@ def rearrange_page(index: int, widget: QWidget, parent: QWidget) -> None:
         widget.book_list.insert(value, page_index)
     widget.book_list.remove(None)
     widget.table.clearContents()
-    reset_table(
-        book_len=len(widget.book_list),
-        widget=widget,
-    )
+    reset_table(book_len=len(widget.book_list), widget=widget)
     set_icon(widget)
     return None
 
@@ -835,12 +804,7 @@ def warning(parent) -> None:
     :param parent: parent
     :return: None
     """
-    QMessageBox.warning(
-        parent,
-        "Oops",
-        MESSAGE[parent.language][2],
-        QMessageBox.Yes,
-    )
+    QMessageBox.warning(parent, "Oops", MESSAGE[parent.language][2], QMessageBox.Yes)
 
 
 def _open_warning(parent: QWidget) -> Tuple[None, bool]:
@@ -850,10 +814,5 @@ def _open_warning(parent: QWidget) -> Tuple[None, bool]:
     :param parent: parent
     :return: (None, False)
     """
-    QMessageBox.critical(
-        parent,
-        "Oops",
-        MESSAGE[parent.language][0],
-        QMessageBox.Yes,
-    )
+    QMessageBox.critical(parent, "Oops", MESSAGE[parent.language][0], QMessageBox.Yes)
     return None, False

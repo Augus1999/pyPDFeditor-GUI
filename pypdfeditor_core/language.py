@@ -253,3 +253,7 @@ def lag_p(parent: QtWidgets.QWidget, language: str) -> None:
     parent.label6.setText(LAB_LP[language][5])
     parent.label7.setText(LAB_LP[language][6])
     parent.label8.setText(LAB_LP[language][7])
+
+
+if __name__ == "__main__":
+    ...

@@ -65,7 +65,7 @@ COMBO_BOX_STYLE = f"""
         border-radius:3px;
         min-height:45px}}
         """
-TEXTEDIT_STYlE = f"""
+TEXTEDIT_STYLE = f"""
         QTextEdit{{font-size:11pt;
         border-top-left-radius:5px;
         border-top-right-radius:5px;
@@ -196,7 +196,7 @@ SWITCH_STYLE = f"""
         background-color:#e2e2dd;
         color:#8d90a4}}
         """
-SCROLL_AREA_STYlE = f"""
+SCROLL_AREA_STYLE = f"""
         QScrollArea{{
         border:none;
         background-color:transparent}}

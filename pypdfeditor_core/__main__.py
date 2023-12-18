@@ -9,7 +9,7 @@ from pypdfeditor_core import main, reset, remove
 
 
 if __name__ == "__main__":
-    debug = False
+    DEBUG= False
     parser = ArgumentParser(description="pyPDFeditor-GUI")
     parser.add_argument(
         "--reset",
@@ -32,5 +32,5 @@ if __name__ == "__main__":
         remove()
         sys.exit(0)
     if args.debug:
-        debug = True
-    main(debug=debug)
+        DEBUG = True
+    main(debug=DEBUG)

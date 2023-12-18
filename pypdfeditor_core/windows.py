@@ -37,10 +37,10 @@ from .style_sheets import (
     TAB_STYLE,
     LABEL_STYLE,
     LINE_EDIT_STYLE,
-    TEXTEDIT_STYlE,
+    TEXTEDIT_STYLE,
     SWITCH_STYLE,
     COMBO_BOX_STYLE,
-    SCROLL_AREA_STYlE,
+    SCROLL_AREA_STYLE,
     TABLE_STYLE1,
     TABLE_STYLE2,
     BUTTON_STYLE,
@@ -206,22 +206,14 @@ class SwitchBtn(QWidget):
         path = QPainterPath()
         path.moveTo(radius, rect.left())
         path.arcTo(
-            QtCore.QRectF(
-                rect.left(),
-                rect.top(),
-                circle_width,
-                circle_width,
-            ),
+            QtCore.QRectF(rect.left(), rect.top(), circle_width, circle_width),
             90,
             180,
         )
         path.lineTo(rect.width() - radius, rect.height())
         path.arcTo(
             QtCore.QRectF(
-                rect.width() - rect.height(),
-                rect.top(),
-                circle_width,
-                circle_width,
+                rect.width() - rect.height(), rect.top(), circle_width, circle_width
             ),
             270,
             180,
@@ -243,10 +235,7 @@ class SwitchBtn(QWidget):
         rect = QtCore.QRect(0, 0, self.width(), self.height())
         slider_width = rect.height() - self.space * 2
         slider_rect = QtCore.QRect(
-            int(self.startX + self.space),
-            self.space,
-            slider_width,
-            slider_width,
+            int(self.startX + self.space), self.space, slider_width, slider_width
         )
         painter.drawEllipse(slider_rect)
         painter.restore()
@@ -468,7 +457,13 @@ class MainR(QTabWidget):
         self.tab2.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
         self.tab3.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
         self.tab4.setStyleSheet(BGC_STYLE % LIGHT_COLOUR)
-        return
+
+    def saveState(self) -> QtCore.QByteArray:
+        return QtCore.QByteArray(f"{self.pos().x()},{self.pos().y()}".encode())
+
+    def restoreState(self, state: QtCore.QByteArray) -> None:
+        x, y = [int(i) for i in str(state)[2:-1].split(",")]
+        self.move(x, y)
 
     def paintEvent(self, event) -> None:
         """
@@ -608,7 +603,7 @@ class MainR(QTabWidget):
             <p style='color:#333;font-family:Verdana'>Out [4]: STAND WITH ISRAEL 🇮🇱</p>
             <p style='color:#333;font-family:Verdana'>Out [5]: ...</p>
             """
-        ) 
+        )
         shadow(text, QColor(0, 0, 0, 90), 10)
         label_w = QLabel(self.tab0)
         label_w.setStyleSheet(LABEL_STYLE)
@@ -719,7 +714,7 @@ class MainR(QTabWidget):
         initialize tab3
         """
         scroll_area = QScrollArea()
-        scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
+        scroll_area.setStyleSheet(SCROLL_AREA_STYLE)
         self.widget3.setMinimumSize(int(self.width() * 0.8), int(self.height() * 0.8))
         layout = QGridLayout(self.widget3)
         scroll_area.setWidget(self.widget3)
@@ -813,7 +808,7 @@ class MainR(QTabWidget):
         self.tab3.line3.setText("90")
         self.tab3.line4.setText("40")
         self.tab3.line5.setText(" 0")
-        self.tab3.text.setStyleSheet(TEXTEDIT_STYlE)
+        self.tab3.text.setStyleSheet(TEXTEDIT_STYLE)
         self.tab3.line1.setStyleSheet(LINE_EDIT_STYLE)
         self.tab3.line2.setStyleSheet(LINE_EDIT_STYLE)
         self.tab3.line3.setStyleSheet(LINE_EDIT_STYLE)
@@ -899,7 +894,7 @@ class MainR(QTabWidget):
         initialize tab4
         """
         scroll_area = QScrollArea()
-        scroll_area.setStyleSheet(SCROLL_AREA_STYlE)
+        scroll_area.setStyleSheet(SCROLL_AREA_STYLE)
         self.widget4.setMinimumSize(int(self.width() * 0.8), int(self.height() * 0.8))
         layout = QGridLayout(self.widget4)
         scroll_area.setWidget(self.widget4)
@@ -937,7 +932,7 @@ class MainR(QTabWidget):
         )
         self.tab4.table.setStyleSheet(TABLE_STYLE2)
         self.tab4.text = QTextEdit(self.tab4)
-        self.tab4.text.setStyleSheet(TEXTEDIT_STYlE)
+        self.tab4.text.setStyleSheet(TEXTEDIT_STYLE)
         self.tab4.text.setLineWrapColumnOrWidth(2000)
         self.tab4.text.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.tab4.label0 = QLabel(self.tab4)
@@ -954,10 +949,7 @@ class MainR(QTabWidget):
         self.tab4.label5.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setPixmap(
             QPixmap(str(icon_path / "book2.svg")).scaled(
-                180,
-                180,
-                QtCore.Qt.IgnoreAspectRatio,
-                QtCore.Qt.SmoothTransformation,
+                180, 180, QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation
             ),
         )
         self.tab4.line1 = QLineEdit(self.tab4)
