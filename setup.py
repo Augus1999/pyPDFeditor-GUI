@@ -42,7 +42,7 @@ setup(
     package_dir={"pypdfeditor_core": "pypdfeditor_core"},
     license="MIT",
     python_requires=">=3.7",
-    install_requires=["PyMuPDF>=1.19.2", "PyQt5>=5.15.4"],
+    install_requires=["PyMuPDF>=1.24.3", "PyQt6>=6.7.0"],
     url="https://github.com/Augus1999/pyPDFeditor-GUI/",
     project_urls={"Source": "https://github.com/Augus1999/pyPDFeditor-GUI"},
     include_package_data=True,

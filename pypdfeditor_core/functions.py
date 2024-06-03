@@ -10,11 +10,11 @@ import json
 import time
 from typing import Union, Optional, Tuple, List
 from pathlib import Path
-from fitz import Document, Page, Pixmap, Rect, Point, Font
-from fitz.utils import get_pixmap, set_metadata, Shape
-from fitz import TOOLS, Matrix, Identity
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtWidgets import (
+from pymupdf import Document, Page, Pixmap, Rect, Point, Font
+from pymupdf.utils import get_pixmap, set_metadata, Shape
+from pymupdf import TOOLS, Matrix, Identity
+from PyQt6 import QtGui, QtCore, QtWidgets
+from PyQt6.QtWidgets import (
     QInputDialog,
     QHBoxLayout,
     QWidget,
@@ -47,13 +47,12 @@ def copy(doc: Doc) -> Doc:
     :param doc: document to be copied
     :return: copied document
     """
-    _doc = Doc(doc.name)
+    _doc = Doc(filename=doc.name)
     if not _doc.is_pdf:
         pdf_bites = _doc.convert_to_pdf()
         _doc = Doc("pdf", pdf_bites)
     if doc.pass_word is not None:
         _doc.authenticate(doc.pass_word)
-    _doc.name = doc.name
     _doc.rotatedPages = doc.rotatedPages
     if len(_doc.rotatedPages) != 0:
         for page in _doc.rotatedPages:
@@ -86,7 +85,12 @@ def open_pdf(file_name: str, parent: QWidget) -> Tuple[Optional[Doc], bool]:
     if doc.needs_pass:
         while doc.is_encrypted:
             value, _ = QInputDialog.getText(
-                parent, " ", "Password:", QLineEdit.Password, "", QtCore.Qt.Dialog
+                parent,
+                " ",
+                "Password:",
+                QLineEdit.EchoMode.Password,
+                "",
+                QtCore.Qt.WindowType.Dialog,
             )
             if not _:
                 doc.close()
@@ -106,9 +110,9 @@ def render_pdf_page(page_data: Doc.load_page) -> QtGui.QPixmap:
     """
     page_pixmap = get_pixmap(page_data, matrix=Identity, clip=True)
     if page_pixmap.alpha:
-        image_format = QtGui.QImage.Format_RGBA8888
+        image_format = QtGui.QImage.Format.Format_RGBA8888
     else:
-        image_format = QtGui.QImage.Format_RGB888
+        image_format = QtGui.QImage.Format.Format_RGB888
     page_image = QtGui.QImage(
         page_pixmap.samples,
         page_pixmap.w,
@@ -214,11 +218,11 @@ def setting_warning(set_file_name: str, parent: QWidget) -> dict:
             "Error",
             f"Cannot find {os.path.basename(set_file_name)}\n\n"
             f"Create an empty setting file?",
-            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
-        if reply == QMessageBox.No:
+        if reply == QMessageBox.StandardButton.No:
             sys.exit(0)
-        if reply == QMessageBox.Yes:
+        if reply == QMessageBox.StandardButton.Yes:
             content = {
                 "start dir": "",
                 "save dir": "",
@@ -259,7 +263,7 @@ def page_icon(page: Page, width: int, w_col: int, _scaled: float) -> QWidget:
     label = QtWidgets.QLabel(None)
     layout = QHBoxLayout(None)
     widget = QWidget(None)
-    layout.addWidget(label, alignment=QtCore.Qt.AlignCenter)
+    layout.addWidget(label, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
     widget.setLayout(layout)
     if _cover.height() / _cover.width() >= 4 / 3:
         scaled_height = int(width // w_col * 4 / 3 * _scaled)
@@ -271,11 +275,11 @@ def page_icon(page: Page, width: int, w_col: int, _scaled: float) -> QWidget:
         QtGui.QPixmap(_cover).scaled(
             scaled_width,
             scaled_height,
-            QtCore.Qt.IgnoreAspectRatio,
-            QtCore.Qt.SmoothTransformation,
+            QtCore.Qt.AspectRatioMode.IgnoreAspectRatio,
+            QtCore.Qt.TransformationMode.SmoothTransformation,
         ),
     )
-    label.setAlignment(QtCore.Qt.AlignCenter)
+    label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
     label.setFixedSize(scaled_width, scaled_height)
     shadow(label, QtGui.QColor(0, 0, 0, 100), 20)
     del _cover, label, layout
@@ -296,9 +300,11 @@ def set_icon(
     x, y = 0, 0
     for i in widget.book_list:
         label = page_icon(
-            widget.book[i]
-            if isinstance(widget.book_list[0], int)
-            else (i[0] if doc is None else doc[0]),
+            (
+                widget.book[i]
+                if isinstance(widget.book_list[0], int)
+                else (i[0] if doc is None else doc[0])
+            ),
             widget.table.width(),
             widget.w_col,
             _scaled,
@@ -386,6 +392,7 @@ def generate_menu(pos, widget: QWidget, main: QWidget, select: int = 0) -> None:
     index = row_num * widget.w_col + col_num  # get position
     if 0 <= index < len(widget.book_list):
         menu = QtWidgets.QMenu()
+        menu.setStyleSheet("font-size:12pt")
         item1 = menu.addAction(
             QtGui.QIcon(os.path.join(icon_path, "delete.svg")), MENU_L[main.language][0]
         )
@@ -417,7 +424,7 @@ def generate_menu(pos, widget: QWidget, main: QWidget, select: int = 0) -> None:
             item8 = menu.addAction(
                 QtGui.QIcon(str(icon_path / "arrow_move.svg")), MENU_L[main.language][7]
             )
-        action = menu.exec_(widget.table.mapToGlobal(pos))
+        action = menu.exec(widget.table.mapToGlobal(pos))
         if action == item1:
             delete(index=index, widget=widget)
         if action == item2 and select == 1:
@@ -539,7 +546,7 @@ def extract_img(index: int, widget: QWidget, main: QWidget) -> None:
         main,
         "Saved",
         MESSAGE[main.language][1].format(len(img_inf), main.s_dir),
-        QMessageBox.Yes,
+        QMessageBox.StandardButton.Yes,
     )
     TOOLS.store_shrink(100)  # delete MuPDF cache
 
@@ -583,7 +590,7 @@ def rearrange_page(index: int, widget: QWidget, parent: QWidget) -> None:
         min=1,
         max=book_length,
         step=1,
-        flags=QtCore.Qt.Dialog,
+        flags=QtCore.Qt.WindowType.Dialog,
     )
     if not _:
         return None
@@ -608,7 +615,7 @@ def _set_watermark_pos(main: QWidget) -> None:
     :return: None
     """
     pos_str, _ = QInputDialog.getText(
-        main, " ", "Set watermark position: x,y", flags=QtCore.Qt.Dialog
+        main, " ", "Set watermark position: x,y", flags=QtCore.Qt.WindowType.Dialog
     )
     if _:
         pos = pos_str.strip().split(",")
@@ -804,7 +811,9 @@ def warning(parent) -> None:
     :param parent: parent
     :return: None
     """
-    QMessageBox.warning(parent, "Oops", MESSAGE[parent.language][2], QMessageBox.Yes)
+    QMessageBox.warning(
+        parent, "Oops", MESSAGE[parent.language][2], QMessageBox.StandardButton.Yes
+    )
 
 
 def _open_warning(parent: QWidget) -> Tuple[None, bool]:
@@ -814,5 +823,7 @@ def _open_warning(parent: QWidget) -> Tuple[None, bool]:
     :param parent: parent
     :return: (None, False)
     """
-    QMessageBox.critical(parent, "Oops", MESSAGE[parent.language][0], QMessageBox.Yes)
+    QMessageBox.critical(
+        parent, "Oops", MESSAGE[parent.language][0], QMessageBox.StandardButton.Yes
+    )
     return None, False

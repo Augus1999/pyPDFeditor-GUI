@@ -10,10 +10,10 @@ import getpass
 import subprocess as sp
 from pathlib import Path
 from typing import Dict
-import fitz
-from PyQt5 import QtCore
-from PyQt5.QtGui import QColor, QPixmap
-from PyQt5.QtWidgets import QColorDialog
+import pymupdf as fitz
+from PyQt6 import QtCore
+from PyQt6.QtGui import QColor, QPixmap, QCloseEvent
+from PyQt6.QtWidgets import QColorDialog
 from .language import set_language, lag_s, lag_p
 from .windows import (
     MainR,
@@ -120,13 +120,15 @@ class Main(MainR):
             )
         )
         self.tab3.button9.clicked.connect(
-            lambda: os.remove(
-                os.path.join(app_home, "font_dir_cache.json"),
+            lambda: (
+                os.remove(
+                    os.path.join(app_home, "font_dir_cache.json"),
+                )
+                if os.path.exists(
+                    os.path.join(app_home, "font_dir_cache.json"),
+                )
+                else None
             )
-            if os.path.exists(
-                os.path.join(app_home, "font_dir_cache.json"),
-            )
-            else None
         )  # delete font dir cache
         self.tab3.line3.returnPressed.connect(self.preview)
         self.tab3.line4.returnPressed.connect(self.preview)
@@ -155,7 +157,7 @@ class Main(MainR):
         if not self.settings.value("windowState") == None:
             self.restoreState(self.settings.value("windowState"))
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: QCloseEvent) -> None:
         """
         write settings to settings.json
         """
@@ -489,7 +491,7 @@ class Main(MainR):
                 int(255 * float(self.tab3.line4.text()) / 100),
             ),
             options=QColorDialog.ColorDialogOption(
-                QColorDialog.ShowAlphaChannel,
+                QColorDialog.ColorDialogOption.ShowAlphaChannel,
             ),
             parent=self,
             title="Select Colour",
@@ -513,7 +515,7 @@ class Main(MainR):
             )
         else:
             font_paths = QtCore.QStandardPaths.standardLocations(
-                QtCore.QStandardPaths.FontsLocation,
+                QtCore.QStandardPaths.StandardLocation.FontsLocation,
             )
             name_dict, file_dict = find_font(font_paths)
             store_font_path(name_dict, os.path.join(app_home, "font_dir_cache.json"))
@@ -617,7 +619,7 @@ class Setting(SettingR):
             self.line1.setReadOnly(False)
             self.line2.setReadOnly(False)
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: QCloseEvent) -> None:
         """
         re-write closeEvent
         """
@@ -644,7 +646,7 @@ class PermMenu(PermMenuR):
         """
         lag_p(self, language)
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: QCloseEvent) -> None:
         """
         close event
         """
@@ -719,7 +721,7 @@ class FontDialog(FontDialogR):
         fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
         del cover, shape, page, r1, doc
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: QCloseEvent) -> None:
         """
         close event
         """

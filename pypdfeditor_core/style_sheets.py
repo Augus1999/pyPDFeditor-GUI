@@ -10,7 +10,7 @@ icon_path_ = str(icon_path).replace("\\", "/")
 MAIN_COLOUR = "#6272a4"  # main colour of the theme
 COMP_COLOUR = "#b7cbc9"  # complementary colour of MAIN_COLOUR
 COMP_COLOUR_2 = "#ca8fc0"
-LIGHT_COLOUR = "#f8f8f2"  # #f8f8f2
+LIGHT_COLOUR = "#f8f8f2"
 DARK_COLOUR = "#4f5c84"
 TEXT_COLOUR = "#1b124b"
 TAB_STYLE = f"""
@@ -28,7 +28,7 @@ TAB_STYLE = f"""
         border:none;
         color:{TEXT_COLOUR};
         background-color:{LIGHT_COLOUR};
-        font-size:9pt;
+        font-size:12pt;
         font-family:Verdana,Microsoft YaHei UI,PingFang SC}}
         QTabWidget{{
         border:none;
@@ -37,7 +37,7 @@ TAB_STYLE = f"""
         """
 COMBO_BOX_STYLE = f"""
         QComboBox{{
-        font-size:11pt;
+        font-size:14pt;
         font-family:Verdana,Microsoft YaHei UI,PingFang SC;
         border-radius:5px;
         background-color:{MAIN_COLOUR};
@@ -66,7 +66,7 @@ COMBO_BOX_STYLE = f"""
         min-height:45px}}
         """
 TEXTEDIT_STYLE = f"""
-        QTextEdit{{font-size:11pt;
+        QTextEdit{{font-size:14pt;
         border-top-left-radius:5px;
         border-top-right-radius:5px;
         border-bottom-left-radius:0px;
@@ -99,7 +99,7 @@ TEXTEDIT_STYLE = f"""
 LINE_EDIT_STYLE = f"""
         QLineEdit{{
         border:none;
-        font-size:10pt;
+        font-size:12pt;
         border-radius:10px;
         background-color:{MAIN_COLOUR};
         color:{LIGHT_COLOUR};
@@ -171,7 +171,7 @@ LABEL_STYLE = f"""
         QLabel{{
         border:none;
         border-radius:10px;
-        font-size:8pt;
+        font-size:12pt;
         font-family:Verdana,Microsoft YaHei UI,PingFang SC;
         color:{TEXT_COLOUR};
         background-color:transparent}}
@@ -185,7 +185,7 @@ BGC_STYLE = f"""
         border:none;
         color:{TEXT_COLOUR};
         background-color:{LIGHT_COLOUR};
-        font-size:9pt;
+        font-size:12pt;
         font-family:Verdana,Microsoft YaHei UI,PingFang SC}}
         """
 SWITCH_STYLE = f"""

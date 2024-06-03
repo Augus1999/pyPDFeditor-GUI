@@ -4,8 +4,9 @@
 application window forms
 """
 import re
-from typing import Tuple
-from PyQt5.QtGui import (
+from typing import Tuple, Union
+from PyQt6.sip import voidptr
+from PyQt6.QtGui import (
     QIcon,
     QPainter,
     QPainterPath,
@@ -14,9 +15,12 @@ from PyQt5.QtGui import (
     QPixmap,
     QTransform,
     QCursor,
+    QPaintEvent,
+    QMouseEvent,
+    QResizeEvent,
 )
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import (
+from PyQt6 import QtCore, QtWidgets
+from PyQt6.QtWidgets import (
     QWidget,
     QGridLayout,
     QTabWidget,
@@ -27,7 +31,6 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QPushButton,
     QTableWidget,
-    QApplication,
 )
 from .style_sheets import (
     icon_path,
@@ -75,7 +78,7 @@ class SwitchBtn(QWidget):
         self.endX = 0
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_value)
-        self.setFont(QFont("calibri", 10))
+        self.setFont(QFont("calibri", 14))
 
     def setStyleSheet(self, style_sheet: str) -> None:
         """
@@ -119,7 +122,7 @@ class SwitchBtn(QWidget):
                 self.timer.stop()
         self.update()
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: QMouseEvent) -> None:
         """
         mousePressEvent
         """
@@ -151,19 +154,19 @@ class SwitchBtn(QWidget):
         """
         return self.checked
 
-    def paintEvent(self, event) -> None:
+    def paintEvent(self, event: QPaintEvent) -> None:
         """
         paintEvent
         """
         painter = QPainter()
         painter.begin(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.draw_bg(painter)
         self.draw_text(painter)
         self.draw_slider(painter)
         painter.end()
 
-    def draw_text(self, painter) -> None:
+    def draw_text(self, painter: QPainter) -> None:
         """
         draw text
         """
@@ -175,7 +178,7 @@ class SwitchBtn(QWidget):
                 0,
                 int(self.width() / 2 + self.space * 2),
                 self.height(),
-                QtCore.Qt.AlignCenter,
+                QtCore.Qt.AlignmentFlag.AlignCenter,
                 self.textOn,
             )
         else:
@@ -185,17 +188,17 @@ class SwitchBtn(QWidget):
                 0,
                 int(self.width() / 2 - self.space),
                 self.height(),
-                QtCore.Qt.AlignCenter,
+                QtCore.Qt.AlignmentFlag.AlignCenter,
                 self.textOff,
             )
         painter.restore()
 
-    def draw_bg(self, painter) -> None:
+    def draw_bg(self, painter: QPainter) -> None:
         """
         draw background
         """
         painter.save()
-        painter.setPen(QtCore.Qt.NoPen)
+        painter.setPen(QtCore.Qt.PenStyle.NoPen)
         if self.checked:
             painter.setBrush(self.bgColorOn)
         else:
@@ -222,12 +225,12 @@ class SwitchBtn(QWidget):
         painter.drawPath(path)
         painter.restore()
 
-    def draw_slider(self, painter) -> None:
+    def draw_slider(self, painter: QPainter) -> None:
         """
         draw slider
         """
         painter.save()
-        painter.setPen(QtCore.Qt.NoPen)
+        painter.setPen(QtCore.Qt.PenStyle.NoPen)
         if self.checked:
             painter.setBrush(self.sliderColorOn)
         else:
@@ -248,12 +251,12 @@ class TableWidget(QTableWidget):
 
     Index = QtCore.pyqtSignal(tuple)
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: QMouseEvent) -> None:
         """
         re-write mousePressEvent
         """
         QTableWidget.mousePressEvent(self, event)
-        if event.button() == QtCore.Qt.LeftButton:
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
             row_num = col_num = int()
             for i in self.selectionModel().selection().indexes():
                 row_num = i.row()
@@ -275,7 +278,7 @@ class MainR(QTabWidget):
         self.setMinimumSize(580, 450)
         self.setWindowTitle("PDF Editor")
         self.setWindowIcon(QIcon(str(icon_path / "pdf icon.svg")))
-        self.setTabPosition(QTabWidget.West)
+        self.setTabPosition(QTabWidget.TabPosition.West)
         self.setIconSize(QtCore.QSize(35, 35))
         self.setStyleSheet(TAB_STYLE)
         self.tab0 = QWidget()
@@ -299,7 +302,7 @@ class MainR(QTabWidget):
             QIcon(
                 QPixmap(
                     str(icon_path / "home.svg"),
-                ).transformed(matrix, QtCore.Qt.SmoothTransformation)
+                ).transformed(matrix, QtCore.Qt.TransformationMode.SmoothTransformation)
             ),
             "",
         )
@@ -308,7 +311,7 @@ class MainR(QTabWidget):
             QIcon(
                 QPixmap(
                     str(icon_path / "merge.svg"),
-                ).transformed(matrix, QtCore.Qt.SmoothTransformation)
+                ).transformed(matrix, QtCore.Qt.TransformationMode.SmoothTransformation)
             ),
             "",
         )
@@ -317,7 +320,7 @@ class MainR(QTabWidget):
             QIcon(
                 QPixmap(
                     str(icon_path / "edit.svg"),
-                ).transformed(matrix, QtCore.Qt.SmoothTransformation)
+                ).transformed(matrix, QtCore.Qt.TransformationMode.SmoothTransformation)
             ),
             "",
         )
@@ -326,7 +329,7 @@ class MainR(QTabWidget):
             QIcon(
                 QPixmap(
                     str(icon_path / "lock.svg"),
-                ).transformed(matrix, QtCore.Qt.SmoothTransformation)
+                ).transformed(matrix, QtCore.Qt.TransformationMode.SmoothTransformation)
             ),
             "",
         )
@@ -335,7 +338,7 @@ class MainR(QTabWidget):
             QIcon(
                 QPixmap(
                     str(icon_path / "metadata.svg"),
-                ).transformed(matrix, QtCore.Qt.SmoothTransformation)
+                ).transformed(matrix, QtCore.Qt.TransformationMode.SmoothTransformation)
             ),
             "",
         )
@@ -441,7 +444,7 @@ class MainR(QTabWidget):
             self._title_bar_pos = [
                 QtCore.QPoint(x, y) for x in range(1200) for y in range(52)
             ]
-            self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+            self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
             self.windowEffect.add_shadow_effect(int(self.winId()))
             self.windowEffect.add_window_style(int(self.winId()))
             self.windowHandle().screenChanged.connect(
@@ -465,7 +468,7 @@ class MainR(QTabWidget):
         x, y = [int(i) for i in str(state)[2:-1].split(",")]
         self.move(x, y)
 
-    def paintEvent(self, event) -> None:
+    def paintEvent(self, event: QPaintEvent) -> None:
         """
         re-write paintEvent
         """
@@ -474,7 +477,7 @@ class MainR(QTabWidget):
             return
         super().paintEvent(event)
         painter = QPainter(self)
-        painter.setPen(QtCore.Qt.NoPen)
+        painter.setPen(QtCore.Qt.PenStyle.NoPen)
         painter.setBrush(QColor(MAIN_COLOUR))
         painter.drawRect(QtCore.QRect(0, 0, self.width() - 2, self.height() - 2))
         painter.setBrush(QColor(LIGHT_COLOUR))
@@ -483,7 +486,7 @@ class MainR(QTabWidget):
 
     # -------well, why do the following ugly codes exist?-------
     # -------they are used to re-enable the window animations under Windows platform-------
-    def mouseMoveEvent(self, event) -> None:
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
         """
         re-write mouseMoveEvent
         move the frameless window
@@ -491,24 +494,26 @@ class MainR(QTabWidget):
         if self.__system__ == "Windows":
             if (
                 event.pos() in self._title_bar_pos
-                and event.buttons() == QtCore.Qt.LeftButton
+                and event.buttons() == QtCore.Qt.MouseButton.LeftButton
             ):
                 self.windowEffect.move_window(int(self.winId()))
         return QTabWidget.mouseMoveEvent(self, event)
 
-    def mouseDoubleClickEvent(self, event) -> None:
+    def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
         """
         re-write mouseDoubleClickEvent
         """
         if self.__system__ == "Windows":
             if (
-                event.button() == QtCore.Qt.LeftButton
+                event.button() == QtCore.Qt.MouseButton.LeftButton
                 and event.pos() in self._title_bar_pos
             ):
                 self.windowChange()
         return QTabWidget.mouseDoubleClickEvent(self, event)
 
-    def nativeEvent(self, event_type, message) -> Tuple[bool, int]:
+    def nativeEvent(
+        self, event_type: QtCore.QByteArray, message: voidptr
+    ) -> Tuple[bool, Union[int, voidptr]]:
         """
         re-write nativeEvent
         """
@@ -543,8 +548,7 @@ class MainR(QTabWidget):
                     return True, 11  # HTRIGHT
             if msg.message == 131:  # WM_NCCALCSIZE
                 if self.windowEffect.isMaximised(msg.hWnd):
-                    desktop = QApplication.desktop()
-                    screen_rect = desktop.availableGeometry()
+                    screen_rect = self.screen().availableGeometry()
                     self.windowEffect.monitorNCCALCSIZE(msg, screen_rect)
                     self.btn_max_0.setStyleSheet(BUTTON_STYLE0 % "square_multiple.svg")
                     self.btn_max_1.setStyleSheet(BUTTON_STYLE0 % "square_multiple.svg")
@@ -558,11 +562,11 @@ class MainR(QTabWidget):
                     self.btn_max_3.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
                     self.btn_max_4.setStyleSheet(BUTTON_STYLE0 % "maximize.svg")
                 return True, 0  # HTNOWHERE
-        return QTabWidget.nativeEvent(self, event_type, message)
+        return False, voidptr(-1)
 
     # -------here ends the ugly code-------
 
-    def resizeEvent(self, event) -> None:
+    def resizeEvent(self, event: QResizeEvent) -> None:
         """
         re-write resizeEvent
         """
@@ -589,19 +593,19 @@ class MainR(QTabWidget):
         """
         self.tab0.grid = QGridLayout(self.tab0)
         text = QTextEdit(self.tab0)
-        text.setStyleSheet("border-radius:15px")
-        text.setFocusPolicy(QtCore.Qt.NoFocus)
+        text.setStyleSheet("border-radius:15px;font-size:20pt")
+        text.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         text.setReadOnly(True)
         text.setHtml(
             """
             <h1 style='color:#02554e;font-family:Verdana'>Welcome 🎃🎉</h1>
-            <p style='color:#333;font-family:Verdana'>Out [1]: Welcome to pyPDFeditor-GUI.</p>
-            <p style='color:#333;font-family:Verdana'>Out [2]: pyPDFeditor-GUI is a cross-platform 
+            <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [1]: Welcome to pyPDFeditor-GUI.</p>
+            <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [2]: pyPDFeditor-GUI is a cross-platform 
             application, thanks to <u>Python</u>, <u>PyQt5</u> and <u>PyMuPDF</u>, 
             designed to work on simple PDF handling.</p>
-            <p style='color:#333;font-family:Verdana'>Out [3]: STAND WITH UKRAINE 🇺🇦</p>
-            <p style='color:#333;font-family:Verdana'>Out [4]: STAND WITH ISRAEL 🇮🇱</p>
-            <p style='color:#333;font-family:Verdana'>Out [5]: ...</p>
+            <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [3]: STAND WITH UKRAINE 🇺🇦</p>
+            <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [4]: STAND WITH ISRAEL 🇮🇱</p>
+            <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [5]: ...</p>
             """
         )
         shadow(text, QColor(0, 0, 0, 90), 10)
@@ -616,8 +620,12 @@ class MainR(QTabWidget):
         self.tab0.label_v.setStyleSheet(LABEL_STYLE)
         self.tab0.label_v.setText(f"⌛ version {self.__version__}")
         self.tab0.grid.addWidget(text, 5, 0, 20, 21)
-        self.tab0.grid.addWidget(self.tab0.label_v, 31, 0, 1, 5, QtCore.Qt.AlignBottom)
-        self.tab0.grid.addWidget(label_w, 31, 17, 1, 4, QtCore.Qt.AlignBottom)
+        self.tab0.grid.addWidget(
+            self.tab0.label_v, 31, 0, 1, 5, QtCore.Qt.AlignmentFlag.AlignBottom
+        )
+        self.tab0.grid.addWidget(
+            label_w, 31, 17, 1, 4, QtCore.Qt.AlignmentFlag.AlignBottom
+        )
 
     def tab1_init(self) -> None:
         """
@@ -648,16 +656,16 @@ class MainR(QTabWidget):
         self.tab1.table.setShowGrid(False)
         self.tab1.table.verticalHeader().setVisible(False)
         self.tab1.table.horizontalHeader().setVisible(False)
-        self.tab1.table.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.tab1.table.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         self.tab1.table.setHorizontalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOff,
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff,
         )
         self.tab1.table.setEditTriggers(
-            QtWidgets.QAbstractItemView.NoEditTriggers,
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers,
         )
         self.tab1.table.setStyleSheet(TABLE_STYLE1)
         self.tab1.table.setContextMenuPolicy(
-            QtCore.Qt.CustomContextMenu,
+            QtCore.Qt.ContextMenuPolicy.CustomContextMenu,
         )
         self.tab1.grid.addWidget(self.tab1.button1, 0, 0)
         self.tab1.grid.addWidget(self.tab1.button2, 0, 1)
@@ -694,15 +702,15 @@ class MainR(QTabWidget):
         self.tab2.table.verticalHeader().setVisible(False)
         self.tab2.table.horizontalHeader().setVisible(False)
         self.tab2.table.setStyleSheet(TABLE_STYLE1)
-        self.tab2.table.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.tab2.table.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         self.tab2.table.setHorizontalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOff,
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff,
         )
         self.tab2.table.setEditTriggers(
-            QtWidgets.QAbstractItemView.NoEditTriggers,
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers,
         )
         self.tab2.table.setContextMenuPolicy(
-            QtCore.Qt.CustomContextMenu,
+            QtCore.Qt.ContextMenuPolicy.CustomContextMenu,
         )
         self.tab2.grid.addWidget(self.tab2.button1, 0, 0)
         self.tab2.grid.addWidget(self.tab2.button2, 0, 1)
@@ -723,18 +731,20 @@ class MainR(QTabWidget):
         self.tab3.table.setShowGrid(False)
         self.tab3.table.verticalHeader().setVisible(False)
         self.tab3.table.horizontalHeader().setVisible(False)
-        self.tab3.table.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.tab3.table.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         self.tab3.table.setVerticalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOff,
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff,
         )
         self.tab3.table.setHorizontalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOff,
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff,
         )
         self.tab3.table.setEditTriggers(
-            QtWidgets.QAbstractItemView.NoEditTriggers,
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers,
         )
         self.tab3.table.setStyleSheet(TABLE_STYLE2)
-        self.tab3.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tab3.table.setContextMenuPolicy(
+            QtCore.Qt.ContextMenuPolicy.CustomContextMenu
+        )
         self.tab3.button1 = QPushButton(self.tab3)
         self.tab3.button2 = QPushButton(self.tab3)
         self.tab3.button3 = QPushButton(self.tab3)
@@ -833,18 +843,18 @@ class MainR(QTabWidget):
         self.tab3.label6.setText("%")
         self.tab3.label8.setText("* " * 20)
         self.tab3.label10.setText("°")
-        self.tab3.label1.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label2.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label3.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label4.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label5.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label6.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label7.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label8.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label9.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label10.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label11.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab3.label12.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab3.label1.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label2.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label3.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label4.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label5.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label6.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label7.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label8.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label9.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label10.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label11.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab3.label12.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.tab3.check = SwitchBtn(self.tab3)
         self.tab3.check1 = SwitchBtn(self.tab3)
         self.tab3.check2 = SwitchBtn(self.tab3)
@@ -861,33 +871,87 @@ class MainR(QTabWidget):
         self.tab3.grid.addWidget(self.tab3.button2, 0, 1)
         self.tab3.grid.addWidget(self.tab3.button8, 0, 2)
         self.tab3.grid.addWidget(scroll_area, 1, 0, 20, 21)
-        layout.addWidget(self.tab3.table, 0, 0, 14, 10, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.label1, 0, 14, 1, 5, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.line1, 1, 14, 1, 5, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.line2, 2, 14, 1, 5, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.label2, 3, 14, 1, 5, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.text, 4, 14, 2, 5, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.label4, 6, 14, 1, 2, QtCore.Qt.AlignRight)
-        layout.addWidget(self.tab3.label7, 7, 14, 1, 2, QtCore.Qt.AlignRight)
-        layout.addWidget(self.tab3.label9, 8, 14, 1, 2, QtCore.Qt.AlignRight)
-        layout.addWidget(self.tab3.line3, 6, 16, 1, 1, QtCore.Qt.AlignRight)
-        layout.addWidget(self.tab3.line4, 7, 16, 1, 1, QtCore.Qt.AlignRight)
-        layout.addWidget(self.tab3.line5, 8, 16, 1, 1, QtCore.Qt.AlignRight)
-        layout.addWidget(self.tab3.label3, 6, 17, 1, 1, QtCore.Qt.AlignLeft)
-        layout.addWidget(self.tab3.label6, 7, 17, 1, 1, QtCore.Qt.AlignLeft)
-        layout.addWidget(self.tab3.label10, 8, 17, 1, 1, QtCore.Qt.AlignLeft)
-        layout.addWidget(self.tab3.button7, 6, 18, 1, 1, QtCore.Qt.AlignLeft)
-        layout.addWidget(self.tab3.button9, 6, 18, 1, 1, QtCore.Qt.AlignRight)
-        layout.addWidget(self.tab3.button4, 7, 18, 1, 1, QtCore.Qt.AlignLeft)
-        layout.addWidget(self.tab3.button5, 8, 18, 1, 1, QtCore.Qt.AlignLeft)
-        layout.addWidget(self.tab3.label8, 9, 14, 1, 5, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.label12, 10, 14, 1, 2, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.label11, 11, 14, 1, 2, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.label5, 12, 14, 1, 2, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.check2, 10, 16, 1, 2, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.check1, 11, 16, 1, 2, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.check, 12, 16, 1, 2, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab3.button6, 10, 18, 1, 1, QtCore.Qt.AlignLeft)
+        layout.addWidget(
+            self.tab3.table, 0, 0, 14, 10, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.label1, 0, 14, 1, 5, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.line1, 1, 14, 1, 5, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.line2, 2, 14, 1, 5, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.label2, 3, 14, 1, 5, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.text, 4, 14, 2, 5, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.label4, 6, 14, 1, 2, QtCore.Qt.AlignmentFlag.AlignRight
+        )
+        layout.addWidget(
+            self.tab3.label7, 7, 14, 1, 2, QtCore.Qt.AlignmentFlag.AlignRight
+        )
+        layout.addWidget(
+            self.tab3.label9, 8, 14, 1, 2, QtCore.Qt.AlignmentFlag.AlignRight
+        )
+        layout.addWidget(
+            self.tab3.line3, 6, 16, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight
+        )
+        layout.addWidget(
+            self.tab3.line4, 7, 16, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight
+        )
+        layout.addWidget(
+            self.tab3.line5, 8, 16, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight
+        )
+        layout.addWidget(
+            self.tab3.label3, 6, 17, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        layout.addWidget(
+            self.tab3.label6, 7, 17, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        layout.addWidget(
+            self.tab3.label10, 8, 17, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        layout.addWidget(
+            self.tab3.button7, 6, 18, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        layout.addWidget(
+            self.tab3.button9, 6, 18, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight
+        )
+        layout.addWidget(
+            self.tab3.button4, 7, 18, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        layout.addWidget(
+            self.tab3.button5, 8, 18, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        layout.addWidget(
+            self.tab3.label8, 9, 14, 1, 5, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.label12, 10, 14, 1, 2, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.label11, 11, 14, 1, 2, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.label5, 12, 14, 1, 2, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.check2, 10, 16, 1, 2, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.check1, 11, 16, 1, 2, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.check, 12, 16, 1, 2, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab3.button6, 10, 18, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
 
     def tab4_init(self) -> None:
         """
@@ -923,18 +987,18 @@ class MainR(QTabWidget):
         self.tab4.table.setShowGrid(False)
         self.tab4.table.verticalHeader().setVisible(False)
         self.tab4.table.horizontalHeader().setVisible(False)
-        self.tab4.table.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.tab4.table.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         self.tab4.table.setHorizontalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOff,
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff,
         )
         self.tab4.table.setEditTriggers(
-            QtWidgets.QAbstractItemView.NoEditTriggers,
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers,
         )
         self.tab4.table.setStyleSheet(TABLE_STYLE2)
         self.tab4.text = QTextEdit(self.tab4)
         self.tab4.text.setStyleSheet(TEXTEDIT_STYLE)
         self.tab4.text.setLineWrapColumnOrWidth(2000)
-        self.tab4.text.setLineWrapMode(QTextEdit.FixedPixelWidth)
+        self.tab4.text.setLineWrapMode(QTextEdit.LineWrapMode.FixedPixelWidth)
         self.tab4.label0 = QLabel(self.tab4)
         self.tab4.label1 = QLabel(self.tab4)
         self.tab4.label2 = QLabel(self.tab4)
@@ -949,7 +1013,10 @@ class MainR(QTabWidget):
         self.tab4.label5.setStyleSheet(LABEL_STYLE)
         self.tab4.label1.setPixmap(
             QPixmap(str(icon_path / "book2.svg")).scaled(
-                180, 180, QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation
+                180,
+                180,
+                QtCore.Qt.AspectRatioMode.IgnoreAspectRatio,
+                QtCore.Qt.TransformationMode.SmoothTransformation,
             ),
         )
         self.tab4.line1 = QLineEdit(self.tab4)
@@ -965,27 +1032,52 @@ class MainR(QTabWidget):
         self.tab4.line3.setFixedSize(312, 35)
         self.tab4.line4.setFixedSize(312, 35)
         self.tab4.text.setFixedSize(312, 450)
-        self.tab4.line1.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab4.line2.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab4.line3.setAlignment(QtCore.Qt.AlignCenter)
-        self.tab4.line4.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab4.line1.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab4.line2.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab4.line3.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tab4.line4.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.tab4.grid.addWidget(self.tab4.button1, 0, 0)
         self.tab4.grid.addWidget(self.tab4.button2, 0, 1)
         self.tab4.grid.addWidget(self.tab4.button4, 0, 2)
         self.tab4.grid.addWidget(scroll_area, 1, 0, 20, 21)
-        layout.addWidget(self.tab4.text, 4, 0, 8, 7, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab4.table, 0, 7, 20, 7)
-        layout.addWidget(self.tab4.label1, 1, 0, 3, 5, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab4.label2, 1, 14, 1, 7, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab4.label3, 3, 14, 1, 7, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab4.label4, 5, 14, 1, 7, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab4.label5, 7, 14, 1, 7, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab4.line1, 2, 14, 1, 7, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab4.line2, 4, 14, 1, 7, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab4.line3, 6, 14, 1, 7, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.tab4.line4, 8, 14, 1, 7, QtCore.Qt.AlignCenter)
         layout.addWidget(
-            self.tab4.label0, 19, 0, 1, 3, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom
+            self.tab4.text, 4, 0, 8, 7, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(self.tab4.table, 0, 7, 20, 7)
+        layout.addWidget(
+            self.tab4.label1, 1, 0, 3, 5, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab4.label2, 1, 14, 1, 7, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab4.label3, 3, 14, 1, 7, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab4.label4, 5, 14, 1, 7, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab4.label5, 7, 14, 1, 7, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab4.line1, 2, 14, 1, 7, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab4.line2, 4, 14, 1, 7, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab4.line3, 6, 14, 1, 7, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab4.line4, 8, 14, 1, 7, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        layout.addWidget(
+            self.tab4.label0,
+            19,
+            0,
+            1,
+            3,
+            QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignBottom,
         )
 
 
@@ -1001,10 +1093,11 @@ class SettingR(QWidget):
         self.setWindowTitle("Setting")
         self.setWindowIcon(QIcon(str(icon_path / "settings.svg")))
         self.setWindowFlags(
-            QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowCloseButtonHint,
+            QtCore.Qt.WindowType.CustomizeWindowHint
+            | QtCore.Qt.WindowType.WindowCloseButtonHint,
         )
         self.setStyleSheet("background-color:#ffffff")
-        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         self.label1 = QLabel(self)
         self.label2 = QLabel(self)
         self.label3 = QLabel(self)
@@ -1024,24 +1117,24 @@ class SettingR(QWidget):
         self.combobox.setStyleSheet(COMBO_BOX_STYLE)
         self.line1.setStyleSheet(LINE_EDIT_STYLE)
         self.line2.setStyleSheet(LINE_EDIT_STYLE)
-        self.label1.setAlignment(QtCore.Qt.AlignVCenter)
-        self.label2.setAlignment(QtCore.Qt.AlignVCenter)
-        self.label3.setAlignment(QtCore.Qt.AlignVCenter)
+        self.label1.setAlignment(QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.label2.setAlignment(QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.label3.setAlignment(QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.check.setFixedSize(80, 30)
         self.line1.setFixedSize(400, 40)
         self.line2.setFixedSize(400, 40)
         self.button1.setFixedSize(28, 28)
         self.button2.setFixedSize(28, 28)
         self.combobox.setFixedSize(170, 40)
-        grid.addWidget(self.label1, 0, 0, 1, 5, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label2, 1, 0, 1, 5, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label3, 2, 0, 1, 7, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label1, 0, 0, 1, 5, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.label2, 1, 0, 1, 5, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.label3, 2, 0, 1, 7, QtCore.Qt.AlignmentFlag.AlignLeft)
         grid.addWidget(self.combobox, 3, 0)
         grid.addWidget(self.line1, 0, 5, 1, 10)
         grid.addWidget(self.line2, 1, 5, 1, 10)
-        grid.addWidget(self.button1, 0, 14, 1, 1, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.button2, 1, 14, 1, 1, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.check, 2, 13, 1, 2, QtCore.Qt.AlignHCenter)
+        grid.addWidget(self.button1, 0, 14, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.button2, 1, 14, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.check, 2, 13, 1, 2, QtCore.Qt.AlignmentFlag.AlignHCenter)
         self.setWindowOpacity(0.92)
 
 
@@ -1058,9 +1151,10 @@ class PermMenuR(QWidget):
         self.setWindowIcon(QIcon(str(icon_path / "lock.svg")))
         self.setStyleSheet("background-color:#ffffff")
         self.setWindowFlags(
-            QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowCloseButtonHint,
+            QtCore.Qt.WindowType.CustomizeWindowHint
+            | QtCore.Qt.WindowType.WindowCloseButtonHint,
         )
-        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         self.check1 = SwitchBtn(self)
         self.check2 = SwitchBtn(self)
         self.check3 = SwitchBtn(self)
@@ -1085,14 +1179,14 @@ class PermMenuR(QWidget):
         self.check6.setFixedSize(80, 30)
         self.check7.setFixedSize(80, 30)
         self.check8.setFixedSize(80, 30)
-        grid.addWidget(self.label1, 0, 0, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label2, 1, 0, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label3, 2, 0, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label4, 3, 0, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label5, 4, 0, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label6, 5, 0, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label7, 6, 0, QtCore.Qt.AlignLeft)
-        grid.addWidget(self.label8, 7, 0, QtCore.Qt.AlignLeft)
+        grid.addWidget(self.label1, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.label2, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.label3, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.label4, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.label5, 4, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.label6, 5, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.label7, 6, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        grid.addWidget(self.label8, 7, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
         grid.addWidget(self.check1, 0, 1)
         grid.addWidget(self.check2, 1, 1)
         grid.addWidget(self.check3, 2, 1)
@@ -1136,14 +1230,15 @@ class FontDialogR(QWidget):
         self.setWindowTitle("Select Font")
         self.setWindowIcon(QIcon(str(icon_path / "font.svg")))
         self.setWindowFlags(
-            QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowCloseButtonHint,
+            QtCore.Qt.WindowType.CustomizeWindowHint
+            | QtCore.Qt.WindowType.WindowCloseButtonHint,
         )
-        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         self.combobox = QComboBox(self)
         self.combobox.setStyleSheet(COMBO_BOX_STYLE)
         self.combobox.setFixedHeight(45)
         self.label = QLabel(self)
-        self.label.setAlignment(QtCore.Qt.AlignTop)
-        grid.addWidget(self.combobox, 0, 0, QtCore.Qt.AlignCenter)
-        grid.addWidget(self.label, 1, 0, QtCore.Qt.AlignCenter)
+        self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+        grid.addWidget(self.combobox, 0, 0, QtCore.Qt.AlignmentFlag.AlignCenter)
+        grid.addWidget(self.label, 1, 0, QtCore.Qt.AlignmentFlag.AlignCenter)
         self.setWindowOpacity(0.92)

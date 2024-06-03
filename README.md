@@ -19,6 +19,11 @@ and [PyMuPDF](https://github.com/pymupdf/PyMuPDF), designed to work on simple PD
 
 I tried my best to make it close to Fluent UI. Icons used can be found [🔗here](https://fluenticons.co/).
 
+From version 3.0.0, we have moved the GUI library to PyQt6. If you upgraded from a previous version, you can consider removing PyQt5:
+```bash
+$ pip uninstall PyQt5 PyQt5-Qt5 PyQt5-sip
+```
+
 ## Features
 
 * Support 3 languages: English, 日本語 (Japanese), and 中文 (Traditional Chinese)
@@ -51,8 +56,8 @@ Python>=3.7
 ```
 
 ```text
-PyQt5>=5.15.4
-PyMuPDF>=1.19.2
+PyQt6>=6.7.0
+PyMuPDF>=1.24.0
 ```
 
 ## Install & Run
