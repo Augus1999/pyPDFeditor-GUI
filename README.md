@@ -57,7 +57,7 @@ Python>=3.7
 
 ```text
 PyQt6>=6.7.0
-PyMuPDF>=1.24.0
+PyMuPDF>=1.24.3
 ```
 
 ## Install & Run
