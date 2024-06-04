@@ -10,6 +10,7 @@ import json
 import time
 from typing import Union, Optional, Tuple, List
 from pathlib import Path
+from pymupdf.mupdf import FzErrorFormat
 from pymupdf import Document, Page, Pixmap, Rect, Point, Font
 from pymupdf.utils import get_pixmap, set_metadata, Shape
 from pymupdf import TOOLS, Matrix, Identity
@@ -77,7 +78,7 @@ def open_pdf(file_name: str, parent: QWidget) -> Tuple[Optional[Doc], bool]:
             try:  # handle wrong image formats
                 pdf_bites = Pixmap(file_name).tobytes()
                 doc = Doc("png", pdf_bites)
-            except RuntimeError:
+            except FzErrorFormat:
                 return _open_warning(parent)
         pdf_bites = doc.convert_to_pdf()  # convert to pdf
         doc = Doc("pdf", pdf_bites)
