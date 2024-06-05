@@ -71,6 +71,8 @@ def open_pdf(file_name: str, parent: QWidget) -> Tuple[Optional[Doc], bool]:
     """
     try:  # handle wrong format (svg included) except images
         doc = Doc(filename=file_name)
+        doc.rotatedPages = {}
+        doc.pass_word = None
     except RuntimeError:
         return _open_warning(parent)
     if not doc.is_pdf:
