@@ -84,6 +84,9 @@ def open_pdf(file_name: str, parent: QWidget) -> Tuple[Optional[Doc], bool]:
                 return _open_warning(parent)
         pdf_bites = doc.convert_to_pdf()  # convert to pdf
         doc = Doc("pdf", pdf_bites)
+        doc._name = file_name
+        doc.rotatedPages = {}
+        doc.pass_word = None
     if doc.needs_pass:
         while doc.is_encrypted:
             value, _ = QInputDialog.getText(
