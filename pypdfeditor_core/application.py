@@ -317,7 +317,7 @@ class Main(MainR):
                 except ValueError:
                     warning(self)
                 doc.close()
-            del doc
+                del doc
 
     def save4(self) -> None:
         """

@@ -10,7 +10,7 @@ import json
 import time
 from typing import Union, Optional, Tuple, List
 from pathlib import Path
-from pymupdf.mupdf import FzErrorFormat
+from pymupdf.mupdf import FzErrorFormat, FzErrorLibrary
 from pymupdf import Document, Page, Pixmap, Rect, Point, Font
 from pymupdf.utils import get_pixmap, set_metadata, Shape
 from pymupdf import TOOLS, Matrix, Identity
@@ -777,9 +777,7 @@ def find_font(font_dirs: List) -> Tuple[dict]:
                 font_name = Font(fontfile=full_name).name
                 name_dict[font_name] = str(Path(full_name))
                 dir_dict[str(Path(full_name))] = font_name
-            except RuntimeError:
-                pass
-            except TypeError:
+            except FzErrorLibrary:
                 pass
     return name_dict, dir_dict
 
