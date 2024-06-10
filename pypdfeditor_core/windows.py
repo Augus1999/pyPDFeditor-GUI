@@ -601,7 +601,7 @@ class MainR(QTabWidget):
             <h1 style='color:#02554e;font-family:Verdana'>Welcome 🎃🎉</h1>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [1]: Welcome to pyPDFeditor-GUI.</p>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [2]: pyPDFeditor-GUI is a cross-platform 
-            application, thanks to <u>Python</u>, <u>PyQt5</u> and <u>PyMuPDF</u>, 
+            application, thanks to <u>Python</u>, <u>PyQt6</u> and <u>PyMuPDF</u>, 
             designed to work on simple PDF handling.</p>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [3]: STAND WITH UKRAINE 🇺🇦</p>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [4]: STAND WITH ISRAEL 🇮🇱</p>
