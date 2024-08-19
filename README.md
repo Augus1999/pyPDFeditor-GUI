@@ -9,7 +9,7 @@
 ![PyQt](https://img.shields.io/badge/PyQt-6.7-blue?color=708ddd)
 ![black](https://img.shields.io/badge/code%20style-black-black)
 
-This project is based on PyQt5 and PyMuPDF and tested on Windows 10 & 11 and Ubuntu on WSL2.
+This project is based on PyQt6 and PyMuPDF and tested on Windows 10 & 11 and Ubuntu on WSL2.
 
 ## Welcome 🎃🎉
 
