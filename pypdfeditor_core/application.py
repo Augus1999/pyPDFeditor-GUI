@@ -4,6 +4,7 @@
 wrap the whole application to one function
 """
 import os
+import sys
 import json
 import shutil
 import getpass
@@ -698,6 +699,7 @@ class FontDialog(FontDialogR):
         """
         display the font
         """
+        font_file = self.name_dict[self.combobox.currentText()]
         doc = fitz.Document()
         fitz.utils.new_page(doc, -1, 380, 220)
         r1 = fitz.Rect(10, 10, 370, 210)
@@ -711,8 +713,8 @@ class FontDialog(FontDialogR):
             color=(0.24, 0.24, 0.24),
             align=1,
             fontsize=25,
-            fontfile=self.name_dict[self.combobox.currentText()],
-            fontname="ext_0",
+            fontfile=None if font_file == "" else font_file,
+            fontname="helv" if font_file == "" else "ext_0",
         )
         shape.commit()
         cover = render_pdf_page(page)
@@ -749,7 +751,11 @@ def remove() -> None:
     """
     c = input("Are you sure to remove the whole application? n/Y" "\n>>>")
     if c.lower() == "y":
-        sp.call("pip uninstall pypdfeditor-gui", shell=True)
+        if sys.executable:
+            cmd = f"{sys.executable} -m "
+        else:
+            cmd = ""
+        sp.call(f"{cmd}pip uninstall pypdfeditor-gui", shell=True)
         if os.path.exists(app_home):
             shutil.rmtree(app_home)
         print("process finished")

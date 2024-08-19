@@ -152,7 +152,7 @@ def add_watermark(
     font_size: int,
     font_file: str,
     opacity: float = 0.5,
-    position: Tuple[int] = (0, 0),
+    position: Tuple[int, int] = (0, 0),
 ) -> Union[Doc, Document]:
     """
     add watermark
@@ -182,8 +182,8 @@ def add_watermark(
             stroke_opacity=0.5,
             fill_opacity=opacity,
             align=1,
-            fontfile=font_file,
-            fontname=os.path.basename(font_file),
+            fontfile=None if font_file == "" else font_file,
+            fontname="helv" if font_file == "" else os.path.basename(font_file),
             morph=(pos0, Matrix(rotate)),
         )
         shape.commit()
@@ -768,17 +768,20 @@ def find_font(font_dirs: List) -> Tuple[dict]:
     :return: two dictionaries => {font name: font file address} &
                                  {font file address: font name}
     """
-    name_dict = {}
-    dir_dict = {}
-    for font_dir in font_dirs:
-        for file_name in os.listdir(font_dir):
-            full_name = os.path.join(font_dir, file_name)
-            try:
-                font_name = Font(fontfile=full_name).name
-                name_dict[font_name] = str(Path(full_name))
-                dir_dict[str(Path(full_name))] = font_name
-            except FzErrorLibrary:
-                pass
+    name_dict = {"default": ""}
+    dir_dict = {"": "default"}
+    try:
+        for font_dir in font_dirs:
+            for file_name in os.listdir(font_dir):
+                full_name = os.path.join(font_dir, file_name)
+                try:
+                    font_name = Font(fontfile=full_name).name
+                    name_dict[font_name] = str(Path(full_name))
+                    dir_dict[str(Path(full_name))] = font_name
+                except FzErrorLibrary:
+                    pass
+    except FileNotFoundError:
+        ...
     return name_dict, dir_dict
 
 
