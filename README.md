@@ -5,11 +5,11 @@
 ![pylint](https://github.com/Augus1999/pyPDFeditor-GUI/actions/workflows/pylint.yml/badge.svg)
 
 ![OS](https://img.shields.io/badge/OS-Win%20|%20Linux%20|%20macOS-blue?color=00b166)
-![python](https://img.shields.io/badge/Python-3.9%20|%203.10-blue.svg?color=dd9b65)
+![python](https://img.shields.io/badge/Python-≥3.9%20-blue.svg?color=dd9b65)
 ![PyQt](https://img.shields.io/badge/PyQt-6.7-blue?color=708ddd)
 ![black](https://img.shields.io/badge/code%20style-black-black)
 
-This project is based on PyQt5 and PyMuPDF and tested on Windows 10 & 11.
+This project is based on PyQt5 and PyMuPDF and tested on Windows 10 & 11 and Ubuntu on WSL2.
 
 ## Welcome 🎃🎉
 
