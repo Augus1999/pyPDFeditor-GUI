@@ -386,7 +386,7 @@ class Main(MainR):
         f_name, _ = add(
             self,
             "PDF files (*.pdf);;"
-            "images (*.png *.jpg *.jpeg *.bmp *.tiff *.svg *.JPG);;"
+            "images (*.png *.jpg *.jpeg *.bmp *.tiff *.svg);;"
             "ebooks (*.epub *.xps *.fb2 *.cbz)",
         )
         if _:
