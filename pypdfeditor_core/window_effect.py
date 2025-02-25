@@ -5,6 +5,7 @@ win32api functions and classes
 """
 from ctypes import POINTER, c_int, WinDLL, Structure, byref, cast
 from ctypes.wintypes import RECT, UINT, HWND, MSG
+from PyQt6.QtCore import QRect
 
 
 class PWindowPOS(Structure):
@@ -69,7 +70,7 @@ class WindowEffect:
         self._extend(h_wnd, byref(margins))
 
     @staticmethod
-    def monitorNCCALCSIZE(_msg: MSG, geometry) -> None:
+    def monitorNCCALCSIZE(_msg: MSG, geometry: QRect) -> None:
         """
         resize the window to fit the screen
 

@@ -8,7 +8,7 @@ import gc
 import sys
 import json
 import time
-from typing import Union, Optional, Tuple, List
+from typing import Union, Optional, Tuple, List, Dict
 from pathlib import Path
 from pymupdf.mupdf import FzErrorFormat, FzErrorLibrary
 from pymupdf import Document, Page, Pixmap, Rect, Point, Font
@@ -38,7 +38,7 @@ class Doc(Document):
     """
 
     pass_word: Optional[str] = None
-    rotatedPages = {}
+    rotatedPages: Dict[int, int] = {}
 
 
 def copy(doc: Doc) -> Doc:
@@ -76,7 +76,10 @@ def open_pdf(file_name: str, parent: QWidget) -> Tuple[Optional[Doc], bool]:
     except RuntimeError:
         return _open_warning(parent)
     if not doc.is_pdf:
-        if file_name.endswith(SUPPORT_IMG_FORMAT[:-1]):
+        _support_img_format = SUPPORT_IMG_FORMAT[:-1] + tuple(
+            i.upper() for i in SUPPORT_IMG_FORMAT[:-1]
+        )
+        if file_name.endswith(_support_img_format):
             try:  # handle wrong image formats
                 pdf_bites = Pixmap(file_name).tobytes()
                 doc = Doc("png", pdf_bites)
@@ -106,7 +109,7 @@ def open_pdf(file_name: str, parent: QWidget) -> Tuple[Optional[Doc], bool]:
     return doc, True
 
 
-def render_pdf_page(page_data: Doc.load_page) -> QtGui.QPixmap:
+def render_pdf_page(page_data: Page) -> QtGui.QPixmap:
     """
     render PDF page
 
@@ -131,7 +134,7 @@ def render_pdf_page(page_data: Doc.load_page) -> QtGui.QPixmap:
     return pixmap
 
 
-def pdf_split(doc: Doc) -> List:
+def pdf_split(doc: Doc) -> List[int]:
     """
     split the selected PDF file into pages;
 
@@ -190,7 +193,7 @@ def add_watermark(
     return doc
 
 
-def setting_warning(set_file_name: str, parent: QWidget) -> dict:
+def setting_warning(set_file_name: str, parent: QWidget) -> Dict[str, Union[str, bool]]:
     """
     import settings from the JSON file
 
@@ -327,7 +330,7 @@ def set_icon(
     TOOLS.store_shrink(100)  # delete MuPDF cache
 
 
-def add(main: QWidget, _format: str) -> Tuple[str]:
+def add(main: QWidget, _format: str) -> Tuple[str, str]:
     """
     add a file
 
@@ -336,14 +339,15 @@ def add(main: QWidget, _format: str) -> Tuple[str]:
     :return: [f_name, state]
     """
     f_name, state = QFileDialog.getOpenFileName(main, "Open files", main.s_dir, _format)
-    if state and not f_name.endswith(SUPPORT_FORMAT):
+    _support_format = SUPPORT_FORMAT + tuple(i.upper() for i in SUPPORT_FORMAT)
+    if state and not f_name.endswith(_support_format):
         return "", ""
     if state and main.dir_store_state:
         main.s_dir = os.path.dirname(f_name)
     return f_name, state
 
 
-def save(main: QWidget, _format: str) -> Tuple[str]:
+def save(main: QWidget, _format: str) -> Tuple[str, str]:
     """
     save a file
 
@@ -645,7 +649,7 @@ def choose(widget: QtWidgets.QLineEdit, c_dir: str) -> None:
         widget.setText(root)
 
 
-def remove_invalid_xref_key(metadata: dict) -> dict:
+def remove_invalid_xref_key(metadata: Dict[str, str]) -> Dict[str, str]:
     """
     remove invalid xref key(s)
     """
@@ -697,8 +701,8 @@ def set_metadata0(doc: Doc, author: Optional[str]) -> None:
 
 
 def set_metadata1(
-    metadata: dict, title: str, author: str, subject: str, keywords: str
-) -> dict:
+    metadata: Dict[str, str], title: str, author: str, subject: str, keywords: str
+) -> Dict[str, str]:
     """
     set metadata to pdf document
 
@@ -731,7 +735,7 @@ def set_metadata1(
     return metadata
 
 
-def toc2plaintext(toc: List) -> str:
+def toc2plaintext(toc: List[List[Union[str, int]]]) -> str:
     """
     :param toc: table of content <- DOCUMENT.get_toc()
     :return: plaintext
@@ -744,7 +748,7 @@ def toc2plaintext(toc: List) -> str:
     return plaintext
 
 
-def plaintext2toc(plaintext: str) -> List[List]:
+def plaintext2toc(plaintext: str) -> List[List[Union[str, int]]]:
     """
     :param plaintext: plaintext
     :return: table of content -> DOCUMENT.get_toc()
@@ -759,7 +763,7 @@ def plaintext2toc(plaintext: str) -> List[List]:
     return toc
 
 
-def find_font(font_dirs: List) -> Tuple[dict]:
+def find_font(font_dirs: List[str]) -> Tuple[Dict[str, str], Dict[str, str]]:
     """
     find all TrueType font files (.ttf): all their font name and file addresses
     then write their directories to a json file
@@ -785,7 +789,7 @@ def find_font(font_dirs: List) -> Tuple[dict]:
     return name_dict, dir_dict
 
 
-def store_font_path(name_dict: dict, cache_file_name: str) -> None:
+def store_font_path(name_dict: Dict[str, str], cache_file_name: str) -> None:
     """
     store the font file dict
 
@@ -796,7 +800,7 @@ def store_font_path(name_dict: dict, cache_file_name: str) -> None:
         json.dump(name_dict, f, sort_keys=True, indent=4, separators=(",", ": "))
 
 
-def read_from_font_cache(cache_file_name: str) -> Tuple[dict]:
+def read_from_font_cache(cache_file_name: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     """
     read font directories from json file
 

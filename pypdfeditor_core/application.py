@@ -10,11 +10,11 @@ import shutil
 import getpass
 import subprocess as sp
 from pathlib import Path
-from typing import Dict
+from typing import List, Dict, Union, Optional
 import pymupdf as fitz
 from PyQt6 import QtCore
 from PyQt6.QtGui import QColor, QPixmap, QCloseEvent
-from PyQt6.QtWidgets import QColorDialog
+from PyQt6.QtWidgets import QColorDialog, QWidget
 from .language import set_language, lag_s, lag_p
 from .windows import (
     MainR,
@@ -158,7 +158,7 @@ class Main(MainR):
         if not self.settings.value("windowState") == None:
             self.restoreState(self.settings.value("windowState"))
 
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def closeEvent(self, event: Optional[QCloseEvent]) -> None:
         """
         write settings to settings.json
         """
@@ -212,7 +212,12 @@ class Main(MainR):
             self.tab3.button6.clicked.disconnect()
             self.perm_int = 4028  # value of all permissions
 
-    def view(self, index=None, widget=None, f_name=None) -> None:
+    def view(
+        self,
+        index: Optional[int] = None,
+        widget: Optional[QWidget] = None,
+        f_name: Optional[str] = None,
+    ) -> None:
         """
         open file outside the application
 
@@ -381,7 +386,7 @@ class Main(MainR):
         f_name, _ = add(
             self,
             "PDF files (*.pdf);;"
-            "images (*.png *.jpg *.jpeg *.bmp *.tiff *.svg);;"
+            "images (*.png *.jpg *.jpeg *.bmp *.tiff *.svg *.JPG);;"
             "ebooks (*.epub *.xps *.fb2 *.cbz)",
         )
         if _:
@@ -460,7 +465,7 @@ class Main(MainR):
             del doc, state
         return
 
-    def get_data(self, par1, par2, par3, par5) -> None:
+    def get_data(self, par1: str, par2: str, par3: bool, par5: str) -> None:
         """
         obtain settings from setting window
         """
@@ -472,7 +477,7 @@ class Main(MainR):
         set_language(self)
         self.setCurrentIndex(i)
 
-    def get_font_dir(self, par) -> None:
+    def get_font_dir(self, par: str) -> None:
         """
         obtain font file directory from font window
         """
@@ -560,7 +565,7 @@ class Main(MainR):
             del doc
 
     @staticmethod
-    def show_index(par, widget):
+    def show_index(par: List[int], widget: QWidget):
         """
         show recent clicked page number
         """
@@ -576,7 +581,7 @@ class Setting(SettingR):
 
     signal = QtCore.pyqtSignal(str, str, bool, str)
 
-    def __init__(self, set_dict: dict):
+    def __init__(self, set_dict: Dict[str, Union[str, bool]]):
         super().__init__()
         self.s_dir = set_dict["start dir"]
         self.o_dir = set_dict["save dir"]
@@ -620,7 +625,7 @@ class Setting(SettingR):
             self.line1.setReadOnly(False)
             self.line2.setReadOnly(False)
 
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def closeEvent(self, event: Optional[QCloseEvent]) -> None:
         """
         re-write closeEvent
         """
@@ -647,7 +652,7 @@ class PermMenu(PermMenuR):
         """
         lag_p(self, language)
 
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def closeEvent(self, event: Optional[QCloseEvent]) -> None:
         """
         close event
         """
@@ -723,7 +728,7 @@ class FontDialog(FontDialogR):
         fitz.TOOLS.store_shrink(100)  # delete MuPDF cache
         del cover, shape, page, r1, doc
 
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def closeEvent(self, event: Optional[QCloseEvent]) -> None:
         """
         close event
         """

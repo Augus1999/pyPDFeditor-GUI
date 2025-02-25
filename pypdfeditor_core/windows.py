@@ -4,7 +4,7 @@
 application window forms
 """
 import re
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
 from PyQt6.sip import voidptr
 from PyQt6.QtGui import (
     QIcon,
@@ -60,7 +60,7 @@ class SwitchBtn(QWidget):
 
     stateChanged = QtCore.pyqtSignal(bool)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
         self.checked = False
         self.bgColorOff = QColor("#e2e2dd")
@@ -80,10 +80,11 @@ class SwitchBtn(QWidget):
         self.timer.timeout.connect(self.update_value)
         self.setFont(QFont("calibri", 14))
 
-    def setStyleSheet(self, style_sheet: str) -> None:
+    def setStyleSheet(self, style_sheet: Optional[str]) -> None:
         """
         define set-style-sheet behaviour
         """
+        assert style_sheet is not None
         style_sheet = re.sub(r"\s+", "", style_sheet)
         on_style = str(re.findall(r"SwitchBtn:on{.+?}", style_sheet))
         off_style = str(re.findall(r"SwitchBtn:off{.+?}", style_sheet))
@@ -122,7 +123,7 @@ class SwitchBtn(QWidget):
                 self.timer.stop()
         self.update()
 
-    def mousePressEvent(self, event: QMouseEvent) -> None:
+    def mousePressEvent(self, event: Optional[QMouseEvent]) -> None:
         """
         mousePressEvent
         """
@@ -154,7 +155,7 @@ class SwitchBtn(QWidget):
         """
         return self.checked
 
-    def paintEvent(self, event: QPaintEvent) -> None:
+    def paintEvent(self, event: Optional[QPaintEvent]) -> None:
         """
         paintEvent
         """
@@ -251,7 +252,7 @@ class TableWidget(QTableWidget):
 
     Index = QtCore.pyqtSignal(tuple)
 
-    def mousePressEvent(self, event: QMouseEvent) -> None:
+    def mousePressEvent(self, event: Optional[QMouseEvent]) -> None:
         """
         re-write mousePressEvent
         """
@@ -468,7 +469,7 @@ class MainR(QTabWidget):
         x, y = [int(i) for i in str(state)[2:-1].split(",")]
         self.move(x, y)
 
-    def paintEvent(self, event: QPaintEvent) -> None:
+    def paintEvent(self, event: Optional[QPaintEvent]) -> None:
         """
         re-write paintEvent
         """
@@ -486,7 +487,7 @@ class MainR(QTabWidget):
 
     # -------well, why do the following ugly codes exist?-------
     # -------they are used to re-enable the window animations under Windows platform-------
-    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+    def mouseMoveEvent(self, event: Optional[QMouseEvent]) -> None:
         """
         re-write mouseMoveEvent
         move the frameless window
@@ -499,7 +500,7 @@ class MainR(QTabWidget):
                 self.windowEffect.move_window(int(self.winId()))
         return QTabWidget.mouseMoveEvent(self, event)
 
-    def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
+    def mouseDoubleClickEvent(self, event: Optional[QMouseEvent]) -> None:
         """
         re-write mouseDoubleClickEvent
         """
@@ -566,7 +567,7 @@ class MainR(QTabWidget):
 
     # -------here ends the ugly code-------
 
-    def resizeEvent(self, event: QResizeEvent) -> None:
+    def resizeEvent(self, event: Optional[QResizeEvent]) -> None:
         """
         re-write resizeEvent
         """
