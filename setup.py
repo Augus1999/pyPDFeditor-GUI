@@ -25,9 +25,8 @@ with open("README.md", mode="r", encoding="utf-8") as f:
     long_description = f.read()
 
 long_description = long_description.replace(
-    '<img src="./screenshots/tab2.png" width="400" alt="tab2 win11"/>',
-    '<img src="https://github.com/Augus1999/pyPDFeditor-GUI/blob/main/screenshots/tab2.png"'
-    ' width="400" alt="tab2 win11"/>',
+    '## Screenshot 🎞️\n\non Windows 11:\n\n<img src="./screenshots/tab2.png" width="400" alt="tab2 win11"/>\n\nSupport [Snap Layouts](https://answers.microsoft.com/en-us/windows/forum/all/how-to-use-snap-layouts-and-snap-groups-in-windows/3213a6b6-5a33-4d40-bbce-e01388a40976)\non Windows 11',
+    "",
 )
 
 setup(
