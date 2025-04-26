@@ -7,23 +7,10 @@
 
 This project is based on PyQt6 and PyMuPDF and tested on Windows 10 & 11 and Ubuntu on WSL2.
 
-## Welcome 🎃🎉
-
-Welcome to use pyPDFeditor-GUI. pyPDFeditor-GUI is a simple cross-platform application, thanks
-to [Python](https://www.python.org/), [PyQt6](https://www.riverbankcomputing.com/software/pyqt/)
-and [PyMuPDF](https://github.com/pymupdf/PyMuPDF), designed to work on simple PDF handling.
-
-I tried my best to make it close to Fluent UI. Icons used can be found [🔗here](https://fluenticons.co/).
-
-From version 3.0.0, we have moved the GUI library to PyQt6. If you upgraded from a previous version, you can consider removing PyQt5:
-```bash
-$ pip uninstall PyQt5 PyQt5-Qt5 PyQt5-sip
-```
-
 ## Features
 
 * Support 3 languages: English, 日本語 (Japanese), and 中文 (Traditional Chinese)
-* Fluent UI design
+* Fluent UI design (Icons used can be found [🔗here](https://fluenticons.co/))
 * Cross-platform support
 * Open-source and free to use under MIT licence
 * Frameless Window on
@@ -39,6 +26,7 @@ $ pip uninstall PyQt5 PyQt5-Qt5 PyQt5-sip
 * (...right-click the page then) Rotate a page
 * (...right-click the page then) Save a page as a PDF file or image file (`.png` `.psd` `.ppm`)
 * Add watermark (PDF only)
+* (...right-click the page then) Adjust the posotion of the watermark
 * Set password either user or/and owner password (PDF only)🔒
 * Set permissions (PDF only)🔏
 * Edit catalogue structure of the file (PDF only)📑

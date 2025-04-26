@@ -603,7 +603,7 @@ class MainR(QTabWidget):
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [1]: Welcome to pyPDFeditor-GUI.</p>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [2]: ...</p>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [3]: STAND WITH UKRAINE 🇺🇦</p>
-            <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [4]: There's no places for America now.</p>
+            <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [4]: There's no place for United States now.</p>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [5]: ...</p>
             """
         )

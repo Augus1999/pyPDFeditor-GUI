@@ -548,7 +548,7 @@ class Main(MainR):
         opacity = int(self.tab3.line4.text()) / 100
         if len(self.tab3.book_list) != 0:
             doc = fitz.Document()
-            doc.insert_pdf(self.tab3.book_list[0], 0, 0)
+            doc.insert_pdf(self.tab3.book_list[0], from_page=0, to_page=0)
             doc = add_watermark(
                 doc=doc,
                 text=watermark,
