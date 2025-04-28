@@ -1,11 +1,10 @@
 # pyPDFeditor-GUI
 
-[![PyPI](https://img.shields.io/pypi/v/pyPDFeditor-GUI?color=5f69b4)](https://pypi.org/project/pyPDFeditor-GUI/)
 ![pylint](https://github.com/Augus1999/pyPDFeditor-GUI/actions/workflows/pylint.yml/badge.svg)
 ![black](https://img.shields.io/badge/code%20style-black-black)
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
-This project is based on PyQt6 and PyMuPDF and tested on Windows 10 & 11 and Ubuntu on WSL2.
+**IMPORTANT: Development and maintenance of this project have been stopped. The package `pyPDFeditor-GUI` has been deleted from PyPI.**
 
 ## Features
 
@@ -57,12 +56,6 @@ $ pip install .
 
 where `<path>` is the directory `setup.py` locates.
 
-### install from PyPi
-
-```bash
-$ pip install -U pyPDFeditor-GUI
-```
-
 ### build thy own package
 
 this requires `build`, `setuptools` and `wheel` installed
@@ -88,12 +81,7 @@ on Windows 11:
 
 <img src="./screenshots/tab2.png" width="400" alt="tab2 win11"/>
 
-Support [Snap Layouts](https://answers.microsoft.com/en-us/windows/forum/all/how-to-use-snap-layouts-and-snap-groups-in-windows/3213a6b6-5a33-4d40-bbce-e01388a40976)
-on Windows 11
-
-## Others
+## Cache files
 
 Setting and cache files are stored in the directory `C:\User\USER\.pyPDFeditor-GUI` (Windows) or `home/USER/.pyPDFeditor-GUI`
 (Linux and macOS).
-
-Please report any errors to [Issues](https://github.com/Augus1999/pyPDFeditor-GUI/issues). Thank you!
