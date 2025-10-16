@@ -15,7 +15,7 @@ if not os.path.exists(app_home):
 
 __system__ = platform.system()
 __author__ = "Nianze A. TAO (Omozawa SUENO)"
-__version__ = "3.0.10"
+__version__ = "3.0.11"
 __all__ = ["main", "reset", "remove"]
 
 

@@ -40,21 +40,18 @@ Python>=3.7
 
 ```text
 PyQt6>=6.7.0
-PyMuPDF>=1.24.3
+PyMuPDF>=1.26.5
 ```
 
 ## Install & Run
 
 ### install from source
 
-you will need `setuptools` and `wheel` installed
+you will need git, `setuptools` and `wheel` installed
 
 ```bash
-$ cd <path>
-$ pip install .
+$ pip install git+https://github.com/Augus1999/pyPDFeditor-GUI.git
 ```
-
-where `<path>` is the directory `setup.py` locates.
 
 ### build thy own package
 

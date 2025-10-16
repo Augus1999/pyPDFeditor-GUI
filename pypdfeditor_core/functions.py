@@ -11,8 +11,7 @@ import time
 from typing import Union, Optional, Tuple, List, Dict
 from pathlib import Path
 from pymupdf.mupdf import FzErrorFormat, FzErrorLibrary
-from pymupdf import Document, Page, Pixmap, Rect, Point, Font
-from pymupdf.utils import get_pixmap, set_metadata, Shape
+from pymupdf import Document, Page, Pixmap, Rect, Point, Font, Shape
 from pymupdf import TOOLS, Matrix, Identity
 from PyQt6 import QtGui, QtCore, QtWidgets
 from PyQt6.QtWidgets import (
@@ -116,7 +115,7 @@ def render_pdf_page(page_data: Page) -> QtGui.QPixmap:
     :param page_data: page data
     :return: a QPixmap
     """
-    page_pixmap = get_pixmap(page_data, matrix=Identity, clip=True)
+    page_pixmap = page_data.get_pixmap(matrix=Identity, clip=True)
     if page_pixmap.alpha:
         image_format = QtGui.QImage.Format.Format_RGBA8888
     else:
@@ -485,7 +484,9 @@ def save_as(index: int, widget: QWidget, main: QWidget) -> None:
     :return: None
     """
     doc = Document()
-    doc.insert_pdf(widget.book, widget.book_list[index], widget.book_list[index])
+    doc.insert_pdf(
+        widget.book, from_page=widget.book_list[index], to_page=widget.book_list[index]
+    )
     f_name = (
         os.path.splitext(os.path.basename(widget.book.name))[0]
         + f"-{widget.book_list[index] + 1}.pdf"
@@ -500,8 +501,7 @@ def save_as(index: int, widget: QWidget, main: QWidget) -> None:
         if file_name.endswith(".pdf"):
             doc.save(file_name)
         if file_name.endswith((".psd", ".png", ".ppm")):
-            pix = get_pixmap(
-                doc[0],
+            pix = doc[0].get_pixmap(
                 dpi=220,
                 alpha=False if file_name.endswith(".ppm") else True,
             )
@@ -697,7 +697,7 @@ def set_metadata0(doc: Doc, author: Optional[str]) -> None:
     )
     metadata["author"] = author
     doc.xref_set_key(-1, "Info", "null")  # remove all original xref
-    set_metadata(doc, remove_invalid_xref_key(metadata))
+    doc.set_metadata(remove_invalid_xref_key(metadata))
 
 
 def set_metadata1(
