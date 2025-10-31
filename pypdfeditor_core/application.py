@@ -312,7 +312,7 @@ class Main(MainR):
                         file_name,
                         garbage=1,
                         permissions=self.perm_int,
-                        encryption=fitz.PDF_ENCRYPT_AES_256,
+                        encryption=fitz.mupdf.PDF_ENCRYPT_AES_256,
                         user_pw=u_password if u_password != "" else None,
                         owner_pw=o_password if o_password != "" else None,
                     )
@@ -658,21 +658,21 @@ class PermMenu(PermMenuR):
         """
         perm_int = 0
         if self.check1.isChecked():
-            perm_int += fitz.PDF_PERM_PRINT
+            perm_int += fitz.mupdf.PDF_PERM_PRINT
         if self.check2.isChecked():
-            perm_int += fitz.PDF_PERM_MODIFY
+            perm_int += fitz.mupdf.PDF_PERM_MODIFY
         if self.check3.isChecked():
-            perm_int += fitz.PDF_PERM_COPY
+            perm_int += fitz.mupdf.PDF_PERM_COPY
         if self.check4.isChecked():
-            perm_int += fitz.PDF_PERM_ANNOTATE
+            perm_int += fitz.mupdf.PDF_PERM_ANNOTATE
         if self.check5.isChecked():
-            perm_int += fitz.PDF_PERM_FORM
+            perm_int += fitz.mupdf.PDF_PERM_FORM
         if self.check6.isChecked():
-            perm_int += fitz.PDF_PERM_ACCESSIBILITY
+            perm_int += fitz.mupdf.PDF_PERM_ACCESSIBILITY
         if self.check7.isChecked():
-            perm_int += fitz.PDF_PERM_ASSEMBLE
+            perm_int += fitz.mupdf.PDF_PERM_ASSEMBLE
         if self.check8.isChecked():
-            perm_int += fitz.PDF_PERM_PRINT_HQ
+            perm_int += fitz.mupdf.PDF_PERM_PRINT_HQ
         self.signal.emit(perm_int)
         self.close()
         del self
@@ -706,10 +706,10 @@ class FontDialog(FontDialogR):
         """
         font_file = self.name_dict[self.combobox.currentText()]
         doc = fitz.Document()
-        fitz.utils.new_page(doc, -1, 380, 220)
+        doc.new_page(-1, 380, 220)
         r1 = fitz.Rect(10, 10, 370, 210)
         page = doc.load_page(0)
-        shape = fitz.utils.Shape(page)
+        shape = page.new_shape()
         shape.draw_rect(r1)
         shape.finish()
         shape.insert_textbox(
@@ -760,6 +760,9 @@ def remove() -> None:
             cmd = f"{sys.executable} -m "
         else:
             cmd = ""
+        sp.call(
+            f"{cmd}pip uninstall pypdfeditor-gui --break-system-packages", shell=True
+        )
         sp.call(f"{cmd}pip uninstall pypdfeditor-gui", shell=True)
         if os.path.exists(app_home):
             shutil.rmtree(app_home)
