@@ -288,10 +288,10 @@ class Main(MainR):
         """
         u_password = self.tab3.line1.text()
         o_password = self.tab3.line2.text()
-        rotation = int(self.tab3.line5.text())
-        font_size = int(self.tab3.line3.text())
+        rotation = self.tab3.line5.text()
+        font_size = self.tab3.line3.text()
         watermark = self.tab3.text.toPlainText()
-        opacity = int(self.tab3.line4.text()) / 100
+        opacity = self.tab3.line4.text()
         if len(self.tab3.book_list) != 0:
             file_name, ok = save(self, ".pdf")
             if ok:
@@ -542,10 +542,10 @@ class Main(MainR):
         """
         preview watermark effects
         """
-        rotation = int(self.tab3.line5.text())
-        font_size = int(self.tab3.line3.text())
+        rotation = self.tab3.line5.text()
+        font_size = self.tab3.line3.text()
         watermark = self.tab3.text.toPlainText()
-        opacity = int(self.tab3.line4.text()) / 100
+        opacity = self.tab3.line4.text()
         if len(self.tab3.book_list) != 0:
             doc = fitz.Document()
             doc.insert_pdf(self.tab3.book_list[0], from_page=0, to_page=0)
@@ -563,6 +563,12 @@ class Main(MainR):
             set_icon(widget=self.tab3, doc=doc)
             doc.close()
             del doc
+        if not self.tab3.line5.text().strip():
+            self.tab3.line5.setText(" 0")
+        if not self.tab3.line3.text().strip():
+            self.tab3.line3.setText("90")
+        if not self.tab3.line4.text().strip():
+            self.tab3.line4.setText("50")
 
     @staticmethod
     def show_index(par: List[int], widget: QWidget):

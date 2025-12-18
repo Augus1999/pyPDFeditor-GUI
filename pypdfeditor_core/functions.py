@@ -149,11 +149,11 @@ def pdf_split(doc: Doc) -> List[int]:
 def add_watermark(
     doc: Union[Doc, Document],
     text: str,
-    rotate: int,
-    colour: Tuple,
-    font_size: int,
+    rotate: Union[int, str],
+    colour: Tuple[float, float, float],
+    font_size: Union[int, str],
     font_file: str,
-    opacity: float = 0.5,
+    opacity: Union[float, int, str] = 0.5,
     position: Tuple[int, int] = (0, 0),
 ) -> Union[Doc, Document]:
     """
@@ -169,6 +169,19 @@ def add_watermark(
     :param position: position of the watermark
     :return: fitz.Document or Doc
     """
+    try:
+        rotate = int(rotate)
+    except ValueError:
+        rotate = 0
+    try:
+        font_size = int(font_size)
+    except ValueError:
+        font_size = 90
+    if not isinstance(opacity, float):
+        try:
+            opacity = int(opacity) / 100
+        except ValueError:
+            opacity = 0.5
     x, y = position
     x, y = int(x), int(y)
     for page in doc:
