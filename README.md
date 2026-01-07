@@ -1,10 +1,11 @@
 # pyPDFeditor-GUI
 
+[![PyPI](https://img.shields.io/pypi/v/pypdfeditor-gui?color=green)](https://pypi.org/project/pypdfeditor-gui/)
 ![pylint](https://github.com/Augus1999/pyPDFeditor-GUI/actions/workflows/pylint.yml/badge.svg)
 ![black](https://img.shields.io/badge/code%20style-black-black)
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
-**IMPORTANT: Development and maintenance of this project have been stopped. The package `pyPDFeditor-GUI` has been deleted from PyPI.**
+**IMPORTANT: Development of this project has been stopped but maintenance will be continued.**
 
 ## Features
 
@@ -40,10 +41,16 @@ Python>=3.10
 
 ```text
 PyQt6>=6.7.0
-PyMuPDF>=1.26.5
+PyMuPDF>=1.26.5,<1.28.0
 ```
 
 ## Install & Run
+
+### install from PyPI
+
+```bash
+$ pip install pypdfeditor-gui
+```
 
 ### install from source
 

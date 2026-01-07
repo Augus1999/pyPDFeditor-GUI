@@ -766,10 +766,13 @@ def remove() -> None:
             cmd = f"{sys.executable} -m "
         else:
             cmd = ""
-        sp.call(
-            f"{cmd}pip uninstall pypdfeditor-gui --break-system-packages", shell=True
-        )
-        sp.call(f"{cmd}pip uninstall pypdfeditor-gui", shell=True)
+        try:
+            sp.run(f"{cmd}pip uninstall pypdfeditor-gui", shell=True, check=True)
+        except sp.CalledProcessError:
+            sp.call(
+                f"{cmd}pip uninstall pypdfeditor-gui --break-system-packages",
+                shell=True,
+            )
         if os.path.exists(app_home):
             shutil.rmtree(app_home)
         print("process finished")
