@@ -38,7 +38,10 @@ setup(
     author="Nianze A. TAO",
     author_email="Augus_1999@outlook.com",
     packages=["pypdfeditor_core", "pypdfeditor_core.icons"],
-    package_dir={"pypdfeditor_core": "pypdfeditor_core", "pypdfeditor_core.icons": "pypdfeditor_core/icons"},
+    package_dir={
+        "pypdfeditor_core": "pypdfeditor_core",
+        "pypdfeditor_core.icons": "pypdfeditor_core/icons",
+    },
     license="MIT",
     python_requires=">=3.10",
     install_requires=["PyMuPDF>=1.26.5,<1.28.0", "PyQt6>=6.7.0"],
