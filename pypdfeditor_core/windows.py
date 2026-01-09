@@ -438,6 +438,7 @@ class MainR(QTabWidget):
             self.btn_ext_2.clicked.connect(self.close)
             self.btn_ext_3.clicked.connect(self.close)
             self.btn_ext_4.clicked.connect(self.close)
+            import winreg as wrg
             from .window_effect import WindowEffect, MSG
 
             self.windowEffect = WindowEffect()
@@ -445,12 +446,19 @@ class MainR(QTabWidget):
             self._title_bar_pos = [
                 QtCore.QPoint(x, y) for x in range(1200) for y in range(52)
             ]
-            self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
+            # self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
+            self.setWindowFlags(QtCore.Qt.WindowType.BypassWindowManagerHint)
             self.windowEffect.add_shadow_effect(int(self.winId()))
             self.windowEffect.add_window_style(int(self.winId()))
             self.windowHandle().screenChanged.connect(
                 lambda: self.windowEffect.screen_change(int(self.winId())),
             )
+            try:
+                _loc = wrg.HKEY_CURRENT_USER
+                _wm = wrg.OpenKeyEx(_loc, r"Control Panel\Desktop\WindowMetrics")
+                self._border = -int(wrg.QueryValueEx(_wm, "BorderWidth")[0])
+            except OSError:
+                self._border = 20
         else:
             self.tab1.grid.addWidget(self.tab1.button3, 0, 20)
             self.tab2.grid.addWidget(self.tab2.button3, 0, 20)
@@ -525,10 +533,10 @@ class MainR(QTabWidget):
                 x_pos = QCursor.pos().x() - self.frameGeometry().x()
                 y_pos = QCursor.pos().y() - self.frameGeometry().y()
                 btn = self.findChildren(QPushButton, f"max{i}")[0]
-                lx = x_pos < 5
-                rx = x_pos > self.width() - 5
-                ty = y_pos < 5
-                by = y_pos > self.height() - 5
+                lx = x_pos < self._border // 4
+                rx = x_pos > self.width() - self._border // 4 - 10
+                ty = y_pos < self._border // 4
+                by = y_pos > self.height() - self._border // 4
                 if QtCore.QPoint(x_pos - btn.width(), y_pos) in btn.geometry():
                     return True, 9  # HTMAXBUTTON
                 if lx and ty:
