@@ -201,7 +201,7 @@ def add_watermark(
             fontname="helv" if font_file == "" else os.path.basename(font_file),
             morph=(pos0, Matrix(rotate)),
         )
-        shape.commit()
+        shape.commit(overlay=False)
     return doc
 
 

@@ -446,7 +446,7 @@ class MainR(QTabWidget):
             self._title_bar_pos = [
                 QtCore.QPoint(x, y) for x in range(1200) for y in range(52)
             ]
-            # self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
+            # self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)  # not working anymore!
             self.setWindowFlags(QtCore.Qt.WindowType.BypassWindowManagerHint)
             self.windowEffect.add_shadow_effect(int(self.winId()))
             self.windowEffect.add_window_style(int(self.winId()))
@@ -457,6 +457,7 @@ class MainR(QTabWidget):
                 _loc = wrg.HKEY_CURRENT_USER
                 _wm = wrg.OpenKeyEx(_loc, r"Control Panel\Desktop\WindowMetrics")
                 self._border = -int(wrg.QueryValueEx(_wm, "BorderWidth")[0])
+                wrg.CloseKey(_wm)
             except OSError:
                 self._border = 20
         else:
