@@ -453,6 +453,9 @@ class MainR(QTabWidget):
             self.windowHandle().screenChanged.connect(
                 lambda: self.windowEffect.screen_change(int(self.winId())),
             )
+            self.windowHandle().screen().availableGeometryChanged.connect(
+                lambda: self.windowEffect.screen_change(int(self.winId())),
+            )
             try:
                 _loc = wrg.HKEY_CURRENT_USER
                 _wm = wrg.OpenKeyEx(_loc, r"Control Panel\Desktop\WindowMetrics")
