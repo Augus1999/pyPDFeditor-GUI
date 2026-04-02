@@ -554,16 +554,17 @@ def extract_img(index: int, widget: QWidget, main: QWidget) -> None:
     :return: None
     """
     doc = widget.book
-    img_inf = doc[widget.book_list[index]].get_images()
+    img_inf = doc[widget.book_list[index]].get_images(full=True)
     for key, inf in enumerate(img_inf):
+        # xref is inf[0]
+        img = doc.extract_image(inf[0])
         f_name = (
             os.path.splitext(os.path.basename(widget.book.name))[0]
-            + f"-{widget.book_list[index] + 1}-image-{key + 1}.png"
+            + f"-{widget.book_list[index] + 1}-image-{key + 1}.{img["ext"]}"
         )
         img_name = os.path.join(main.s_dir, f_name)
-        # xref is inf[0]
-        img = Pixmap(doc, inf[0])
-        img.save(img_name)
+        with open(img_name, "wb") as f:
+            f.write(img["image"])
     QMessageBox.information(
         main,
         "Saved",
