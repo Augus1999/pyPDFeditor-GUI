@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✨ pdf2md ✨
+# ✨ Distilmark ✨
 
 ### 📄 → 📝 The friendliest way to turn PDFs into beautiful Markdown
 
@@ -11,7 +11,7 @@
   <img alt="qt" src="https://img.shields.io/badge/PyQt6-41CD52?logo=qt&logoColor=white" />
   <img alt="platform" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" />
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green" />
-  <img alt="version" src="https://img.shields.io/badge/version-v0.3.0-7aa2f7" />
+  <img alt="version" src="https://img.shields.io/badge/version-v1.0.0-2563eb" />
 </p>
 
 <p>
@@ -24,7 +24,7 @@
 
 ## 🌟 What is this?
 
-**pdf2md** is a modern, lovingly-designed desktop app that converts PDF files into
+**Distilmark** is a modern, lovingly-designed desktop app that converts PDF files into
 clean Markdown. Pick a backend — fully offline native parser, a local Ollama vision
 model, or any hosted LLM — drop your files in, and grab your `.md`s. That's it.
 
@@ -50,7 +50,7 @@ Grab the prebuilt `.exe` from the [**📦 Releases page**](https://github.com/He
 
 ```bash
 pip install git+https://github.com/Hesamsamani/pymupdfgui.git
-pdf2md
+distilmark
 ```
 
 </td>
@@ -62,7 +62,7 @@ pdf2md
 ```bash
 git clone https://github.com/Hesamsamani/pymupdfgui.git
 cd pymupdfgui && pip install -r requirements.txt
-python -m pdf2md
+python -m distilmark
 ```
 
 </td>
@@ -106,12 +106,12 @@ Pick whichever vibe matches you:
 - 📂 **Smart folder scanning** — recursively finds all `.pdf` files in a folder, adds them to the queue in one click
 - 📚 **Batch convert** — feed it dozens of PDFs at once, processed one by one with live progress
 - 🖼️ **Image extraction with relative paths** — embedded images are saved and referenced as `./name_images/page1_img1.png` so previews work in VS Code, Obsidian, Typora, and any markdown viewer
-- 📋 **Conversion history** — every run (success or failure) is logged with timestamp, engine, filename, and page count; persisted across sessions at `~/.pdf2md/history.json`
+- 📋 **Conversion history** — every run (success or failure) is logged with timestamp, engine, filename, and page count; persisted across sessions at `~/.distilmark/history.json`
 - 🦙 **Ollama model management** — choose a preset tier, browse installed models, and download new ones — all from inside the app
 - 🌗 **Dark & Light themes** — modern Tokyo-Night–style dark / clean light
 - 🧵 **Threaded worker** — UI stays buttery smooth on long jobs
 - 📊 **Live progress** — per-page progress bar and status messages
-- 🧩 **Persistent settings** — `~/.pdf2md/config.json`
+- 🧩 **Persistent settings** — `~/.distilmark/config.json`
 - 🔑 **Hidden keys** — API tokens entered as password fields
 - 📦 **Prebuilt `.exe`** — one-click Windows install via GitHub Actions
 
@@ -121,7 +121,7 @@ Pick whichever vibe matches you:
 
 ```
 ╭────────────────────────────────────────────────────────────╮
-│  ◆ pdf2md                                                  │
+│  ◆ Distilmark                                                  │
 │                                                            │
 │  NAVIGATION                                                │
 │  ▸ Convert         ┃  PDF → Markdown                       │
@@ -144,7 +144,7 @@ Pick whichever vibe matches you:
 
 ## 🦙 Going offline with Ollama
 
-pdf2md has built-in Ollama model management — no terminal needed.
+Distilmark has built-in Ollama model management — no terminal needed.
 
 ### Pick a preset tier
 
@@ -168,7 +168,7 @@ pdf2md has built-in Ollama model management — no terminal needed.
 ollama serve                          # start the server
 ollama pull llama3.2-vision:11b       # or any vision model
 
-# in pdf2md → Engines → Test connection → ✓ Connected — 1 model
+# in Distilmark → Engines → Test connection → ✓ Connected — 1 model
 ```
 
 100% local. Zero network calls. Zero API bills. 🎉
@@ -185,7 +185,7 @@ Every file you convert is logged automatically:
 ✗  2026-06-01 14:40:01  |  broken.pdf                |  native    |  0 pages
 ```
 
-- History is stored at `~/.pdf2md/history.json` and survives restarts
+- History is stored at `~/.distilmark/history.json` and survives restarts
 - Switch to the **History** tab any time to review past conversions
 - Colour-coded: green ✓ for success, red ✗ for errors
 - Clear button wipes the log when you no longer need it
@@ -194,7 +194,7 @@ Every file you convert is logged automatically:
 
 ## 📂 Folder scanning
 
-Drop a whole folder onto the window (or click **Add Folder**) and pdf2md
+Drop a whole folder onto the window (or click **Add Folder**) and Distilmark
 recursively finds **every PDF inside** — including sub-folders — and adds
 them all to the queue. Files are then converted one by one with a
 `File N/total` counter so you always know where you are.
@@ -205,14 +205,14 @@ them all to the queue. Files are then converted one by one with a
 
 ```powershell
 pip install -r requirements.txt pyinstaller pillow
-pyinstaller --noconfirm --onefile --windowed --name pdf2md `
+pyinstaller --noconfirm --onefile --windowed --name Distilmark `
   --collect-all pymupdf --collect-all pymupdf4llm `
-  --icon icon.ico pdf2md_launcher.py
-# → dist\pdf2md.exe 🎉
+  --icon icon.ico distilmark_launcher.py
+# → dist\Distilmark.exe 🎉
 ```
 
 Or just push a `v*` tag — the [release workflow](./.github/workflows/release.yml)
-builds and uploads `pdf2md.exe` to GitHub Releases automatically.
+builds and uploads `Distilmark.exe` to GitHub Releases automatically.
 
 ---
 
@@ -220,9 +220,9 @@ builds and uploads `pdf2md.exe` to GitHub Releases automatically.
 
 | OS | Path |
 |---|---|
-| 🪟 Windows | `C:\Users\YOU\.pdf2md\config.json` |
-| 🍎 macOS | `~/.pdf2md/config.json` |
-| 🐧 Linux | `~/.pdf2md/config.json` |
+| 🪟 Windows | `C:\Users\YOU\.distilmark\config.json` |
+| 🍎 macOS | `~/.distilmark/config.json` |
+| 🐧 Linux | `~/.distilmark/config.json` |
 
 ---
 
@@ -273,6 +273,6 @@ MIT — see [`LICENSE`](./LICENSE). Use it, fork it, ship it. 💜
 
 Made with ❤️ + ☕ + a lot of 🐍
 
-⭐ **If pdf2md saved you time, give it a star!** ⭐
+⭐ **If Distilmark saved you time, give it a star!** ⭐
 
 </div>

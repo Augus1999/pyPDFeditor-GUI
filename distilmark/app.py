@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""pdf2md main application — modern PyQt6 GUI."""
+"""Distilmark main application — modern PyQt6 GUI."""
 from __future__ import annotations
 
 import sys
@@ -201,21 +201,78 @@ class ScanWorker(QThread):
 
 
 # ---------------------------------------------------------------------------
-# Helper: procedural icon
+# Helpers: drawn vector icons (no emoji — scalable, theme-controlled)
 # ---------------------------------------------------------------------------
 
-def _make_icon(color: str, glyph: str) -> QIcon:
+from PyQt6.QtCore import QRectF  # noqa: E402
+from PyQt6.QtGui import QPen, QPainterPath  # noqa: E402
+
+
+def _icon_add(color: str = "#2563eb") -> QIcon:
+    """A document with a plus badge — 'add PDFs'."""
     pm = QPixmap(28, 28)
     pm.fill(Qt.GlobalColor.transparent)
     p = QPainter(pm)
     p.setRenderHint(QPainter.RenderHint.Antialiasing)
-    p.setBrush(QColor(color))
+    pen = QPen(QColor(color), 2.0)
+    p.setPen(pen)
+    p.setBrush(Qt.BrushStyle.NoBrush)
+    p.drawRoundedRect(QRectF(6, 4, 12, 16), 2, 2)        # page
+    p.drawLine(15, 10, 22, 10)                            # plus badge
+    p.drawLine(15, 10, 15, 10)
+    pen2 = QPen(QColor(color), 2.2)
+    p.setPen(pen2)
+    p.drawLine(20, 14, 20, 22)                            # +
+    p.drawLine(16, 18, 24, 18)
+    p.end()
+    return QIcon(pm)
+
+
+def _brand_mark(size: int = 26) -> QPixmap:
+    """Distilmark logo mark: a blue rounded tile with an orange distillation droplet."""
+    import math
+    ss = 4  # supersample for crisp edges
+    s = size * ss
+    pm = QPixmap(s, s)
+    pm.fill(Qt.GlobalColor.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing)
     p.setPen(Qt.PenStyle.NoPen)
-    p.drawEllipse(2, 2, 24, 24)
-    p.setPen(QColor("#ffffff"))
-    f = QFont("Segoe UI", 12, QFont.Weight.Bold)
-    p.setFont(f)
-    p.drawText(pm.rect(), Qt.AlignmentFlag.AlignCenter, glyph)
+    p.setBrush(QColor("#2563eb"))
+    p.drawRoundedRect(QRectF(0, 0, s, s), s * 0.24, s * 0.24)
+    # parametric teardrop, point up (matches icon.png)
+    cx, cy, sx, sy, m = s * 0.5, s * 0.52, s * 0.30, s * 0.30, 3.0
+    drop = QPainterPath()
+    for i in range(241):
+        t = 2 * math.pi * i / 240
+        u = math.cos(t)
+        v = math.sin(t) * (math.sin(t / 2) ** m)
+        px, py = cx + sx * v, cy - sy * u
+        drop.moveTo(px, py) if i == 0 else drop.lineTo(px, py)
+    drop.closeSubpath()
+    p.setBrush(QColor("#f97316"))
+    p.drawPath(drop)
+    p.end()
+    return pm.scaled(size, size, Qt.AspectRatioMode.KeepAspectRatio,
+                     Qt.TransformationMode.SmoothTransformation)
+
+
+def _icon_folder(color: str = "#f97316") -> QIcon:
+    """A folder outline — 'add folder'."""
+    pm = QPixmap(28, 28)
+    pm.fill(Qt.GlobalColor.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing)
+    p.setPen(QPen(QColor(color), 2.0))
+    path = QPainterPath()
+    path.moveTo(4, 8)
+    path.lineTo(11, 8)
+    path.lineTo(13, 11)
+    path.lineTo(24, 11)
+    path.lineTo(24, 22)
+    path.lineTo(4, 22)
+    path.closeSubpath()
+    p.drawPath(path)
     p.end()
     return QIcon(pm)
 
@@ -238,29 +295,39 @@ class ConvertPage(QWidget):
         self._build()
 
     def _build(self):
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 24, 24, 24)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        inner = QWidget()
+        layout = QVBoxLayout(inner)
+        layout.setContentsMargins(32, 28, 32, 28)
         layout.setSpacing(14)
 
-        title = QLabel("PDF → Markdown")
-        title.setStyleSheet("font-size: 22px; font-weight: 700;")
+        title = QLabel("Convert")
+        title.setObjectName("H1")
         layout.addWidget(title)
 
-        subtitle = QLabel("Drop files or a folder · pick an engine · hit Convert.")
-        subtitle.setStyleSheet("color: #8a909c;")
+        subtitle = QLabel("Drop files or a folder, choose an engine, and distil to Markdown.")
+        subtitle.setObjectName("H2")
         layout.addWidget(subtitle)
 
         # File / folder picker row
         file_row = QHBoxLayout()
         self.pick_btn = QPushButton(" Add PDFs")
-        self.pick_btn.setIcon(_make_icon("#7aa2f7", "+"))
+        self.pick_btn.setIcon(_icon_add("#2563eb"))
+        self.pick_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.pick_btn.clicked.connect(self.pick_files)
 
         self.folder_btn = QPushButton(" Add Folder")
-        self.folder_btn.setIcon(_make_icon("#9ece6a", "📁"))
+        self.folder_btn.setIcon(_icon_folder("#f97316"))
+        self.folder_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.folder_btn.clicked.connect(self.pick_folder)
 
         self.clear_btn = QPushButton("Clear")
+        self.clear_btn.setObjectName("Ghost")
+        self.clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.clear_btn.clicked.connect(self.clear_queue)
 
         file_row.addWidget(self.pick_btn)
@@ -271,12 +338,13 @@ class ConvertPage(QWidget):
 
         self.list = QListWidget()
         self.list.setAcceptDrops(True)
-        self.list.setMinimumHeight(160)
+        self.list.setMinimumHeight(150)
+        self.list.setMaximumHeight(260)
         self.setAcceptDrops(True)
-        layout.addWidget(self.list, 1)
+        layout.addWidget(self.list)
 
-        self.queue_label = QLabel("")
-        self.queue_label.setStyleSheet("color: #8a909c; font-size: 11px;")
+        self.queue_label = QLabel("Drag PDF files or a folder here to get started.")
+        self.queue_label.setObjectName("Hint")
         layout.addWidget(self.queue_label)
 
         # Engine + options
@@ -284,13 +352,13 @@ class ConvertPage(QWidget):
         opts_layout = QFormLayout(opts_box)
 
         self.engine_combo = QComboBox()
-        self.engine_combo.addItem("⚡ Native (offline · PyMuPDF)", "native")
-        self.engine_combo.addItem("📐 pdfplumber (offline · layout + tables)", "pdfplumber")
-        self.engine_combo.addItem("⚖ Compare: native + pdfplumber (outputs two files)", "compare")
-        self.engine_combo.addItem("🦙 Ollama (local LLM)", "ollama")
-        self.engine_combo.addItem("🤖 OpenAI", "openai")
-        self.engine_combo.addItem("🧠 Anthropic Claude", "anthropic")
-        self.engine_combo.addItem("🌐 OpenAI-compatible (Groq · OpenRouter · LM Studio…)", "openai_compatible")
+        self.engine_combo.addItem("Native — offline · PyMuPDF", "native")
+        self.engine_combo.addItem("pdfplumber — offline · layout + tables", "pdfplumber")
+        self.engine_combo.addItem("Compare — native + pdfplumber (two files)", "compare")
+        self.engine_combo.addItem("Ollama — local LLM", "ollama")
+        self.engine_combo.addItem("OpenAI", "openai")
+        self.engine_combo.addItem("Anthropic Claude", "anthropic")
+        self.engine_combo.addItem("OpenAI-compatible — Groq · OpenRouter · LM Studio", "openai_compatible")
         cur = self.cfg.get("engine", "native")
         for i in range(self.engine_combo.count()):
             if self.engine_combo.itemData(i) == cur:
@@ -325,9 +393,10 @@ class ConvertPage(QWidget):
         layout.addWidget(opts_box)
 
         # ---- Advanced options (collapsible) ----
-        self.adv_toggle = QPushButton("⚙ Advanced options  ▼")
+        self.adv_toggle = QPushButton("Advanced options  ▾")
         self.adv_toggle.setCheckable(True)
         self.adv_toggle.setObjectName("NavItem")
+        self.adv_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
         self.adv_toggle.toggled.connect(self._toggle_advanced)
         layout.addWidget(self.adv_toggle)
         self.adv_box = self._build_advanced()
@@ -340,24 +409,32 @@ class ConvertPage(QWidget):
         layout.addWidget(self.progress)
 
         self.progress_label = QLabel("")
-        self.progress_label.setStyleSheet("color: #8a909c; font-size: 11px;")
+        self.progress_label.setObjectName("Hint")
         layout.addWidget(self.progress_label)
 
         action_row = QHBoxLayout()
         self.estimate_btn = QPushButton("Estimate cost")
+        self.estimate_btn.setObjectName("Ghost")
+        self.estimate_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.estimate_btn.clicked.connect(self._estimate_cost)
         self.cancel_conv_btn = QPushButton("Cancel")
+        self.cancel_conv_btn.setObjectName("Danger")
         self.cancel_conv_btn.setEnabled(False)
+        self.cancel_conv_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.cancel_conv_btn.clicked.connect(self._cancel_conversion)
-        self.convert_btn = QPushButton("Convert")
+        self.convert_btn = QPushButton("Convert  →")
         self.convert_btn.setObjectName("Primary")
-        self.convert_btn.setMinimumHeight(38)
+        self.convert_btn.setMinimumHeight(40)
+        self.convert_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.convert_btn.clicked.connect(self.start_conversion)
         action_row.addWidget(self.estimate_btn)
         action_row.addStretch()
         action_row.addWidget(self.cancel_conv_btn)
         action_row.addWidget(self.convert_btn)
         layout.addLayout(action_row)
+
+        scroll.setWidget(inner)
+        outer.addWidget(scroll)
 
     def _build_advanced(self) -> QWidget:
         box = QGroupBox("")
@@ -411,7 +488,7 @@ class ConvertPage(QWidget):
 
     def _toggle_advanced(self, checked: bool):
         self.adv_box.setVisible(checked)
-        self.adv_toggle.setText("⚙ Advanced options  ▲" if checked else "⚙ Advanced options  ▼")
+        self.adv_toggle.setText("Advanced options  ▴" if checked else "Advanced options  ▾")
 
     # ---- drag & drop ----
     def dragEnterEvent(self, e):
@@ -679,12 +756,15 @@ class SettingsPage(QWidget):
         layout.setContentsMargins(24, 24, 24, 24)
         layout.setSpacing(14)
 
-        title = QLabel("Engine settings")
-        title.setStyleSheet("font-size: 22px; font-weight: 700;")
+        title = QLabel("Engines")
+        title.setObjectName("H1")
         layout.addWidget(title)
+        subtitle = QLabel("Configure offline and hosted conversion back-ends.")
+        subtitle.setObjectName("H2")
+        layout.addWidget(subtitle)
 
         # ---- Ollama ----
-        olm = QGroupBox("🦙 Ollama (offline, local)")
+        olm = QGroupBox("Ollama  ·  offline, local")
         f = QFormLayout(olm)
 
         # Hidden state inputs used for save()
@@ -778,7 +858,7 @@ class SettingsPage(QWidget):
         layout.addWidget(olm)
 
         # ---- OpenAI ----
-        op = QGroupBox("🤖 OpenAI")
+        op = QGroupBox("OpenAI")
         of = QFormLayout(op)
         self.openai_key = QLineEdit(self.cfg["openai_api_key"])
         self.openai_key.setEchoMode(QLineEdit.EchoMode.Password)
@@ -790,7 +870,7 @@ class SettingsPage(QWidget):
         layout.addWidget(op)
 
         # ---- Anthropic ----
-        an = QGroupBox("🧠 Anthropic Claude")
+        an = QGroupBox("Anthropic Claude")
         af = QFormLayout(an)
         self.an_key = QLineEdit(self.cfg["anthropic_api_key"])
         self.an_key.setEchoMode(QLineEdit.EchoMode.Password)
@@ -800,7 +880,7 @@ class SettingsPage(QWidget):
         layout.addWidget(an)
 
         # ---- Custom OpenAI-compatible ----
-        cm = QGroupBox("🌐 Custom OpenAI-compatible (Groq · OpenRouter · LM Studio · vLLM…)")
+        cm = QGroupBox("Custom OpenAI-compatible  ·  Groq · OpenRouter · LM Studio · vLLM")
         cf = QFormLayout(cm)
         self.compat_key = QLineEdit(self.cfg["compat_api_key"])
         self.compat_key.setEchoMode(QLineEdit.EchoMode.Password)
@@ -814,6 +894,7 @@ class SettingsPage(QWidget):
         save_btn = QPushButton("Save settings")
         save_btn.setObjectName("Accent")
         save_btn.setMinimumHeight(38)
+        save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         save_btn.clicked.connect(self._save)
         row = QHBoxLayout()
         row.addStretch()
@@ -1037,17 +1118,19 @@ class HistoryPage(QWidget):
         layout.setSpacing(14)
 
         title_row = QHBoxLayout()
-        title = QLabel("Conversion history")
-        title.setStyleSheet("font-size: 22px; font-weight: 700;")
+        title = QLabel("History")
+        title.setObjectName("H1")
         title_row.addWidget(title)
         title_row.addStretch()
         clear_btn = QPushButton("Clear history")
+        clear_btn.setObjectName("Danger")
+        clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         clear_btn.clicked.connect(self._clear)
         title_row.addWidget(clear_btn)
         layout.addLayout(title_row)
 
         subtitle = QLabel("All conversions this session and across sessions. Most recent first.")
-        subtitle.setStyleSheet("color: #8a909c;")
+        subtitle.setObjectName("H2")
         layout.addWidget(subtitle)
 
         self.list = QListWidget()
@@ -1055,7 +1138,7 @@ class HistoryPage(QWidget):
         layout.addWidget(self.list, 1)
 
         self.summary = QLabel("")
-        self.summary.setStyleSheet("color: #8a909c; font-size: 11px;")
+        self.summary.setObjectName("Hint")
         layout.addWidget(self.summary)
 
     def showEvent(self, event):
@@ -1119,13 +1202,13 @@ class PreviewPage(QWidget):
         layout.setSpacing(10)
 
         title = QLabel("Preview")
-        title.setStyleSheet("font-size: 22px; font-weight: 700;")
+        title.setObjectName("H1")
         layout.addWidget(title)
 
         self.subtitle = QLabel(
             "Convert a file to preview the source PDF beside the rendered Markdown."
         )
-        self.subtitle.setStyleSheet("color: #8a909c;")
+        self.subtitle.setObjectName("H2")
         layout.addWidget(self.subtitle)
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -1136,8 +1219,12 @@ class PreviewPage(QWidget):
         lv.setContentsMargins(0, 0, 0, 0)
         nav = QHBoxLayout()
         self.prev_btn = QPushButton("◀ Prev")
+        self.prev_btn.setObjectName("Ghost")
+        self.prev_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.prev_btn.clicked.connect(self._prev_page)
         self.next_btn = QPushButton("Next ▶")
+        self.next_btn.setObjectName("Ghost")
+        self.next_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.next_btn.clicked.connect(self._next_page)
         self.page_label = QLabel("—")
         self.page_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -1263,16 +1350,17 @@ class AboutPage(QWidget):
         layout.setContentsMargins(24, 24, 24, 24)
         layout.setSpacing(10)
 
-        title = QLabel("pdf2md")
-        title.setStyleSheet("font-size: 26px; font-weight: 700;")
+        title = QLabel("Distilmark")
+        title.setObjectName("H1")
+        title.setStyleSheet("font-size: 28px;")
         layout.addWidget(title)
 
-        ver = QLabel(f"Version {version}  ·  PDF → Markdown converter")
-        ver.setStyleSheet("color: #8a909c; font-size: 12px;")
+        ver = QLabel(f"Version {version}  ·  Distil any PDF into clean Markdown")
+        ver.setObjectName("Hint")
         layout.addWidget(ver)
 
         tagline = QLabel(
-            "A modern, multi-engine GUI for turning PDFs into clean Markdown — "
+            "A modern, multi-engine desktop app for turning PDFs into clean Markdown — "
             "works fully offline or with any hosted LLM."
         )
         tagline.setWordWrap(True)
@@ -1316,7 +1404,7 @@ class AboutPage(QWidget):
             "• Conversion history with timestamps, persisted across sessions",
             "• Ollama model management — preset tiers, download from UI",
             "• Dark and light themes",
-            "• Persistent settings at <code>~/.pdf2md/config.json</code>",
+            "• Persistent settings at <code>~/.distilmark/config.json</code>",
             "• Pre-built Windows .exe via GitHub Actions",
         ):
             lbl = QLabel(line)
@@ -1354,9 +1442,9 @@ class MainWindow(QMainWindow):
     def __init__(self, cfg: dict):
         super().__init__()
         self.cfg = cfg
-        self.setWindowTitle("pdf2md — PDF to Markdown")
-        self.resize(1150, 740)
-        self.setMinimumSize(QSize(900, 600))
+        self.setWindowTitle("Distilmark — PDF to Markdown")
+        self.resize(1180, 760)
+        self.setMinimumSize(QSize(920, 600))
         self._build()
         self._apply_theme()
 
@@ -1370,14 +1458,25 @@ class MainWindow(QMainWindow):
         # Sidebar
         sidebar = QFrame()
         sidebar.setObjectName("Sidebar")
-        sidebar.setFixedWidth(230)
+        sidebar.setFixedWidth(238)
         sb = QVBoxLayout(sidebar)
         sb.setContentsMargins(0, 0, 0, 0)
         sb.setSpacing(0)
 
-        logo = QLabel("◆ pdf2md")
-        logo.setObjectName("Logo")
-        sb.addWidget(logo)
+        logo_row = QHBoxLayout()
+        logo_row.setContentsMargins(18, 18, 18, 0)
+        logo_row.setSpacing(10)
+        logo_mark = QLabel()
+        logo_mark.setPixmap(_brand_mark(26))
+        logo_mark.setFixedSize(26, 26)
+        logo_text = QLabel("Distilmark")
+        logo_text.setStyleSheet("font-size: 19px; font-weight: 800;")
+        logo_row.addWidget(logo_mark)
+        logo_row.addWidget(logo_text)
+        logo_row.addStretch()
+        logo_wrap = QWidget()
+        logo_wrap.setLayout(logo_row)
+        sb.addWidget(logo_wrap)
         sub = QLabel("PDF → Markdown converter")
         sub.setObjectName("Subtitle")
         sb.addWidget(sub)
@@ -1391,6 +1490,7 @@ class MainWindow(QMainWindow):
             b = QPushButton(f"  {label}")
             b.setObjectName("NavItem")
             b.setCheckable(True)
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
             b.clicked.connect(lambda _checked, i=idx: self._switch(i))
             sb.addWidget(b)
             self.nav_buttons.append(b)
@@ -1462,7 +1562,9 @@ class MainWindow(QMainWindow):
 def main() -> None:
     cfg = config.load()
     app = QApplication(sys.argv)
-    app.setApplicationName("pdf2md")
+    app.setApplicationName("Distilmark")
+    app.setWindowIcon(QIcon(_brand_mark(64)))
     w = MainWindow(cfg)
+    w.setWindowIcon(QIcon(_brand_mark(64)))
     w.show()
     sys.exit(app.exec())

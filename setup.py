@@ -37,11 +37,11 @@ setup(
     long_description_content_type="text/markdown",
     author="Nianze A. TAO",
     author_email="Augus_1999@outlook.com",
-    packages=["pypdfeditor_core", "pypdfeditor_core.icons", "pdf2md"],
+    packages=["pypdfeditor_core", "pypdfeditor_core.icons", "distilmark"],
     package_dir={
         "pypdfeditor_core": "pypdfeditor_core",
         "pypdfeditor_core.icons": "pypdfeditor_core/icons",
-        "pdf2md": "pdf2md",
+        "distilmark": "distilmark",
     },
     license="MIT",
     python_requires=">=3.10",
@@ -49,6 +49,7 @@ setup(
         "PyMuPDF>=1.26.5,<1.28.0",
         "PyQt6>=6.7.0",
         "pymupdf4llm>=0.0.17",
+        "pdfplumber>=0.11.0",
     ],
     url="https://github.com/Augus1999/pyPDFeditor-GUI/",
     project_urls={"Source": "https://github.com/Augus1999/pyPDFeditor-GUI"},
@@ -69,7 +70,7 @@ setup(
     entry_points={
         "gui_scripts": [
             "pdfeditor=pypdfeditor_core:main",
-            "pdf2md=pdf2md:main",
+            "distilmark=distilmark:main",
         ]
     },
 )

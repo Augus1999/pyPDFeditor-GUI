@@ -1,4 +1,4 @@
-# Installing pdf2md on Windows
+# Installing Distilmark on Windows
 
 You have three options. Pick whichever you like.
 
@@ -8,12 +8,12 @@ You have three options. Pick whichever you like.
 
 1. Go to the **Releases** page:
    https://github.com/Hesamsamani/pymupdfgui/releases
-2. Download `pdf2md.exe` from the latest release (e.g. `v0.3.0`).
-3. Double-click `pdf2md.exe` to run. That's it.
+2. Download `Distilmark.exe` from the latest release (e.g. `v1.0.0`).
+3. Double-click `Distilmark.exe` to run. That's it.
 
 > Windows SmartScreen may warn about an "unrecognized app". Click **More info → Run anyway**. The binary is built in GitHub Actions from the public source — you can verify the build log on the Releases page.
 
-If there is no release yet, push a tag (`git tag v0.3.0 && git push origin v0.3.0`) and the
+If there is no release yet, push a tag (`git tag v1.0.0 && git push origin v1.0.0`) and the
 `release.yml` workflow will build and attach the `.exe` automatically.
 
 ---
@@ -36,13 +36,13 @@ pip install -r requirements.txt
 pip install .
 
 # 4. Run
-pdf2md
+distilmark
 ```
 
 You can also run it without installing:
 
 ```powershell
-python -m pdf2md
+python -m distilmark
 ```
 
 ---
@@ -53,21 +53,21 @@ python -m pdf2md
 pip install -r requirements.txt
 pip install pyinstaller
 
-pyinstaller --noconfirm --onefile --windowed --name pdf2md `
+pyinstaller --noconfirm --onefile --windowed --name Distilmark `
   --collect-all pymupdf `
   --collect-all pymupdf4llm `
   --icon icon.png `
-  pdf2md_launcher.py
+  distilmark_launcher.py
 
 # Result:
-.\dist\pdf2md.exe
+.\dist\Distilmark.exe
 ```
 
 ---
 
 ## First-time setup inside the app
 
-1. Launch **pdf2md**.
+1. Launch **Distilmark**.
 2. Go to the **Engines** tab in the sidebar.
 3. Configure the engines you want to use:
    - **Native** — works out of the box, no setup, fully offline.
@@ -81,14 +81,14 @@ pyinstaller --noconfirm --onefile --windowed --name pdf2md `
 5. Switch to the **Convert** tab, drag PDFs in (or click *Add PDFs*), pick an engine
    from the dropdown, and click **Convert**.
 
-Settings are stored at `C:\Users\<YOU>\.pdf2md\config.json`.
+Settings are stored at `C:\Users\<YOU>\.distilmark\config.json`.
 
 ---
 
 ## Troubleshooting
 
-- **`pdf2md.exe` won't start** — open a terminal and run it from there to see the error:
-  `.\pdf2md.exe`
+- **`Distilmark.exe` won't start** — open a terminal and run it from there to see the error:
+  `.\Distilmark.exe`
 - **Ollama "Unreachable"** — make sure `ollama serve` is running, and the URL in
   settings matches (default `http://localhost:11434`).
 - **API errors** — recheck the API key and base URL on the **Engines** tab.

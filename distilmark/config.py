@@ -1,15 +1,26 @@
 # -*- coding: utf-8 -*-
-"""Persistent settings and history for pdf2md."""
+"""Persistent settings and history for Distilmark."""
 import json
+import shutil
 import datetime
 from pathlib import Path
 from typing import Any
 
-APP_HOME = Path.home() / ".pdf2md"
+APP_HOME = Path.home() / ".distilmark"
+_LEGACY_HOME = Path.home() / ".pdf2md"  # pre-1.0 location
 CONFIG_FILE = APP_HOME / "config.json"
 HISTORY_FILE = APP_HOME / "history.json"
 
 MAX_HISTORY = 500
+
+
+def _migrate_legacy() -> None:
+    """One-time migration of pre-1.0 ``~/.pdf2md`` settings/history."""
+    try:
+        if _LEGACY_HOME.exists() and not APP_HOME.exists():
+            shutil.copytree(_LEGACY_HOME, APP_HOME)
+    except OSError:
+        pass
 
 # Ollama preset models
 OLLAMA_PRESETS = {
@@ -68,6 +79,7 @@ DEFAULTS: dict[str, Any] = {
 
 
 def load() -> dict[str, Any]:
+    _migrate_legacy()
     APP_HOME.mkdir(parents=True, exist_ok=True)
     if not CONFIG_FILE.exists():
         save(DEFAULTS)
