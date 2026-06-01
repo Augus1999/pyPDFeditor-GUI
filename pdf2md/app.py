@@ -34,6 +34,7 @@ from PyQt6.QtWidgets import (
 )
 
 from . import config, converters, styles
+from ._version import __version__
 
 
 # ---------------------------------------------------------------------------
@@ -398,18 +399,7 @@ class SettingsPage(QWidget):
 class AboutPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        # Read version from __init__.py without importing the package
-        # (avoids a cyclic import: pdf2md/__init__.py loads .app).
-        try:
-            from importlib.metadata import version as _pkg_version
-            version = _pkg_version("pdf2md")
-        except Exception:
-            init_path = Path(__file__).with_name("__init__.py")
-            version = "?"
-            for line in init_path.read_text(encoding="utf-8").splitlines():
-                if line.startswith("__version__"):
-                    version = line.split("=", 1)[1].strip().strip('"').strip("'")
-                    break
+        version = __version__
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 24, 24, 24)
