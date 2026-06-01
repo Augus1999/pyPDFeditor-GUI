@@ -7,6 +7,33 @@
 
 **IMPORTANT: Development of this project has been stopped but maintenance will be continued.**
 
+## 🆕 pdf2md — PDF → Markdown converter
+
+This repo now also ships a separate, modern GUI tool called **pdf2md** that converts
+PDFs to Markdown using multiple backends:
+
+* **Native** — offline, no LLM. Pure PyMuPDF / pymupdf4llm. Fast.
+* **Ollama** — local, offline vision LLMs (`llama3.2-vision`, `llava`, ...).
+* **OpenAI** — hosted vision models (`gpt-4o-mini`, etc.).
+* **Anthropic Claude** — hosted (`claude-haiku-4-5`, etc.).
+* **OpenAI-compatible** — drop-in for Groq, OpenRouter, LM Studio, vLLM, …
+
+Highlights:
+
+* Drag-and-drop batch conversion
+* Embedded image extraction (native engine)
+* Sidebar navigation, dark/light themes, modern PyQt6 UI
+* Settings persisted at `~/.pdf2md/config.json`
+
+Run with:
+
+```bash
+$ pdf2md            # after `pip install .`
+$ python -m pdf2md  # from source
+```
+
+---
+
 ## Features
 
 * Support 3 languages: English, 日本語 (Japanese), and 中文 (Traditional Chinese)
