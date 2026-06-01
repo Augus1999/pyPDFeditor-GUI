@@ -45,8 +45,9 @@ from ._version import __version__
 
 class ConvertWorker(QThread):
     progress = pyqtSignal(int, int, str)
-    finished_ok = pyqtSignal(str, str, int)   # (markdown, source_pdf, page_count)
-    failed = pyqtSignal(str, str)             # (source_pdf, error)
+    finished_ok = pyqtSignal(str, str, int)       # (markdown, source_pdf, page_count)
+    finished_compare = pyqtSignal(str, str, str, int)  # (md_native, md_pdfplumber, source_pdf, page_count)
+    failed = pyqtSignal(str, str)                 # (source_pdf, error)
 
     def __init__(self, pdf: Path, cfg: dict, image_dir: Path | None, image_dir_name: str | None):
         super().__init__()
@@ -94,6 +95,15 @@ class ConvertWorker(QThread):
                     self.pdf, self.cfg["compat_base_url"],
                     self.cfg["compat_api_key"], self.cfg["compat_model"], opts, cb,
                 )
+            elif engine == "compare":
+                def _prog_native(c, t, m):
+                    self.progress.emit(c, t * 2, f"[native] {m}")
+                def _prog_plumber(c, t, m):
+                    self.progress.emit(t + c, t * 2, f"[pdfplumber] {m}")
+                md_native = converters.convert_native(self.pdf, opts, _prog_native)
+                md_pdfplumber = converters.convert_pdfplumber(self.pdf, opts, _prog_plumber)
+                self.finished_compare.emit(md_native, md_pdfplumber, str(self.pdf), page_count)
+                return
             else:
                 raise ValueError(f"Unknown engine: {engine}")
 
@@ -230,6 +240,7 @@ class ConvertPage(QWidget):
         self.engine_combo = QComboBox()
         self.engine_combo.addItem("⚡ Native (offline · PyMuPDF)", "native")
         self.engine_combo.addItem("📐 pdfplumber (offline · layout + tables)", "pdfplumber")
+        self.engine_combo.addItem("⚖ Compare: native + pdfplumber (outputs two files)", "compare")
         self.engine_combo.addItem("🦙 Ollama (local LLM)", "ollama")
         self.engine_combo.addItem("🤖 OpenAI", "openai")
         self.engine_combo.addItem("🧠 Anthropic Claude", "anthropic")
@@ -368,6 +379,7 @@ class ConvertPage(QWidget):
         self.worker = ConvertWorker(pdf, dict(self.cfg), img_dir, img_dir_name)
         self.worker.progress.connect(self._on_progress)
         self.worker.finished_ok.connect(self._on_done)
+        self.worker.finished_compare.connect(self._on_done_compare)
         self.worker.failed.connect(self._on_failed)
         done_so_far = self._total_files - len(self._remaining) - 1
         self.progress_label.setText(
@@ -394,6 +406,36 @@ class ConvertPage(QWidget):
             "status": "ok",
         })
         self.status.showMessage(f"✓ {src_path.name} → {out.name}", 4000)
+        self._convert_next()
+
+    def _on_done_compare(self, md_native: str, md_pdfplumber: str, src: str, pages: int):
+        src_path = Path(src)
+        out_native = self._out_dir / f"{src_path.stem}_native.md"
+        out_plumber = self._out_dir / f"{src_path.stem}_pdfplumber.md"
+        out_native.write_text(md_native, encoding="utf-8")
+        out_plumber.write_text(md_pdfplumber, encoding="utf-8")
+        self._done_files += 1
+        config.append_history({
+            "source": src_path.name,
+            "source_path": src,
+            "output": out_native.name,
+            "output_path": str(out_native),
+            "engine": "native (compare)",
+            "pages": pages,
+            "status": "ok",
+        })
+        config.append_history({
+            "source": src_path.name,
+            "source_path": src,
+            "output": out_plumber.name,
+            "output_path": str(out_plumber),
+            "engine": "pdfplumber (compare)",
+            "pages": pages,
+            "status": "ok",
+        })
+        self.status.showMessage(
+            f"✓ {src_path.name} → {out_native.name} + {out_plumber.name}", 5000
+        )
         self._convert_next()
 
     def _on_failed(self, src: str, err: str):
@@ -892,6 +934,7 @@ class AboutPage(QWidget):
         for line in (
             "• <b>Native</b> — offline, fast. PyMuPDF + pymupdf4llm.",
             "• <b>pdfplumber</b> — offline, layout-aware. Best for table-heavy PDFs.",
+            "• <b>Compare</b> — runs native + pdfplumber simultaneously, outputs two files side-by-side for quality comparison.",
             "• <b>Ollama</b> — local vision LLMs (llama3.2-vision, llava, …). Fully offline.",
             "• <b>OpenAI</b> — hosted vision models (gpt-4o-mini and friends).",
             "• <b>Anthropic Claude</b> — Claude Haiku / Sonnet / Opus with vision.",
@@ -906,6 +949,7 @@ class AboutPage(QWidget):
         features = QGroupBox("Features")
         fg = QVBoxLayout(features)
         for line in (
+            "• Dual-engine compare mode — native + pdfplumber outputs two files for easy quality comparison",
             "• Drag-and-drop batch conversion with file queue",
             "• Smart folder scanning — finds all PDFs recursively",
             "• Background worker thread — UI stays responsive",
