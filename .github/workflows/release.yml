@@ -24,14 +24,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller Pillow
+          pip install pyinstaller
 
       - name: Build pdf2md Windows executable
         run: |
           pyinstaller --noconfirm --onefile --windowed --name pdf2md `
             --collect-all pymupdf `
             --collect-all pymupdf4llm `
-            --icon icon.png `
+            --icon icon.ico `
             pdf2md/__main__.py
 
       - name: Upload artifact
