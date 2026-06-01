@@ -398,7 +398,18 @@ class SettingsPage(QWidget):
 class AboutPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        from . import __version__
+        # Read version from __init__.py without importing the package
+        # (avoids a cyclic import: pdf2md/__init__.py loads .app).
+        try:
+            from importlib.metadata import version as _pkg_version
+            version = _pkg_version("pdf2md")
+        except Exception:
+            init_path = Path(__file__).with_name("__init__.py")
+            version = "?"
+            for line in init_path.read_text(encoding="utf-8").splitlines():
+                if line.startswith("__version__"):
+                    version = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    break
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 24, 24, 24)
@@ -408,7 +419,7 @@ class AboutPage(QWidget):
         title.setStyleSheet("font-size: 26px; font-weight: 700;")
         layout.addWidget(title)
 
-        ver = QLabel(f"Version {__version__}  ·  PDF → Markdown converter")
+        ver = QLabel(f"Version {version}  ·  PDF → Markdown converter")
         ver.setStyleSheet("color: #8a909c; font-size: 12px;")
         layout.addWidget(ver)
 
