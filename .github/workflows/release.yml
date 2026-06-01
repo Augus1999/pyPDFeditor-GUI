@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      create_release:
+        description: "Create / update a GitHub Release with the .exe"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -26,6 +31,15 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller pillow
 
+      - name: Read pdf2md version
+        id: version
+        shell: bash
+        run: |
+          v=$(grep -E '^__version__' pdf2md/__init__.py | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "tag=v$v" >> "$GITHUB_OUTPUT"
+          echo "pdf2md version: $v"
+
       - name: Build pdf2md Windows executable
         run: |
           pyinstaller --noconfirm --onefile --windowed --name pdf2md `
@@ -40,10 +54,25 @@ jobs:
           name: pdf2md-windows
           path: dist/pdf2md.exe
 
-      - name: Attach to GitHub Release
+      # Tag-triggered runs: publish release at that tag.
+      - name: Attach to release (tag push)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          files: dist/pdf2md.exe
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Manual runs: create/update a release using the version from __init__.py.
+      - name: Attach to release (manual dispatch)
+        if: github.event_name == 'workflow_dispatch' && inputs.create_release == true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: pdf2md ${{ steps.version.outputs.tag }}
           files: dist/pdf2md.exe
           draft: false
           prerelease: false
