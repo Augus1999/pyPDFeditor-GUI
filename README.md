@@ -15,7 +15,7 @@
 </p>
 
 <p>
-  🌙 <b>Dark & Light themes</b> · 🚀 <b>Drag & Drop</b> · 🔌 <b>5 engines</b> · 🦙 <b>Offline ready</b>
+  🌙 <b>Dark & Light themes</b> · 🚀 <b>Drag & Drop</b> · 🔌 <b>7 engines</b> · 👀 <b>Live preview</b> · 🦙 <b>Offline ready</b>
 </p>
 
 </div>
@@ -80,6 +80,8 @@ Pick whichever vibe matches you:
 | Engine | Icon | Offline? | Best for | Notes |
 |---|:---:|:---:|---|---|
 | **Native** | ⚡ | ✅ | Speed, privacy, simple PDFs | PyMuPDF + `pymupdf4llm`, with a heading heuristic fallback. Zero cost. |
+| **pdfplumber** | 📐 | ✅ | Table-heavy, layout-sensitive PDFs | Layout-aware extraction, tables → GitHub-flavored Markdown. Tunable. |
+| **Compare** | ⚖ | ✅ | Deciding which engine wins | Runs native **and** pdfplumber at once, writes two files + a diff view. |
 | **Ollama** | 🦙 | ✅ | Tricky layouts, all-local LLM | Uses local vision models (`llama3.2-vision`, `llava`, …). |
 | **OpenAI** | 🤖 | ❌ | Highest fidelity, easy setup | `gpt-4o-mini` and friends. |
 | **Anthropic** | 🧠 | ❌ | Great structure on dense PDFs | Claude Haiku/Sonnet/Opus with vision. |
@@ -89,7 +91,16 @@ Pick whichever vibe matches you:
 
 ## ✨ Features
 
-- 🎯 **Multiple engines** — five backends, one UI, switch in a single click
+- 🎯 **Multiple engines** — seven backends, one UI, switch in a single click
+- 👀 **Live preview** — source PDF page beside the rendered Markdown; in **Compare** mode get Native / pdfplumber / **Diff** tabs side-by-side
+- ⚖ **Dual-engine compare** — run native + pdfplumber together and get two files (`name_native.md` + `name_pdfplumber.md`) to judge for yourself
+- 🔍 **OCR fallback** — scanned/image-only pages are run through Tesseract automatically (when installed)
+- 🎯 **Page-range selection** — convert just pages 5–20 of a 500-page monster
+- 🛑 **Cancel anytime** — a Cancel button stops a long batch mid-run
+- 💲 **Cost estimator** — see a rough $ estimate before firing off a paid LLM job
+- ⚡ **Parallel pages** — hosted LLM engines can process N pages concurrently for a big speedup
+- 🧹 **Post-processing** — merge hyphenated line breaks, collapse blank lines, strip repeating headers/footers
+- 🔧 **pdfplumber tuning** — table strategies & snap tolerance exposed in Advanced options
 - 🔒 **Privacy-first** — fully offline mode, your PDFs never leave your machine
 - 🪄 **Drag & drop files or folders** — drop a whole folder and every PDF inside gets queued automatically
 - 📂 **Smart folder scanning** — recursively finds all `.pdf` files in a folder, adds them to the queue in one click

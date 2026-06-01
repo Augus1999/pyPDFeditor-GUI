@@ -1,12 +1,23 @@
 # -*- coding: utf-8 -*-
-"""Conversion engines: native PyMuPDF, Ollama, OpenAI-compatible, Anthropic."""
+"""Conversion engines: native PyMuPDF, pdfplumber, Ollama, OpenAI, Anthropic.
+
+Shared features handled here (engine-agnostic):
+  • page range selection            (opts.page_range)
+  • OCR fallback for scanned pages  (opts.ocr_enabled)
+  • post-processing pipeline        (opts.pp_*)
+  • pdfplumber table tuning         (opts.plumber_table_settings)
+  • concurrent page processing      (opts.llm_concurrency, LLM engines only)
+  • cooperative cancellation        (opts.cancel_check)
+"""
 from __future__ import annotations
 
 import base64
 import json
+import re
 import urllib.error
 import urllib.request
-from dataclasses import dataclass, field
+from collections import Counter
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
@@ -16,6 +27,10 @@ import pymupdf
 ProgressCb = Callable[[int, int, str], None]  # (current_page, total_pages, message)
 
 
+class CancelledError(Exception):
+    """Raised cooperatively when the user cancels a running conversion."""
+
+
 @dataclass
 class ConvertOptions:
     include_images: bool = True
@@ -23,6 +38,105 @@ class ConvertOptions:
     image_dir: Path | None = None
     # folder name (not full path) used for relative markdown image refs
     image_dir_name: str | None = None
+    # 1-based inclusive page range; None = all pages
+    page_range: tuple[int, int] | None = None
+    # OCR fallback for pages with no extractable text (needs Tesseract)
+    ocr_enabled: bool = False
+    ocr_language: str = "eng"
+    # post-processing pipeline
+    pp_merge_hyphens: bool = False
+    pp_collapse_blanks: bool = False
+    pp_strip_headers_footers: bool = False
+    # pdfplumber table extraction
+    plumber_tables_enabled: bool = True
+    # pdfplumber table-extraction tuning (passed straight to extract_tables)
+    plumber_table_settings: dict | None = None
+    # number of pages processed in parallel for LLM engines (1 = sequential)
+    llm_concurrency: int = 1
+    # cooperative cancellation: a callable that returns True to abort
+    cancel_check: Callable[[], bool] | None = None
+
+
+# ---------------------------------------------------------------------------
+# Shared helpers
+# ---------------------------------------------------------------------------
+
+def _check_cancel(opts: ConvertOptions) -> None:
+    if opts.cancel_check and opts.cancel_check():
+        raise CancelledError("Conversion cancelled by user.")
+
+
+def _page_indices(total: int, page_range: tuple[int, int] | None) -> list[int]:
+    """Return 0-based page indices to process for a 1-based inclusive range."""
+    if not page_range:
+        return list(range(total))
+    start, end = page_range
+    start = max(1, start or 1)
+    end = min(total, end or total)
+    return [i for i in range(total) if start <= i + 1 <= end]
+
+
+def _ocr_page(page: pymupdf.Page, language: str = "eng", dpi: int = 200) -> str:
+    """OCR a page via PyMuPDF's Tesseract integration. Raises if unavailable."""
+    tp = page.get_textpage_ocr(flags=3, language=language, dpi=dpi, full=True)
+    return page.get_text(textpage=tp).strip()
+
+
+# ---- post-processing ----
+
+def _strip_headers_footers(pages: list[str]) -> list[str]:
+    """Drop the first/last line of each page when it repeats across most pages
+    (running headers / footers / page numbers)."""
+    if len(pages) < 3:
+        return pages
+    firsts: Counter[str] = Counter()
+    lasts: Counter[str] = Counter()
+    parsed: list[tuple[list[str], list[tuple[int, str]]]] = []
+    for p in pages:
+        lines = p.splitlines()
+        non_empty = [(i, l) for i, l in enumerate(lines) if l.strip()]
+        parsed.append((lines, non_empty))
+        if non_empty:
+            firsts[non_empty[0][1].strip()] += 1
+            lasts[non_empty[-1][1].strip()] += 1
+    threshold = max(2, len(pages) // 2)
+    common_first = {l for l, c in firsts.items() if c >= threshold}
+    common_last = {l for l, c in lasts.items() if c >= threshold}
+    if not common_first and not common_last:
+        return pages
+    cleaned: list[str] = []
+    for lines, non_empty in parsed:
+        drop: set[int] = set()
+        k = 0
+        while k < len(non_empty) and non_empty[k][1].strip() in common_first:
+            drop.add(non_empty[k][0])
+            k += 1
+        k = len(non_empty) - 1
+        while k >= 0 and non_empty[k][1].strip() in common_last:
+            drop.add(non_empty[k][0])
+            k -= 1
+        cleaned.append("\n".join(l for i, l in enumerate(lines) if i not in drop))
+    return cleaned
+
+
+def postprocess(pages: list[str], opts: ConvertOptions) -> list[str]:
+    if opts.pp_strip_headers_footers:
+        pages = _strip_headers_footers(pages)
+    if opts.pp_merge_hyphens:
+        pages = [re.sub(r"(\w)-\n(\w)", r"\1\2", p) for p in pages]
+    return pages
+
+
+def _assemble(pages: list[str], opts: ConvertOptions) -> str:
+    parts: list[str] = []
+    for k, p in enumerate(pages):
+        parts.append(p)
+        if opts.page_separator and k < len(pages) - 1:
+            parts.append("\n---\n")
+    text = "\n".join(parts)
+    if opts.pp_collapse_blanks:
+        text = re.sub(r"\n{3,}", "\n\n", text)
+    return text
 
 
 # ---------------------------------------------------------------------------
@@ -71,18 +185,28 @@ def convert_native(
 ) -> str:
     doc = pymupdf.open(pdf_path)
     total = doc.page_count
-    out: list[str] = []
-    for i, page in enumerate(doc):
+    indices = _page_indices(total, opts.page_range)
+    pages: list[str] = []
+    for n, i in enumerate(indices):
+        _check_cancel(opts)
+        page = doc[i]
         if progress:
-            progress(i + 1, total, f"Page {i+1}/{total} (native)")
-        md = _native_page_markdown(page)
-        out.append(md)
+            progress(n + 1, len(indices), f"Page {i+1}/{total} (native)")
+        raw = page.get_text().strip()
+        if opts.ocr_enabled and len(raw) < 8:
+            try:
+                md = _ocr_page(page, opts.ocr_language)
+            except Exception as e:  # Tesseract missing / failed — keep going
+                md = f"<!-- OCR unavailable for page {i+1}: {e} -->"
+        else:
+            md = _native_page_markdown(page)
+        chunk = [md]
         if opts.include_images and opts.image_dir is not None:
-            _extract_images(doc, page, opts.image_dir, opts.image_dir_name, out)
-        if opts.page_separator and i < total - 1:
-            out.append("\n---\n")
+            _extract_images(doc, page, opts.image_dir, opts.image_dir_name, chunk)
+        pages.append("\n".join(chunk))
     doc.close()
-    return "\n".join(out)
+    pages = postprocess(pages, opts)
+    return _assemble(pages, opts)
 
 
 def _extract_images(
@@ -146,18 +270,38 @@ def convert_pdfplumber(
             "pdfplumber is not installed. Run: pip install pdfplumber"
         ) from e
 
-    out: list[str] = []
+    table_settings = opts.plumber_table_settings or None
+    pages_md: list[str] = []
     with pdfplumber.open(str(pdf_path)) as doc:
         total = len(doc.pages)
-        for i, page in enumerate(doc.pages):
+        indices = _page_indices(total, opts.page_range)
+        for n, i in enumerate(indices):
+            _check_cancel(opts)
+            page = doc.pages[i]
             if progress:
-                progress(i + 1, total, f"Page {i+1}/{total} (pdfplumber)")
+                progress(n + 1, len(indices), f"Page {i+1}/{total} (pdfplumber)")
             text = page.extract_text() or ""
-            tables = page.extract_tables() or []
+            tables = []
+            if opts.plumber_tables_enabled:
+                try:
+                    tables = page.extract_tables(table_settings) if table_settings else page.extract_tables()
+                except Exception:
+                    tables = []
             page_chunks: list[str] = []
             if text.strip():
                 page_chunks.append(text.strip())
-            for t in tables:
+            elif opts.ocr_enabled:
+                # pdfplumber can't OCR — fall back to PyMuPDF Tesseract
+                try:
+                    import pymupdf as _mu
+                    _d = _mu.open(str(pdf_path))
+                    ocr_text = _ocr_page(_d[i], opts.ocr_language)
+                    _d.close()
+                    if ocr_text:
+                        page_chunks.append(ocr_text)
+                except Exception as e:
+                    page_chunks.append(f"<!-- OCR unavailable for page {i+1}: {e} -->")
+            for t in tables or []:
                 md_table = _table_to_md(t)
                 if md_table:
                     page_chunks.append("\n" + md_table + "\n")
@@ -171,10 +315,9 @@ def convert_pdfplumber(
                     _d.close()
                 except Exception:
                     pass
-            out.append("\n\n".join(page_chunks))
-            if opts.page_separator and i < total - 1:
-                out.append("\n---\n")
-    return "\n".join(out)
+            pages_md.append("\n\n".join(page_chunks))
+    pages_md = postprocess(pages_md, opts)
+    return _assemble(pages_md, opts)
 
 
 # ---------------------------------------------------------------------------
@@ -195,6 +338,63 @@ PROMPT = (
 
 
 # ---------------------------------------------------------------------------
+# Generic LLM page runner (sequential or concurrent)
+# ---------------------------------------------------------------------------
+
+PageFn = Callable[[str], str]  # (image_b64) -> markdown
+
+
+def _run_llm(
+    pdf_path: Path,
+    opts: ConvertOptions,
+    progress: ProgressCb | None,
+    label: str,
+    page_fn: PageFn,
+) -> str:
+    doc = pymupdf.open(pdf_path)
+    total = doc.page_count
+    indices = _page_indices(total, opts.page_range)
+    # Render all needed pages up front — PyMuPDF docs are not thread-safe, so
+    # the parallel workers only ever touch the already-encoded PNG bytes.
+    images: dict[int, str] = {}
+    for i in indices:
+        _check_cancel(opts)
+        images[i] = _render_page_png_b64(doc[i])
+    doc.close()
+
+    n_total = len(indices)
+    results: dict[int, str] = {}
+    concurrency = max(1, opts.llm_concurrency)
+
+    if concurrency == 1:
+        for n, i in enumerate(indices):
+            _check_cancel(opts)
+            if progress:
+                progress(n + 1, n_total, f"Page {i+1}/{total} ({label})")
+            results[i] = page_fn(images[i])
+    else:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        done = 0
+        with ThreadPoolExecutor(max_workers=concurrency) as ex:
+            futs = {ex.submit(page_fn, images[i]): i for i in indices}
+            try:
+                for fut in as_completed(futs):
+                    _check_cancel(opts)
+                    results[futs[fut]] = fut.result()
+                    done += 1
+                    if progress:
+                        progress(done, n_total, f"Page {done}/{n_total} ({label}, ×{concurrency})")
+            except BaseException:
+                for f in futs:
+                    f.cancel()
+                raise
+
+    pages = [results[i] for i in indices]
+    pages = postprocess(pages, opts)
+    return _assemble(pages, opts)
+
+
+# ---------------------------------------------------------------------------
 # Ollama (local, offline)
 # ---------------------------------------------------------------------------
 
@@ -205,13 +405,7 @@ def convert_ollama(
     opts: ConvertOptions,
     progress: ProgressCb | None = None,
 ) -> str:
-    doc = pymupdf.open(pdf_path)
-    total = doc.page_count
-    out: list[str] = []
-    for i, page in enumerate(doc):
-        if progress:
-            progress(i + 1, total, f"Page {i+1}/{total} (ollama:{model})")
-        img_b64 = _render_page_png_b64(page)
+    def page_fn(img_b64: str) -> str:
         payload = {
             "model": model,
             "prompt": PROMPT,
@@ -226,11 +420,9 @@ def convert_ollama(
         )
         with urllib.request.urlopen(req, timeout=600) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-        out.append(data.get("response", ""))
-        if opts.page_separator and i < total - 1:
-            out.append("\n---\n")
-    doc.close()
-    return "\n".join(out)
+        return data.get("response", "")
+
+    return _run_llm(pdf_path, opts, progress, f"ollama:{model}", page_fn)
 
 
 # ---------------------------------------------------------------------------
@@ -245,13 +437,7 @@ def convert_openai_compatible(
     opts: ConvertOptions,
     progress: ProgressCb | None = None,
 ) -> str:
-    doc = pymupdf.open(pdf_path)
-    total = doc.page_count
-    out: list[str] = []
-    for i, page in enumerate(doc):
-        if progress:
-            progress(i + 1, total, f"Page {i+1}/{total} ({model})")
-        img_b64 = _render_page_png_b64(page)
+    def page_fn(img_b64: str) -> str:
         payload = {
             "model": model,
             "messages": [
@@ -278,12 +464,9 @@ def convert_openai_compatible(
         )
         with urllib.request.urlopen(req, timeout=600) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-        content = data["choices"][0]["message"]["content"]
-        out.append(content)
-        if opts.page_separator and i < total - 1:
-            out.append("\n---\n")
-    doc.close()
-    return "\n".join(out)
+        return data["choices"][0]["message"]["content"]
+
+    return _run_llm(pdf_path, opts, progress, model, page_fn)
 
 
 # ---------------------------------------------------------------------------
@@ -297,13 +480,7 @@ def convert_anthropic(
     opts: ConvertOptions,
     progress: ProgressCb | None = None,
 ) -> str:
-    doc = pymupdf.open(pdf_path)
-    total = doc.page_count
-    out: list[str] = []
-    for i, page in enumerate(doc):
-        if progress:
-            progress(i + 1, total, f"Page {i+1}/{total} ({model})")
-        img_b64 = _render_page_png_b64(page)
+    def page_fn(img_b64: str) -> str:
         payload = {
             "model": model,
             "max_tokens": 4096,
@@ -341,11 +518,55 @@ def convert_anthropic(
             for b in data.get("content", [])
             if b.get("type") == "text"
         ]
-        out.append("".join(text_parts))
-        if opts.page_separator and i < total - 1:
-            out.append("\n---\n")
-    doc.close()
-    return "\n".join(out)
+        return "".join(text_parts)
+
+    return _run_llm(pdf_path, opts, progress, model, page_fn)
+
+
+# ---------------------------------------------------------------------------
+# Cost estimation (rough — for hosted LLM engines only)
+# ---------------------------------------------------------------------------
+
+# Approximate USD prices per 1K tokens: (input, output). Matched by substring.
+LLM_PRICES: dict[str, tuple[float, float]] = {
+    "gpt-4o-mini": (0.00015, 0.0006),
+    "gpt-4o": (0.0025, 0.01),
+    "gpt-4.1-mini": (0.0004, 0.0016),
+    "gpt-4.1": (0.002, 0.008),
+    "claude-haiku": (0.0008, 0.004),
+    "claude-sonnet": (0.003, 0.015),
+    "claude-opus": (0.015, 0.075),
+}
+
+# rough vision tokens consumed by one rendered page image, plus typical output
+_IMG_TOKENS = 1100
+_AVG_OUTPUT_TOKENS = 700
+
+
+def _price_for(model: str) -> tuple[float, float]:
+    m = (model or "").lower()
+    for key, price in LLM_PRICES.items():
+        if key in m:
+            return price
+    return (0.001, 0.004)  # generic fallback
+
+
+def estimate_cost(engine: str, model: str, total_pages: int) -> float | None:
+    """Return a rough USD estimate, or None for free/offline engines."""
+    if engine in ("native", "pdfplumber", "compare", "ollama"):
+        return None
+    inp, out = _price_for(model)
+    return total_pages * (_IMG_TOKENS / 1000 * inp + _AVG_OUTPUT_TOKENS / 1000 * out)
+
+
+def count_pages(pdf_path: Path) -> int:
+    try:
+        doc = pymupdf.open(pdf_path)
+        n = doc.page_count
+        doc.close()
+        return n
+    except Exception:
+        return 0
 
 
 # ---------------------------------------------------------------------------

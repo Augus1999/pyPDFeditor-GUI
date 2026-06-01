@@ -47,6 +47,23 @@ DEFAULTS: dict[str, Any] = {
     "include_images": True,
     "page_separator": True,
     "last_output_dir": str(Path.home()),
+    # page range (blank = all pages)
+    "page_range_from": "",
+    "page_range_to": "",
+    # OCR fallback (needs Tesseract installed)
+    "ocr_enabled": False,
+    "ocr_language": "eng",
+    # post-processing pipeline
+    "pp_merge_hyphens": False,
+    "pp_collapse_blanks": False,
+    "pp_strip_headers_footers": False,
+    # pdfplumber table tuning
+    "plumber_tables_enabled": True,
+    "plumber_vertical_strategy": "lines",
+    "plumber_horizontal_strategy": "lines",
+    "plumber_snap_tolerance": 3,
+    # parallel page processing for hosted LLM engines
+    "llm_concurrency": 1,
 }
 
 

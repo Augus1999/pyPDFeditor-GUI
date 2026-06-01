@@ -33,6 +33,9 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
     QScrollArea,
     QSplitter,
+    QSpinBox,
+    QTabWidget,
+    QTextBrowser,
 )
 
 from . import config, converters, styles, ollama_manager
@@ -43,11 +46,49 @@ from ._version import __version__
 # Worker: PDF → Markdown conversion
 # ---------------------------------------------------------------------------
 
+def _parse_page_range(cfg: dict) -> tuple[int, int] | None:
+    f = str(cfg.get("page_range_from", "")).strip()
+    t = str(cfg.get("page_range_to", "")).strip()
+    if not f and not t:
+        return None
+    try:
+        start = int(f) if f else 1
+        end = int(t) if t else 0  # 0 → open-ended (handled by converters)
+    except ValueError:
+        return None
+    return (start, end)
+
+
+def _build_opts(cfg: dict, image_dir, image_dir_name, cancel_check) -> "converters.ConvertOptions":
+    table_settings = {
+        "vertical_strategy": cfg.get("plumber_vertical_strategy", "lines"),
+        "horizontal_strategy": cfg.get("plumber_horizontal_strategy", "lines"),
+        "snap_tolerance": int(cfg.get("plumber_snap_tolerance", 3)),
+    }
+    return converters.ConvertOptions(
+        include_images=cfg.get("include_images", True),
+        page_separator=cfg.get("page_separator", True),
+        image_dir=image_dir,
+        image_dir_name=image_dir_name,
+        page_range=_parse_page_range(cfg),
+        ocr_enabled=cfg.get("ocr_enabled", False),
+        ocr_language=cfg.get("ocr_language", "eng") or "eng",
+        pp_merge_hyphens=cfg.get("pp_merge_hyphens", False),
+        pp_collapse_blanks=cfg.get("pp_collapse_blanks", False),
+        pp_strip_headers_footers=cfg.get("pp_strip_headers_footers", False),
+        plumber_tables_enabled=cfg.get("plumber_tables_enabled", True),
+        plumber_table_settings=table_settings,
+        llm_concurrency=int(cfg.get("llm_concurrency", 1) or 1),
+        cancel_check=cancel_check,
+    )
+
+
 class ConvertWorker(QThread):
     progress = pyqtSignal(int, int, str)
     finished_ok = pyqtSignal(str, str, int)       # (markdown, source_pdf, page_count)
     finished_compare = pyqtSignal(str, str, str, int)  # (md_native, md_pdfplumber, source_pdf, page_count)
     failed = pyqtSignal(str, str)                 # (source_pdf, error)
+    cancelled = pyqtSignal(str)                   # (source_pdf)
 
     def __init__(self, pdf: Path, cfg: dict, image_dir: Path | None, image_dir_name: str | None):
         super().__init__()
@@ -55,6 +96,10 @@ class ConvertWorker(QThread):
         self.cfg = cfg
         self.image_dir = image_dir
         self.image_dir_name = image_dir_name
+        self._cancelled = False
+
+    def cancel(self) -> None:
+        self._cancelled = True
 
     def run(self) -> None:
         try:
@@ -63,11 +108,9 @@ class ConvertWorker(QThread):
             page_count = _doc.page_count
             _doc.close()
 
-            opts = converters.ConvertOptions(
-                include_images=self.cfg.get("include_images", True),
-                page_separator=self.cfg.get("page_separator", True),
-                image_dir=self.image_dir,
-                image_dir_name=self.image_dir_name,
+            opts = _build_opts(
+                self.cfg, self.image_dir, self.image_dir_name,
+                lambda: self._cancelled,
             )
             cb = lambda c, t, m: self.progress.emit(c, t, m)
             engine = self.cfg.get("engine", "native")
@@ -108,6 +151,8 @@ class ConvertWorker(QThread):
                 raise ValueError(f"Unknown engine: {engine}")
 
             self.finished_ok.emit(md, str(self.pdf), page_count)
+        except converters.CancelledError:
+            self.cancelled.emit(str(self.pdf))
         except Exception:
             self.failed.emit(str(self.pdf), traceback.format_exc())
 
@@ -181,6 +226,7 @@ def _make_icon(color: str, glyph: str) -> QIcon:
 
 class ConvertPage(QWidget):
     conversion_done = pyqtSignal()  # notify History tab
+    preview_ready = pyqtSignal(dict)  # push last result to Preview tab
 
     def __init__(self, cfg: dict, status: QStatusBar, parent=None):
         super().__init__(parent)
@@ -260,7 +306,33 @@ class ConvertPage(QWidget):
         self.sep_cb.setChecked(self.cfg.get("page_separator", True))
         opts_layout.addRow("", self.sep_cb)
 
+        # Page range row
+        range_row = QHBoxLayout()
+        self.range_from = QLineEdit(str(self.cfg.get("page_range_from", "")))
+        self.range_from.setPlaceholderText("first")
+        self.range_from.setFixedWidth(70)
+        self.range_to = QLineEdit(str(self.cfg.get("page_range_to", "")))
+        self.range_to.setPlaceholderText("last")
+        self.range_to.setFixedWidth(70)
+        range_row.addWidget(QLabel("From"))
+        range_row.addWidget(self.range_from)
+        range_row.addWidget(QLabel("to"))
+        range_row.addWidget(self.range_to)
+        range_row.addWidget(QLabel("(blank = all pages)"))
+        range_row.addStretch()
+        opts_layout.addRow("Page range:", range_row)
+
         layout.addWidget(opts_box)
+
+        # ---- Advanced options (collapsible) ----
+        self.adv_toggle = QPushButton("⚙ Advanced options  ▼")
+        self.adv_toggle.setCheckable(True)
+        self.adv_toggle.setObjectName("NavItem")
+        self.adv_toggle.toggled.connect(self._toggle_advanced)
+        layout.addWidget(self.adv_toggle)
+        self.adv_box = self._build_advanced()
+        self.adv_box.setVisible(False)
+        layout.addWidget(self.adv_box)
 
         self.progress = QProgressBar()
         self.progress.setRange(0, 100)
@@ -272,13 +344,74 @@ class ConvertPage(QWidget):
         layout.addWidget(self.progress_label)
 
         action_row = QHBoxLayout()
+        self.estimate_btn = QPushButton("Estimate cost")
+        self.estimate_btn.clicked.connect(self._estimate_cost)
+        self.cancel_conv_btn = QPushButton("Cancel")
+        self.cancel_conv_btn.setEnabled(False)
+        self.cancel_conv_btn.clicked.connect(self._cancel_conversion)
         self.convert_btn = QPushButton("Convert")
         self.convert_btn.setObjectName("Primary")
         self.convert_btn.setMinimumHeight(38)
         self.convert_btn.clicked.connect(self.start_conversion)
+        action_row.addWidget(self.estimate_btn)
         action_row.addStretch()
+        action_row.addWidget(self.cancel_conv_btn)
         action_row.addWidget(self.convert_btn)
         layout.addLayout(action_row)
+
+    def _build_advanced(self) -> QWidget:
+        box = QGroupBox("")
+        form = QFormLayout(box)
+
+        # OCR
+        self.ocr_cb = QCheckBox("Enable OCR fallback for scanned pages (needs Tesseract)")
+        self.ocr_cb.setChecked(self.cfg.get("ocr_enabled", False))
+        form.addRow("OCR:", self.ocr_cb)
+        self.ocr_lang = QLineEdit(self.cfg.get("ocr_language", "eng"))
+        self.ocr_lang.setPlaceholderText("eng, fas, eng+fas, …")
+        self.ocr_lang.setFixedWidth(140)
+        form.addRow("OCR language:", self.ocr_lang)
+
+        # Post-processing
+        self.pp_hyphen_cb = QCheckBox("Merge hyphenated line breaks")
+        self.pp_hyphen_cb.setChecked(self.cfg.get("pp_merge_hyphens", False))
+        form.addRow("Clean-up:", self.pp_hyphen_cb)
+        self.pp_blanks_cb = QCheckBox("Collapse multiple blank lines")
+        self.pp_blanks_cb.setChecked(self.cfg.get("pp_collapse_blanks", False))
+        form.addRow("", self.pp_blanks_cb)
+        self.pp_hf_cb = QCheckBox("Strip repeating headers / footers / page numbers")
+        self.pp_hf_cb.setChecked(self.cfg.get("pp_strip_headers_footers", False))
+        form.addRow("", self.pp_hf_cb)
+
+        # pdfplumber table tuning
+        self.tables_cb = QCheckBox("Extract tables (pdfplumber engine)")
+        self.tables_cb.setChecked(self.cfg.get("plumber_tables_enabled", True))
+        form.addRow("Tables:", self.tables_cb)
+        self.vstrat = QComboBox()
+        self.vstrat.addItems(["lines", "text", "lines_strict"])
+        self.vstrat.setCurrentText(self.cfg.get("plumber_vertical_strategy", "lines"))
+        form.addRow("Table vertical strategy:", self.vstrat)
+        self.hstrat = QComboBox()
+        self.hstrat.addItems(["lines", "text", "lines_strict"])
+        self.hstrat.setCurrentText(self.cfg.get("plumber_horizontal_strategy", "lines"))
+        form.addRow("Table horizontal strategy:", self.hstrat)
+        self.snap = QSpinBox()
+        self.snap.setRange(0, 50)
+        self.snap.setValue(int(self.cfg.get("plumber_snap_tolerance", 3)))
+        form.addRow("Table snap tolerance:", self.snap)
+
+        # LLM concurrency
+        self.concurrency = QSpinBox()
+        self.concurrency.setRange(1, 16)
+        self.concurrency.setValue(int(self.cfg.get("llm_concurrency", 1)))
+        self.concurrency.setToolTip("Pages processed in parallel for hosted LLM engines (OpenAI/Anthropic/compatible).")
+        form.addRow("LLM parallel pages:", self.concurrency)
+
+        return box
+
+    def _toggle_advanced(self, checked: bool):
+        self.adv_box.setVisible(checked)
+        self.adv_toggle.setText("⚙ Advanced options  ▲" if checked else "⚙ Advanced options  ▼")
 
     # ---- drag & drop ----
     def dragEnterEvent(self, e):
@@ -340,7 +473,53 @@ class ConvertPage(QWidget):
         self.cfg["engine"] = self.engine_combo.currentData()
         self.cfg["include_images"] = self.images_cb.isChecked()
         self.cfg["page_separator"] = self.sep_cb.isChecked()
+        self.cfg["page_range_from"] = self.range_from.text().strip()
+        self.cfg["page_range_to"] = self.range_to.text().strip()
+        self.cfg["ocr_enabled"] = self.ocr_cb.isChecked()
+        self.cfg["ocr_language"] = self.ocr_lang.text().strip() or "eng"
+        self.cfg["pp_merge_hyphens"] = self.pp_hyphen_cb.isChecked()
+        self.cfg["pp_collapse_blanks"] = self.pp_blanks_cb.isChecked()
+        self.cfg["pp_strip_headers_footers"] = self.pp_hf_cb.isChecked()
+        self.cfg["plumber_tables_enabled"] = self.tables_cb.isChecked()
+        self.cfg["plumber_vertical_strategy"] = self.vstrat.currentText()
+        self.cfg["plumber_horizontal_strategy"] = self.hstrat.currentText()
+        self.cfg["plumber_snap_tolerance"] = self.snap.value()
+        self.cfg["llm_concurrency"] = self.concurrency.value()
         config.save(self.cfg)
+
+    def _estimate_cost(self):
+        if not self.queue:
+            self.status.showMessage("Add files first to estimate cost.", 4000)
+            return
+        self._sync_cfg()
+        engine = self.cfg.get("engine", "native")
+        total_pages = sum(converters.count_pages(p) for p in self.queue)
+        model = {
+            "openai": self.cfg.get("openai_model", ""),
+            "anthropic": self.cfg.get("anthropic_model", ""),
+            "openai_compatible": self.cfg.get("compat_model", ""),
+        }.get(engine, "")
+        cost = converters.estimate_cost(engine, model, total_pages)
+        if cost is None:
+            QMessageBox.information(
+                self, "Cost estimate",
+                f"{total_pages} page(s) · engine '{engine}' runs locally — "
+                f"no API cost. 🎉",
+            )
+        else:
+            QMessageBox.information(
+                self, "Cost estimate",
+                f"{total_pages} page(s) · model '{model}'\n\n"
+                f"Estimated cost: ~${cost:.2f} USD\n\n"
+                f"(rough estimate — actual cost depends on page complexity "
+                f"and provider pricing)",
+            )
+
+    def _cancel_conversion(self):
+        self._remaining = []
+        if self.worker and self.worker.isRunning():
+            self.worker.cancel()
+            self.status.showMessage("Cancelling…", 3000)
 
     def start_conversion(self):
         if not self.queue:
@@ -361,11 +540,13 @@ class ConvertPage(QWidget):
         self._total_files = len(self._remaining)
         self._done_files = 0
         self.convert_btn.setEnabled(False)
+        self.cancel_conv_btn.setEnabled(True)
         self._convert_next()
 
     def _convert_next(self):
         if not self._remaining:
             self.convert_btn.setEnabled(True)
+            self.cancel_conv_btn.setEnabled(False)
             self.status.showMessage(
                 f"All done — {self._done_files} file(s) converted.", 8000
             )
@@ -381,6 +562,7 @@ class ConvertPage(QWidget):
         self.worker.finished_ok.connect(self._on_done)
         self.worker.finished_compare.connect(self._on_done_compare)
         self.worker.failed.connect(self._on_failed)
+        self.worker.cancelled.connect(self._on_cancelled)
         done_so_far = self._total_files - len(self._remaining) - 1
         self.progress_label.setText(
             f"File {done_so_far + 1}/{self._total_files}: {pdf.name}"
@@ -406,6 +588,12 @@ class ConvertPage(QWidget):
             "status": "ok",
         })
         self.status.showMessage(f"✓ {src_path.name} → {out.name}", 4000)
+        self.preview_ready.emit({
+            "pdf": src,
+            "compare": False,
+            "md": md,
+            "output": str(out),
+        })
         self._convert_next()
 
     def _on_done_compare(self, md_native: str, md_pdfplumber: str, src: str, pages: int):
@@ -436,7 +624,23 @@ class ConvertPage(QWidget):
         self.status.showMessage(
             f"✓ {src_path.name} → {out_native.name} + {out_plumber.name}", 5000
         )
+        self.preview_ready.emit({
+            "pdf": src,
+            "compare": True,
+            "md_native": md_native,
+            "md_pdfplumber": md_pdfplumber,
+            "output_native": str(out_native),
+            "output_pdfplumber": str(out_plumber),
+        })
         self._convert_next()
+
+    def _on_cancelled(self, src: str):
+        self._remaining = []
+        self.convert_btn.setEnabled(True)
+        self.cancel_conv_btn.setEnabled(False)
+        self.progress.setValue(0)
+        self.progress_label.setText("")
+        self.status.showMessage("Conversion cancelled.", 4000)
 
     def _on_failed(self, src: str, err: str):
         src_path = Path(src)
@@ -897,6 +1101,152 @@ class HistoryPage(QWidget):
 
 
 # ---------------------------------------------------------------------------
+# Preview page — source PDF beside rendered Markdown
+# ---------------------------------------------------------------------------
+
+class PreviewPage(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._pdf_path: str | None = None
+        self._page_index = 0
+        self._page_count = 0
+        self._data: dict | None = None
+        self._build()
+
+    def _build(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(10)
+
+        title = QLabel("Preview")
+        title.setStyleSheet("font-size: 22px; font-weight: 700;")
+        layout.addWidget(title)
+
+        self.subtitle = QLabel(
+            "Convert a file to preview the source PDF beside the rendered Markdown."
+        )
+        self.subtitle.setStyleSheet("color: #8a909c;")
+        layout.addWidget(self.subtitle)
+
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+
+        # Left — rendered PDF page with navigation
+        left = QWidget()
+        lv = QVBoxLayout(left)
+        lv.setContentsMargins(0, 0, 0, 0)
+        nav = QHBoxLayout()
+        self.prev_btn = QPushButton("◀ Prev")
+        self.prev_btn.clicked.connect(self._prev_page)
+        self.next_btn = QPushButton("Next ▶")
+        self.next_btn.clicked.connect(self._next_page)
+        self.page_label = QLabel("—")
+        self.page_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        nav.addWidget(self.prev_btn)
+        nav.addWidget(self.page_label, 1)
+        nav.addWidget(self.next_btn)
+        lv.addLayout(nav)
+        self.pdf_scroll = QScrollArea()
+        self.pdf_scroll.setWidgetResizable(False)
+        self.pdf_scroll.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.pdf_label = QLabel("No PDF loaded yet.")
+        self.pdf_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.pdf_scroll.setWidget(self.pdf_label)
+        lv.addWidget(self.pdf_scroll, 1)
+        splitter.addWidget(left)
+
+        # Right — markdown output tabs
+        self.tabs = QTabWidget()
+        splitter.addWidget(self.tabs)
+        splitter.setSizes([460, 660])
+        layout.addWidget(splitter, 1)
+
+    def load(self, data: dict):
+        self._data = data
+        self._pdf_path = data.get("pdf")
+        self._page_index = 0
+        name = Path(self._pdf_path).name if self._pdf_path else ""
+        mode = "compare" if data.get("compare") else "single"
+        self.subtitle.setText(f"{name}  ·  {mode} mode")
+        try:
+            import pymupdf
+            doc = pymupdf.open(self._pdf_path)
+            self._page_count = doc.page_count
+            doc.close()
+        except Exception:
+            self._page_count = 0
+        self._render_pdf_page()
+        self._build_tabs(data)
+
+    def _build_tabs(self, data: dict):
+        self.tabs.clear()
+        if data.get("compare"):
+            nb = QTextBrowser()
+            nb.setMarkdown(data.get("md_native", ""))
+            self.tabs.addTab(nb, "⚡ Native")
+            pb = QTextBrowser()
+            pb.setMarkdown(data.get("md_pdfplumber", ""))
+            self.tabs.addTab(pb, "📐 pdfplumber")
+            diff = QTextBrowser()
+            diff.setHtml(self._make_diff(
+                data.get("md_native", ""), data.get("md_pdfplumber", "")
+            ))
+            self.tabs.addTab(diff, "≠ Diff")
+        else:
+            rendered = QTextBrowser()
+            rendered.setMarkdown(data.get("md", ""))
+            self.tabs.addTab(rendered, "Rendered")
+            src = QPlainTextEdit()
+            src.setPlainText(data.get("md", ""))
+            src.setReadOnly(True)
+            self.tabs.addTab(src, "Source")
+
+    @staticmethod
+    def _make_diff(a: str, b: str) -> str:
+        import difflib
+        return difflib.HtmlDiff(wrapcolumn=70).make_table(
+            a.splitlines(), b.splitlines(),
+            fromdesc="native", todesc="pdfplumber",
+            context=True, numlines=2,
+        )
+
+    def _render_pdf_page(self):
+        if not self._pdf_path or self._page_count == 0:
+            self.pdf_label.setText("No PDF loaded yet.")
+            self.pdf_label.adjustSize()
+            self.page_label.setText("—")
+            self.prev_btn.setEnabled(False)
+            self.next_btn.setEnabled(False)
+            return
+        try:
+            import pymupdf
+            doc = pymupdf.open(self._pdf_path)
+            page = doc[self._page_index]
+            pix = page.get_pixmap(dpi=110)
+            data = pix.tobytes("png")
+            doc.close()
+            img = QPixmap()
+            img.loadFromData(data)
+            self.pdf_label.setPixmap(img)
+            self.pdf_label.resize(img.size())
+        except Exception as e:
+            self.pdf_label.setText(f"Could not render page: {e}")
+            self.pdf_label.adjustSize()
+        self.page_label.setText(f"Page {self._page_index + 1} / {self._page_count}")
+        self.prev_btn.setEnabled(self._page_index > 0)
+        self.next_btn.setEnabled(self._page_index < self._page_count - 1)
+
+    def _prev_page(self):
+        if self._page_index > 0:
+            self._page_index -= 1
+            self._render_pdf_page()
+
+    def _next_page(self):
+        if self._page_index < self._page_count - 1:
+            self._page_index += 1
+            self._render_pdf_page()
+
+
+# ---------------------------------------------------------------------------
 # About page
 # ---------------------------------------------------------------------------
 
@@ -950,6 +1300,14 @@ class AboutPage(QWidget):
         fg = QVBoxLayout(features)
         for line in (
             "• Dual-engine compare mode — native + pdfplumber outputs two files for easy quality comparison",
+            "• Live preview — source PDF page beside rendered Markdown, with a diff view in compare mode",
+            "• OCR fallback for scanned PDFs (via Tesseract)",
+            "• Page-range selection — convert only the pages you need",
+            "• Cancellable conversions with a Cancel button",
+            "• Cost estimator for hosted LLM engines before you convert",
+            "• Parallel page processing for hosted LLM engines (configurable)",
+            "• Post-processing — merge hyphenated breaks, collapse blanks, strip headers/footers",
+            "• pdfplumber table tuning in Advanced options",
             "• Drag-and-drop batch conversion with file queue",
             "• Smart folder scanning — finds all PDFs recursively",
             "• Background worker thread — UI stays responsive",
@@ -1029,7 +1387,7 @@ class MainWindow(QMainWindow):
         sb.addWidget(section)
 
         self.nav_buttons: list[QPushButton] = []
-        for label, idx in [("Convert", 0), ("Engines", 1), ("History", 2), ("About", 3)]:
+        for label, idx in [("Convert", 0), ("Preview", 1), ("Engines", 2), ("History", 3), ("About", 4)]:
             b = QPushButton(f"  {label}")
             b.setObjectName("NavItem")
             b.setCheckable(True)
@@ -1063,17 +1421,21 @@ class MainWindow(QMainWindow):
         self.setStatusBar(status)
 
         self.convert_page = ConvertPage(self.cfg, status)
+        self.preview_page = PreviewPage()
         self.settings_page = SettingsPage(self.cfg)
         self.history_page = HistoryPage()
         self.about_page = AboutPage()
 
         self.stack.addWidget(self.convert_page)
+        self.stack.addWidget(self.preview_page)
         self.stack.addWidget(self.settings_page)
         self.stack.addWidget(self.history_page)
         self.stack.addWidget(self.about_page)
 
         # Refresh history tab when a conversion completes
         self.convert_page.conversion_done.connect(self.history_page.refresh)
+        # Feed the Preview tab with the latest conversion result
+        self.convert_page.preview_ready.connect(self.preview_page.load)
 
         root.addWidget(self.stack, 1)
 
