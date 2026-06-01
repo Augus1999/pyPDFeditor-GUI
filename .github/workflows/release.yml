@@ -35,7 +35,7 @@ jobs:
         id: version
         shell: bash
         run: |
-          v=$(grep -E '^__version__' pdf2md/__init__.py | sed -E 's/.*"([^"]+)".*/\1/')
+          v=$(grep -E '^__version__' pdf2md/_version.py | sed -E 's/.*"([^"]+)".*/\1/')
           echo "version=$v" >> "$GITHUB_OUTPUT"
           echo "tag=v$v" >> "$GITHUB_OUTPUT"
           echo "pdf2md version: $v"
