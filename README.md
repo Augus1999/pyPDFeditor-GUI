@@ -149,7 +149,7 @@ ollama pull llama3.2-vision
 pip install -r requirements.txt pyinstaller pillow
 pyinstaller --noconfirm --onefile --windowed --name pdf2md `
   --collect-all pymupdf --collect-all pymupdf4llm `
-  --icon icon.ico pdf2md/__main__.py
+  --icon icon.ico pdf2md_launcher.py
 # → dist\pdf2md.exe 🎉
 ```
 

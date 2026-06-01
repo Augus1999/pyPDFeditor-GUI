@@ -46,7 +46,7 @@ jobs:
             --collect-all pymupdf `
             --collect-all pymupdf4llm `
             --icon icon.ico `
-            pdf2md/__main__.py
+            pdf2md_launcher.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

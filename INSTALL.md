@@ -57,7 +57,7 @@ pyinstaller --noconfirm --onefile --windowed --name pdf2md `
   --collect-all pymupdf `
   --collect-all pymupdf4llm `
   --icon icon.png `
-  pdf2md/__main__.py
+  pdf2md_launcher.py
 
 # Result:
 .\dist\pdf2md.exe
