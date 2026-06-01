@@ -8,12 +8,12 @@ You have three options. Pick whichever you like.
 
 1. Go to the **Releases** page:
    https://github.com/Hesamsamani/pymupdfgui/releases
-2. Download `pdf2md.exe` from the latest release (e.g. `v0.2.0`).
+2. Download `pdf2md.exe` from the latest release (e.g. `v0.3.0`).
 3. Double-click `pdf2md.exe` to run. That's it.
 
 > Windows SmartScreen may warn about an "unrecognized app". Click **More info → Run anyway**. The binary is built in GitHub Actions from the public source — you can verify the build log on the Releases page.
 
-If there is no release yet, push a tag (`git tag v0.2.0 && git push origin v0.2.0`) and the
+If there is no release yet, push a tag (`git tag v0.3.0 && git push origin v0.3.0`) and the
 `release.yml` workflow will build and attach the `.exe` automatically.
 
 ---

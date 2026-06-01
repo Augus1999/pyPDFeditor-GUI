@@ -91,15 +91,17 @@ Pick whichever vibe matches you:
 
 - 🎯 **Multiple engines** — five backends, one UI, switch in a single click
 - 🔒 **Privacy-first** — fully offline mode, your PDFs never leave your machine
-- 🪄 **Drag & drop** — chuck files in, watch the queue, profit
-- 📚 **Batch convert** — feed it dozens of PDFs at once
+- 🪄 **Drag & drop files or folders** — drop a whole folder and every PDF inside gets queued automatically
+- 📂 **Smart folder scanning** — recursively finds all `.pdf` files in a folder, adds them to the queue in one click
+- 📚 **Batch convert** — feed it dozens of PDFs at once, processed one by one with live progress
+- 🖼️ **Image extraction with relative paths** — embedded images are saved and referenced as `./name_images/page1_img1.png` so previews work in VS Code, Obsidian, Typora, and any markdown viewer
+- 📋 **Conversion history** — every run (success or failure) is logged with timestamp, engine, filename, and page count; persisted across sessions at `~/.pdf2md/history.json`
+- 🦙 **Ollama model management** — choose a preset tier, browse installed models, and download new ones — all from inside the app
 - 🌗 **Dark & Light themes** — modern Tokyo-Night–style dark / clean light
 - 🧵 **Threaded worker** — UI stays buttery smooth on long jobs
 - 📊 **Live progress** — per-page progress bar and status messages
-- 🖼️ **Image extraction** — pulls out embedded images (native engine)
 - 🧩 **Persistent settings** — `~/.pdf2md/config.json`
 - 🔑 **Hidden keys** — API tokens entered as password fields
-- 🩺 **Ollama health check** — test connection button lists pulled models
 - 📦 **Prebuilt `.exe`** — one-click Windows install via GitHub Actions
 
 ---
@@ -107,39 +109,84 @@ Pick whichever vibe matches you:
 ## 🖼️ A peek inside
 
 ```
-╭───────────────────────────────────────────────────────╮
-│  ◆ pdf2md                                             │
-│                                                       │
-│  NAVIGATION                                           │
-│  ▸ Convert         ┃  PDF → Markdown                  │
-│    Engines         ┃                                  │
-│    About           ┃  📂 Add PDFs   Clear             │
-│                    ┃  ╭─────────────────────────────╮ │
-│                    ┃  │ report-2025.pdf  — ~/Docs   │ │
-│                    ┃  │ paper.pdf        — ~/Papers │ │
-│                    ┃  ╰─────────────────────────────╯ │
-│  THEME             ┃  ⚙ Engine: Ollama (llama3.2-…) │
-│  [ dark ▾ ]        ┃  ████████████░░░░░  68%         │
-│                    ┃                    [ Convert ]   │
-╰───────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────────────────╮
+│  ◆ pdf2md                                                  │
+│                                                            │
+│  NAVIGATION                                                │
+│  ▸ Convert         ┃  PDF → Markdown                       │
+│    Engines         ┃                                       │
+│    History         ┃  📄 Add PDFs  📁 Add Folder  Clear    │
+│    About           ┃  ╭──────────────────────────────────╮ │
+│                    ┃  │ report-2025.pdf  — ~/Docs        │ │
+│                    ┃  │ paper.pdf        — ~/Papers      │ │
+│                    ┃  │ thesis.pdf       — ~/Desktop     │ │
+│                    ┃  ╰──────────────────────────────────╯ │
+│  THEME             ┃  3 files in queue                     │
+│  [ dark ▾ ]        ┃  ⚙ Engine: ⚡ Balanced (11B)          │
+│                    ┃  File 2/3: paper.pdf                  │
+│                    ┃  ████████████░░░░░  68%               │
+│                    ┃                       [ Convert ]     │
+╰────────────────────────────────────────────────────────────╯
 ```
 
 ---
 
 ## 🦙 Going offline with Ollama
 
-```bash
-# 1. install ollama (https://ollama.com)
-# 2. pull a vision model
-ollama pull llama3.2-vision
+pdf2md has built-in Ollama model management — no terminal needed.
 
-# 3. in pdf2md → Engines tab → set:
-#      Server URL: http://localhost:11434
-#      Model:      llama3.2-vision
-#    → click "Test connection"  → ✓ Connected
+### Pick a preset tier
+
+| Tier | Model | VRAM needed | Best for |
+|------|-------|:-----------:|---------|
+| 🚀 **Powerful** | `llama3.2-vision:90b` | 64 GB+ | Maximum accuracy, research PDFs |
+| ⚡ **Balanced** | `llama3.2-vision:11b` | 8 GB+ | Great quality, most users |
+| 💨 **Light** | `moondream:latest` | 4 GB+ | Speed, simple documents |
+
+### Download a model from inside the app
+
+1. Open **Engines** tab → **Ollama** section
+2. Click a preset button to fill the model name, or type your own
+3. Click **⬇ Pull / Download** — a live progress bar shows GB downloaded
+4. When done, the model appears in the **Active model** dropdown automatically
+
+### Manual terminal setup
+
+```bash
+# install Ollama: https://ollama.com/download
+ollama serve                          # start the server
+ollama pull llama3.2-vision:11b       # or any vision model
+
+# in pdf2md → Engines → Test connection → ✓ Connected — 1 model
 ```
 
 100% local. Zero network calls. Zero API bills. 🎉
+
+---
+
+## 📋 Conversion history
+
+Every file you convert is logged automatically:
+
+```
+✓  2026-06-01 15:30:12  |  report.pdf → report.md    |  native    |  12 pages
+✓  2026-06-01 14:55:08  |  thesis.pdf → thesis.md    |  ollama    |  87 pages
+✗  2026-06-01 14:40:01  |  broken.pdf                |  native    |  0 pages
+```
+
+- History is stored at `~/.pdf2md/history.json` and survives restarts
+- Switch to the **History** tab any time to review past conversions
+- Colour-coded: green ✓ for success, red ✗ for errors
+- Clear button wipes the log when you no longer need it
+
+---
+
+## 📂 Folder scanning
+
+Drop a whole folder onto the window (or click **Add Folder**) and pdf2md
+recursively finds **every PDF inside** — including sub-folders — and adds
+them all to the queue. Files are then converted one by one with a
+`File N/total` counter so you always know where you are.
 
 ---
 
