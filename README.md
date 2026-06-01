@@ -32,6 +32,9 @@ $ pdf2md            # after `pip install .`
 $ python -m pdf2md  # from source
 ```
 
+**Windows users:** see [INSTALL.md](./INSTALL.md) for prebuilt `.exe` download
+and step-by-step setup. Current version: **v0.2.0**.
+
 ---
 
 ## Features
