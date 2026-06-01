@@ -37,14 +37,19 @@ setup(
     long_description_content_type="text/markdown",
     author="Nianze A. TAO",
     author_email="Augus_1999@outlook.com",
-    packages=["pypdfeditor_core", "pypdfeditor_core.icons"],
+    packages=["pypdfeditor_core", "pypdfeditor_core.icons", "pdf2md"],
     package_dir={
         "pypdfeditor_core": "pypdfeditor_core",
         "pypdfeditor_core.icons": "pypdfeditor_core/icons",
+        "pdf2md": "pdf2md",
     },
     license="MIT",
     python_requires=">=3.10",
-    install_requires=["PyMuPDF>=1.26.5,<1.28.0", "PyQt6>=6.7.0"],
+    install_requires=[
+        "PyMuPDF>=1.26.5,<1.28.0",
+        "PyQt6>=6.7.0",
+        "pymupdf4llm>=0.0.17",
+    ],
     url="https://github.com/Augus1999/pyPDFeditor-GUI/",
     project_urls={"Source": "https://github.com/Augus1999/pyPDFeditor-GUI"},
     include_package_data=True,
@@ -61,7 +66,12 @@ setup(
         "Programming Language :: Python :: 3",
         "Topic :: Office/Business",
     ],
-    entry_points={"gui_scripts": ["pdfeditor=pypdfeditor_core:main"]},
+    entry_points={
+        "gui_scripts": [
+            "pdfeditor=pypdfeditor_core:main",
+            "pdf2md=pdf2md:main",
+        ]
+    },
 )
 
 if os.path.exists("build"):
