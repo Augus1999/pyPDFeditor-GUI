@@ -398,23 +398,84 @@ class SettingsPage(QWidget):
 class AboutPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        from . import __version__
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(10)
+
         title = QLabel("pdf2md")
-        title.setStyleSheet("font-size: 24px; font-weight: 700;")
+        title.setStyleSheet("font-size: 26px; font-weight: 700;")
         layout.addWidget(title)
-        desc = QLabel(
-            "Convert PDF files to clean Markdown using multiple engines:\n\n"
-            "• Native: offline, fast, PyMuPDF-based heuristics.\n"
-            "• Ollama: local vision-capable LLMs (llama3.2-vision, llava, ...).\n"
-            "• OpenAI / Anthropic: hosted vision models.\n"
-            "• Custom OpenAI-compatible: Groq, OpenRouter, LM Studio, vLLM.\n\n"
-            "Drag-and-drop PDFs, batch convert, embedded image extraction.\n"
-            "Built on PyQt6 + PyMuPDF."
+
+        ver = QLabel(f"Version {__version__}  ·  PDF → Markdown converter")
+        ver.setStyleSheet("color: #8a909c; font-size: 12px;")
+        layout.addWidget(ver)
+
+        tagline = QLabel(
+            "A modern, multi-engine GUI for turning PDFs into clean Markdown — "
+            "works fully offline or with any hosted LLM."
         )
-        desc.setWordWrap(True)
-        desc.setStyleSheet("color: #8a909c; font-size: 13px; line-height: 1.6;")
-        layout.addWidget(desc)
+        tagline.setWordWrap(True)
+        tagline.setStyleSheet("font-size: 14px; padding-top: 8px; padding-bottom: 8px;")
+        layout.addWidget(tagline)
+
+        engines = QGroupBox("Conversion engines")
+        eg = QVBoxLayout(engines)
+        for line in (
+            "• <b>Native</b> — offline, fast. PyMuPDF + pymupdf4llm with a "
+            "font-size heuristic fallback.",
+            "• <b>Ollama</b> — local vision LLMs (llama3.2-vision, llava, …). "
+            "Fully offline once a model is pulled.",
+            "• <b>OpenAI</b> — hosted vision models (gpt-4o-mini and friends).",
+            "• <b>Anthropic Claude</b> — Claude Haiku / Sonnet / Opus with vision.",
+            "• <b>OpenAI-compatible</b> — Groq, OpenRouter, LM Studio, vLLM, "
+            "or any /chat/completions endpoint.",
+        ):
+            lbl = QLabel(line)
+            lbl.setWordWrap(True)
+            lbl.setTextFormat(Qt.TextFormat.RichText)
+            eg.addWidget(lbl)
+        layout.addWidget(engines)
+
+        features = QGroupBox("Features")
+        fg = QVBoxLayout(features)
+        for line in (
+            "• Drag-and-drop batch conversion with a file queue",
+            "• Background worker thread — UI stays responsive on long jobs",
+            "• Per-page progress bar and live status messages",
+            "• Embedded image extraction (native engine)",
+            "• Heading / list / bold preservation in native mode",
+            "• Configurable page separators",
+            "• Dark and light themes",
+            "• Persistent settings at <code>~/.pdf2md/config.json</code>",
+            "• Pre-built Windows .exe via GitHub Actions",
+            "• Hidden API key entry, Ollama connection test from the UI",
+        ):
+            lbl = QLabel(line)
+            lbl.setWordWrap(True)
+            lbl.setTextFormat(Qt.TextFormat.RichText)
+            fg.addWidget(lbl)
+        layout.addWidget(features)
+
+        stack = QGroupBox("Built with")
+        sg = QVBoxLayout(stack)
+        stack_lbl = QLabel(
+            "PyQt6 · PyMuPDF · pymupdf4llm · Python 3.10+ · MIT licensed"
+        )
+        stack_lbl.setStyleSheet("color: #8a909c;")
+        sg.addWidget(stack_lbl)
+        layout.addWidget(stack)
+
+        repo = QLabel(
+            '<a style="color:#7aa2f7;" '
+            'href="https://github.com/Hesamsamani/pymupdfgui">'
+            "github.com/Hesamsamani/pymupdfgui</a>"
+        )
+        repo.setTextFormat(Qt.TextFormat.RichText)
+        repo.setOpenExternalLinks(True)
+        layout.addWidget(repo)
+
         layout.addStretch()
 
 
