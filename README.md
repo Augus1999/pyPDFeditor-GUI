@@ -1,7 +1,7 @@
 # pyPDFeditor-GUI
 
-[![PyPI](https://img.shields.io/pypi/v/pypdfeditor-gui?color=green)](https://pypi.org/project/pypdfeditor-gui/)
-![pylint](https://github.com/Augus1999/pyPDFeditor-GUI/actions/workflows/pylint.yml/badge.svg)
+![pylint](https://github.com/Hesamsamani/pymupdfgui/actions/workflows/pylint.yml/badge.svg)
+![release](https://github.com/Hesamsamani/pymupdfgui/actions/workflows/release.yml/badge.svg)
 ![black](https://img.shields.io/badge/code%20style-black-black)
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
@@ -76,19 +76,27 @@ PyMuPDF>=1.26.5,<1.28.0
 
 ## Install & Run
 
-### install from PyPI
-
-```bash
-$ pip install pypdfeditor-gui
-```
-
-### install from source
+### install from source (this fork)
 
 you will need git, `setuptools` and `wheel` installed
 
 ```bash
-$ pip install git+https://github.com/Augus1999/pyPDFeditor-GUI.git
+$ pip install git+https://github.com/Hesamsamani/pymupdfgui.git
 ```
+
+or clone first:
+
+```bash
+$ git clone https://github.com/Hesamsamani/pymupdfgui.git
+$ cd pymupdfgui
+$ pip install -r requirements.txt
+$ pip install .
+```
+
+### Windows — prebuilt `.exe`
+
+Download `pdf2md.exe` from the [Releases page](https://github.com/Hesamsamani/pymupdfgui/releases).
+See [INSTALL.md](./INSTALL.md) for full details.
 
 ### build thy own package
 
