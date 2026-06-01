@@ -7,7 +7,7 @@ You have three options. Pick whichever you like.
 ## Option A — Use the prebuilt `.exe` (easiest, no Python required)
 
 1. Go to the **Releases** page:
-   https://github.com/Hesamsamani/pymupdfgui/releases
+   https://github.com/Hesamsamani/distilmark/releases
 2. Download `Distilmark.exe` from the latest release (e.g. `v1.0.0`).
 3. Double-click `Distilmark.exe` to run. That's it.
 
@@ -24,8 +24,8 @@ Requires **Python 3.10+** on PATH.
 
 ```powershell
 # 1. Clone
-git clone https://github.com/Hesamsamani/pymupdfgui.git
-cd pymupdfgui
+git clone https://github.com/Hesamsamani/distilmark.git
+cd distilmark
 
 # 2. (Recommended) virtual environment
 python -m venv .venv

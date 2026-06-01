@@ -1420,8 +1420,8 @@ class AboutPage(QWidget):
 
         repo = QLabel(
             '<a style="color:#7aa2f7;" '
-            'href="https://github.com/Hesamsamani/pymupdfgui">'
-            "github.com/Hesamsamani/pymupdfgui</a>"
+            'href="https://github.com/Hesamsamani/distilmark">'
+            "github.com/Hesamsamani/distilmark</a>"
         )
         repo.setTextFormat(Qt.TextFormat.RichText)
         repo.setOpenExternalLinks(True)

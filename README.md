@@ -5,8 +5,8 @@
 ### 📄 → 📝 The friendliest way to turn PDFs into beautiful Markdown
 
 <p>
-  <img alt="lint" src="https://github.com/Hesamsamani/pymupdfgui/actions/workflows/pylint.yml/badge.svg" />
-  <img alt="release" src="https://github.com/Hesamsamani/pymupdfgui/actions/workflows/release.yml/badge.svg" />
+  <img alt="lint" src="https://github.com/Hesamsamani/distilmark/actions/workflows/pylint.yml/badge.svg" />
+  <img alt="release" src="https://github.com/Hesamsamani/distilmark/actions/workflows/release.yml/badge.svg" />
   <img alt="python" src="https://img.shields.io/badge/python-3.10+-blue?logo=python&logoColor=white" />
   <img alt="qt" src="https://img.shields.io/badge/PyQt6-41CD52?logo=qt&logoColor=white" />
   <img alt="platform" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" />
@@ -40,7 +40,7 @@ model, or any hosted LLM — drop your files in, and grab your `.md`s. That's it
 <td>🪟<br/><b>Windows</b></td>
 <td>
 
-Grab the prebuilt `.exe` from the [**📦 Releases page**](https://github.com/Hesamsamani/pymupdfgui/releases) — no Python needed.
+Grab the prebuilt `.exe` from the [**📦 Releases page**](https://github.com/Hesamsamani/distilmark/releases) — no Python needed.
 
 </td>
 </tr>
@@ -49,7 +49,7 @@ Grab the prebuilt `.exe` from the [**📦 Releases page**](https://github.com/He
 <td>
 
 ```bash
-pip install git+https://github.com/Hesamsamani/pymupdfgui.git
+pip install git+https://github.com/Hesamsamani/distilmark.git
 distilmark
 ```
 
@@ -60,8 +60,8 @@ distilmark
 <td>
 
 ```bash
-git clone https://github.com/Hesamsamani/pymupdfgui.git
-cd pymupdfgui && pip install -r requirements.txt
+git clone https://github.com/Hesamsamani/distilmark.git
+cd distilmark && pip install -r requirements.txt
 python -m distilmark
 ```
 
@@ -119,26 +119,29 @@ Pick whichever vibe matches you:
 
 ## 🖼️ A peek inside
 
-```
-╭────────────────────────────────────────────────────────────╮
-│  ◆ Distilmark                                                  │
-│                                                            │
-│  NAVIGATION                                                │
-│  ▸ Convert         ┃  PDF → Markdown                       │
-│    Engines         ┃                                       │
-│    History         ┃  📄 Add PDFs  📁 Add Folder  Clear    │
-│    About           ┃  ╭──────────────────────────────────╮ │
-│                    ┃  │ report-2025.pdf  — ~/Docs        │ │
-│                    ┃  │ paper.pdf        — ~/Papers      │ │
-│                    ┃  │ thesis.pdf       — ~/Desktop     │ │
-│                    ┃  ╰──────────────────────────────────╯ │
-│  THEME             ┃  3 files in queue                     │
-│  [ dark ▾ ]        ┃  ⚙ Engine: ⚡ Balanced (11B)          │
-│                    ┃  File 2/3: paper.pdf                  │
-│                    ┃  ████████████░░░░░  68%               │
-│                    ┃                       [ Convert ]     │
-╰────────────────────────────────────────────────────────────╯
-```
+**Convert** — drag in files or a folder, pick an engine, tune the advanced options:
+
+<p align="center">
+  <img src="./screenshots/convert-dark.png" width="820" alt="Distilmark — Convert page (dark theme)" />
+</p>
+
+**Preview** — the source PDF beside the rendered Markdown (Diff view in Compare mode):
+
+<p align="center">
+  <img src="./screenshots/preview-dark.png" width="820" alt="Distilmark — Preview page with side-by-side PDF and Markdown" />
+</p>
+
+**Engines** — manage Ollama and configure every offline & hosted back-end:
+
+<p align="center">
+  <img src="./screenshots/engines-dark.png" width="820" alt="Distilmark — Engines settings page" />
+</p>
+
+**Light theme** — the same UI, clean and bright:
+
+<p align="center">
+  <img src="./screenshots/convert-light.png" width="820" alt="Distilmark — Convert page (light theme)" />
+</p>
 
 ---
 
@@ -262,6 +265,31 @@ PRs, issues, and ✨ stars ✨ all warmly welcome.
 2. 🌿 Create a branch
 3. 🛠️ Code away
 4. 📬 Open a PR
+
+---
+
+## 🙏 Credits & acknowledgments
+
+Distilmark stands on the shoulders of some excellent open-source projects.
+Huge thanks to all of them:
+
+**Foundations**
+- [**pyPDFeditor-GUI**](https://github.com/Augus1999/pyPDFeditor-GUI) by Nianze A. TAO — the original PDF-editor project Distilmark was forked from.
+- [**PyMuPDF**](https://github.com/pymupdf/PyMuPDF) (`fitz`) — core PDF parsing, rendering, and image extraction.
+- [**pymupdf4llm**](https://github.com/pymupdf/RAG) — high-quality Markdown extraction for the native engine.
+- [**pdfplumber**](https://github.com/jsvine/pdfplumber) by Jeremy Singer-Vine — the layout-aware, table-savvy extraction engine.
+- [**PyQt6 / Qt**](https://www.qt.io/) — the cross-platform GUI toolkit.
+
+**Engines & runtimes**
+- [**Ollama**](https://github.com/ollama/ollama) — local LLM runtime for fully offline vision conversion.
+- [**tz-ollama-utils**](https://github.com/taggedzi/tz-ollama-utils) by taggedzi — inspiration for the Ollama model-management and direct-download logic.
+- [**Tesseract**](https://github.com/tesseract-ocr/tesseract) (via PyMuPDF) — OCR fallback for scanned PDFs.
+- [**OpenAI**](https://openai.com/), [**Anthropic Claude**](https://www.anthropic.com/), and OpenAI-compatible providers ([Groq](https://groq.com/), [OpenRouter](https://openrouter.ai/), [LM Studio](https://lmstudio.ai/), [vLLM](https://github.com/vllm-project/vllm)) — supported hosted conversion back-ends.
+
+**Design & tooling**
+- [**UI/UX Pro Max**](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) by nextlevelbuilder — the design-intelligence skill that guided the v1.0 redesign (palette, typography, layout, accessibility).
+- [**Inter**](https://rsms.me/inter/) by Rasmus Andersson — the primary UI typeface.
+- [**PyInstaller**](https://pyinstaller.org/) — packages the Windows `.exe`.
 
 ---
 
