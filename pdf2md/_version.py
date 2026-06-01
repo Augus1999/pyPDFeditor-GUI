@@ -6,4 +6,4 @@ Kept import-free so it can be imported from both ``pdf2md/__init__.py`` and
 correctly inside a frozen PyInstaller bundle (no file reads or installed
 package metadata required).
 """
-__version__ = "0.3.0"
+__version__ = "0.4.0"

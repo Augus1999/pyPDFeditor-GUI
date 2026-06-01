@@ -35,7 +35,7 @@ from PyQt6.QtWidgets import (
     QSplitter,
 )
 
-from . import config, converters, styles
+from . import config, converters, styles, ollama_manager
 from ._version import __version__
 
 
@@ -73,6 +73,8 @@ class ConvertWorker(QThread):
 
             if engine == "native":
                 md = converters.convert_native(self.pdf, opts, cb)
+            elif engine == "pdfplumber":
+                md = converters.convert_pdfplumber(self.pdf, opts, cb)
             elif engine == "ollama":
                 md = converters.convert_ollama(
                     self.pdf, self.cfg["ollama_url"], self.cfg["ollama_model"], opts, cb
@@ -105,24 +107,42 @@ class ConvertWorker(QThread):
 # ---------------------------------------------------------------------------
 
 class PullWorker(QThread):
-    pull_progress = pyqtSignal(str, int, int)  # (status, total, completed)
+    """Direct downloader — pulls blobs from registry.ollama.ai, no daemon needed."""
+    progress_update = pyqtSignal(object)  # DownloadProgress
     finished_ok = pyqtSignal()
     failed = pyqtSignal(str)
 
-    def __init__(self, url: str, model: str):
+    def __init__(self, model_ref: str, dest_dir: Path | None):
         super().__init__()
-        self.url = url
-        self.model = model
+        self.model_ref = model_ref
+        self.dest_dir = dest_dir
 
     def run(self) -> None:
         try:
-            converters.pull_ollama_model(
-                self.url, self.model,
-                lambda s, t, c: self.pull_progress.emit(s, t, c),
+            ollama_manager.download_model_direct(
+                self.model_ref,
+                self.dest_dir,
+                lambda p: self.progress_update.emit(p),
             )
             self.finished_ok.emit()
         except Exception:
             self.failed.emit(traceback.format_exc())
+
+
+class ScanWorker(QThread):
+    """Background filesystem scan for installed Ollama models."""
+    done = pyqtSignal(list)
+
+    def __init__(self, extra_roots: list[Path]):
+        super().__init__()
+        self.extra_roots = extra_roots
+
+    def run(self) -> None:
+        try:
+            results = ollama_manager.scan_installed_models(self.extra_roots)
+        except Exception:
+            results = []
+        self.done.emit(results)
 
 
 # ---------------------------------------------------------------------------
@@ -209,6 +229,7 @@ class ConvertPage(QWidget):
 
         self.engine_combo = QComboBox()
         self.engine_combo.addItem("⚡ Native (offline · PyMuPDF)", "native")
+        self.engine_combo.addItem("📐 pdfplumber (offline · layout + tables)", "pdfplumber")
         self.engine_combo.addItem("🦙 Ollama (local LLM)", "ollama")
         self.engine_combo.addItem("🤖 OpenAI", "openai")
         self.engine_combo.addItem("🧠 Anthropic Claude", "anthropic")
@@ -420,54 +441,82 @@ class SettingsPage(QWidget):
         olm = QGroupBox("🦙 Ollama (offline, local)")
         f = QFormLayout(olm)
 
+        # Hidden state inputs used for save()
         self.ollama_url = QLineEdit(self.cfg["ollama_url"])
         self.ollama_model = QLineEdit(self.cfg["ollama_model"])
 
-        url_row = QHBoxLayout()
-        url_row.addWidget(self.ollama_url)
-        test_btn = QPushButton("Test")
-        test_btn.clicked.connect(self._test_ollama)
-        url_row.addWidget(test_btn)
+        # Service status row
+        status_row = QHBoxLayout()
+        self.service_label = QLabel("Checking…")
+        self.service_label.setWordWrap(True)
+        self.start_service_btn = QPushButton("▶ Start Ollama")
+        self.start_service_btn.setVisible(False)
+        self.start_service_btn.clicked.connect(self._start_service)
+        recheck_btn = QPushButton("↻ Re-check")
+        recheck_btn.clicked.connect(self._refresh_service_status)
+        status_row.addWidget(self.service_label, 1)
+        status_row.addWidget(self.start_service_btn)
+        status_row.addWidget(recheck_btn)
+        f.addRow("Service:", status_row)
 
-        f.addRow("Server URL:", url_row)
+        f.addRow("Server URL:", self.ollama_url)
 
-        # Presets
+        # Recommendations / presets
         preset_row = QHBoxLayout()
-        preset_lbl = QLabel("Presets:")
-        preset_row.addWidget(preset_lbl)
         for key, info in config.OLLAMA_PRESETS.items():
             btn = QPushButton(info["label"])
             btn.setToolTip(info["desc"])
             btn.clicked.connect(lambda _=False, m=info["model"]: self._apply_preset(m))
             preset_row.addWidget(btn)
         preset_row.addStretch()
-        f.addRow("", preset_row)
+        f.addRow("Recommend:", preset_row)
 
-        # Available model selector
-        self.model_combo = QComboBox()
-        self.model_combo.addItem(self.cfg["ollama_model"])
-        self.model_combo.currentTextChanged.connect(
-            lambda t: self.ollama_model.setText(t)
+        # Detected installed models (filesystem scan)
+        self.installed_combo = QComboBox()
+        self.installed_combo.setEditable(False)
+        self.installed_combo.currentTextChanged.connect(self._on_installed_selected)
+        scan_btn = QPushButton("🔍 Scan")
+        scan_btn.setToolTip("Scan filesystem for installed Ollama models (works even if Ollama is off)")
+        scan_btn.clicked.connect(self._scan_filesystem)
+        update_all_btn = QPushButton("⟳ Update all")
+        update_all_btn.setToolTip(
+            "Re-download every installed model from registry.ollama.ai "
+            "(inspired by tz-ollama-utils)."
         )
-        refresh_btn = QPushButton("↻")
-        refresh_btn.setFixedWidth(32)
-        refresh_btn.setToolTip("Refresh model list from Ollama")
-        refresh_btn.clicked.connect(self._refresh_models)
-        model_row = QHBoxLayout()
-        model_row.addWidget(self.model_combo)
-        model_row.addWidget(refresh_btn)
-        f.addRow("Model:", model_row)
-        f.addRow("Custom model:", self.ollama_model)
+        update_all_btn.clicked.connect(self._update_all)
+        installed_row = QHBoxLayout()
+        installed_row.addWidget(self.installed_combo, 1)
+        installed_row.addWidget(scan_btn)
+        installed_row.addWidget(update_all_btn)
+        f.addRow("Installed:", installed_row)
 
-        # Pull / download model
+        # Active model used for conversion
+        f.addRow("Active model:", self.ollama_model)
+
+        # Custom scan path
+        scanpath_row = QHBoxLayout()
+        self.custom_scan_path = QLineEdit(self.cfg.get("ollama_extra_scan_path", ""))
+        self.custom_scan_path.setPlaceholderText("Optional — extra folder to scan (e.g. D:\\.ollama\\models)")
+        browse_btn = QPushButton("…")
+        browse_btn.setFixedWidth(32)
+        browse_btn.clicked.connect(self._browse_scan_path)
+        scanpath_row.addWidget(self.custom_scan_path, 1)
+        scanpath_row.addWidget(browse_btn)
+        f.addRow("Extra scan path:", scanpath_row)
+
+        # Direct download
         pull_row = QHBoxLayout()
         self.pull_input = QLineEdit()
-        self.pull_input.setPlaceholderText("e.g. llama3.2-vision:11b")
-        self.pull_btn = QPushButton("⬇ Pull / Download")
+        self.pull_input.setPlaceholderText("e.g. llama3.2-vision:11b  (downloads directly, no daemon needed)")
+        self.pull_btn = QPushButton("⬇ Download")
         self.pull_btn.clicked.connect(self._pull_model)
-        pull_row.addWidget(self.pull_input)
+        self.cancel_btn = QPushButton("Cancel")
+        self.cancel_btn.setVisible(False)
+        self.cancel_btn.clicked.connect(self._cancel_pull)
+        pull_row.addWidget(self.pull_input, 1)
         pull_row.addWidget(self.pull_btn)
-        f.addRow("Download model:", pull_row)
+        pull_row.addWidget(self.cancel_btn)
+        f.addRow("Direct download:", pull_row)
 
         self.pull_progress = QProgressBar()
         self.pull_progress.setRange(0, 100)
@@ -477,11 +526,8 @@ class SettingsPage(QWidget):
 
         self.pull_status = QLabel("")
         self.pull_status.setWordWrap(True)
+        self.pull_status.setStyleSheet("color: #8a909c; font-size: 11px;")
         f.addRow("", self.pull_status)
-
-        self.ollama_status = QLabel("")
-        self.ollama_status.setWordWrap(True)
-        f.addRow("", self.ollama_status)
 
         layout.addWidget(olm)
 
@@ -534,77 +580,190 @@ class SettingsPage(QWidget):
         outer.setContentsMargins(0, 0, 0, 0)
         outer.addWidget(scroll)
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        # Lazy first scan / status check when the tab is opened
+        self._refresh_service_status()
+        self._scan_filesystem()
+
     def _apply_preset(self, model: str):
         self.ollama_model.setText(model)
         self.pull_input.setText(model)
 
-    def _refresh_models(self):
+    # ----- Service status -----
+    def _refresh_service_status(self):
         url = self.ollama_url.text().strip()
-        models = converters.list_ollama_models(url)
-        self.model_combo.clear()
-        if models:
-            for m in models:
-                self.model_combo.addItem(m)
-            cur = self.ollama_model.text().strip()
-            idx = self.model_combo.findText(cur)
-            if idx >= 0:
-                self.model_combo.setCurrentIndex(idx)
-            self._set_ollama_status(f"✓ {len(models)} model(s): " + ", ".join(models[:5]), "ok")
+        running = ollama_manager.is_running(url)
+        if running:
+            self.service_label.setStyleSheet("color: #9ece6a;")
+            self.service_label.setText("● Running")
+            self.start_service_btn.setVisible(False)
         else:
-            self.model_combo.addItem(self.ollama_model.text())
-            self._set_ollama_status("✗ Ollama unreachable — is `ollama serve` running?", "err")
+            binary = ollama_manager.has_ollama_binary()
+            if binary:
+                self.service_label.setStyleSheet("color: #e0af68;")
+                self.service_label.setText("○ Not running")
+                self.start_service_btn.setVisible(True)
+            else:
+                self.service_label.setStyleSheet("color: #f7768e;")
+                self.service_label.setText(
+                    "✗ Ollama not installed — get it at ollama.com/download"
+                )
+                self.start_service_btn.setVisible(False)
 
-    def _set_ollama_status(self, msg: str, kind: str):
-        colors = {"ok": "#9ece6a", "err": "#f7768e", "warn": "#e0af68"}
-        self.ollama_status.setStyleSheet(f"color: {colors.get(kind, '#8a909c')};")
-        self.ollama_status.setText(msg)
+    def _start_service(self):
+        ok, msg = ollama_manager.start_service()
+        self.service_label.setText(msg)
+        if ok:
+            QApplication.processEvents()
+            # Give the daemon a moment to come up
+            self.start_service_btn.setEnabled(False)
+            self.start_service_btn.setText("Starting…")
+            self.startTimer(2000)  # one-shot via timerEvent
+        else:
+            QMessageBox.warning(self, "Ollama", msg)
 
-    def _test_ollama(self):
-        self._refresh_models()
+    def timerEvent(self, event):
+        self.killTimer(event.timerId())
+        self.start_service_btn.setEnabled(True)
+        self.start_service_btn.setText("▶ Start Ollama")
+        self._refresh_service_status()
 
+    # ----- Filesystem scan -----
+    def _scan_filesystem(self):
+        extra: list[Path] = []
+        custom = self.custom_scan_path.text().strip()
+        if custom:
+            extra.append(Path(custom))
+        self._scan_worker = ScanWorker(extra)
+        self._scan_worker.done.connect(self._on_scan_done)
+        self.installed_combo.clear()
+        self.installed_combo.addItem("Scanning…")
+        self._scan_worker.start()
+
+    def _on_scan_done(self, models):
+        self.installed_combo.clear()
+        if not models:
+            self.installed_combo.addItem("(none found — try installing a model)")
+            self.installed_combo.setEnabled(False)
+            return
+        self.installed_combo.setEnabled(True)
+        for m in models:
+            size = self._human(m.size_bytes) if m.size_bytes else "?"
+            self.installed_combo.addItem(f"{m.name}    ({size})", m.name)
+        # Pre-select current
+        cur = self.ollama_model.text().strip()
+        for i in range(self.installed_combo.count()):
+            if self.installed_combo.itemData(i) == cur:
+                self.installed_combo.setCurrentIndex(i)
+                break
+
+    def _update_all(self):
+        # Build list of detected model names and queue them through the pull
+        names: list[str] = []
+        for i in range(self.installed_combo.count()):
+            data = self.installed_combo.itemData(i)
+            if data:
+                names.append(data)
+        if not names:
+            QMessageBox.information(self, "Update all", "No installed models detected.")
+            return
+        r = QMessageBox.question(
+            self, "Update all",
+            f"Re-download {len(names)} installed model(s) from registry.ollama.ai?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        if r != QMessageBox.StandardButton.Yes:
+            return
+        self._update_queue = names[1:]
+        self.pull_input.setText(names[0])
+        self._pull_model()
+
+    def _on_installed_selected(self, text: str):
+        data = self.installed_combo.currentData()
+        if data:
+            self.ollama_model.setText(data)
+
+    @staticmethod
+    def _human(n: int) -> str:
+        units = ["B", "KB", "MB", "GB", "TB"]
+        f = float(n)
+        for u in units:
+            if f < 1024:
+                return f"{f:.1f} {u}"
+            f /= 1024
+        return f"{f:.1f} PB"
+
+    def _browse_scan_path(self):
+        folder = QFileDialog.getExistingDirectory(
+            self, "Extra Ollama models folder to scan", str(Path.home())
+        )
+        if folder:
+            self.custom_scan_path.setText(folder)
+            self._scan_filesystem()
+
+    # ----- Direct download -----
     def _pull_model(self):
         if self._pull_worker and self._pull_worker.isRunning():
             return
         model = self.pull_input.text().strip()
         if not model:
             return
-        url = self.ollama_url.text().strip()
+        # Choose destination: first existing candidate dir, else default
+        dirs = ollama_manager.candidate_models_dirs()
+        dest = dirs[0] if dirs else ollama_manager.default_models_dir()
         self.pull_progress.setVisible(True)
         self.pull_progress.setValue(0)
-        self.pull_status.setText(f"Pulling {model}…")
+        self.pull_status.setStyleSheet("color: #8a909c;")
+        self.pull_status.setText(f"Starting direct download of {model} → {dest}")
         self.pull_btn.setEnabled(False)
-        self._pull_worker = PullWorker(url, model)
-        self._pull_worker.pull_progress.connect(self._on_pull_progress)
+        self.cancel_btn.setVisible(True)
+        self._pull_worker = PullWorker(model, dest)
+        self._pull_worker.progress_update.connect(self._on_pull_progress)
         self._pull_worker.finished_ok.connect(self._on_pull_done)
         self._pull_worker.failed.connect(self._on_pull_failed)
         self._pull_worker.start()
 
-    def _on_pull_progress(self, status: str, total: int, completed: int):
-        if total > 0:
-            pct = int(completed / total * 100)
-            self.pull_progress.setValue(pct)
-            gb_done = completed / 1e9
-            gb_total = total / 1e9
-            self.pull_status.setText(f"{status}  {gb_done:.1f} GB / {gb_total:.1f} GB")
-        else:
-            self.pull_status.setText(status)
+    def _cancel_pull(self):
+        if self._pull_worker and self._pull_worker.isRunning():
+            self._pull_worker.terminate()
+            self.pull_status.setStyleSheet("color: #e0af68;")
+            self.pull_status.setText("Download cancelled.")
+            self.pull_btn.setEnabled(True)
+            self.cancel_btn.setVisible(False)
+
+    def _on_pull_progress(self, p):
+        self.pull_progress.setValue(int(p.overall_pct))
+        self.pull_status.setText(p.message)
 
     def _on_pull_done(self):
         self.pull_btn.setEnabled(True)
+        self.cancel_btn.setVisible(False)
         self.pull_progress.setValue(100)
         self.pull_status.setStyleSheet("color: #9ece6a;")
-        self.pull_status.setText("✓ Download complete!")
-        self._refresh_models()
+        self.pull_status.setText("✓ Download complete — model is ready to use.")
+        self._scan_filesystem()
+        self._refresh_service_status()
+        # Chain "Update all" queue if active
+        queue = getattr(self, "_update_queue", None)
+        if queue:
+            next_model = queue.pop(0)
+            self.pull_input.setText(next_model)
+            self._pull_model()
 
     def _on_pull_failed(self, err: str):
         self.pull_btn.setEnabled(True)
+        self.cancel_btn.setVisible(False)
         self.pull_progress.setVisible(False)
         self.pull_status.setStyleSheet("color: #f7768e;")
-        self.pull_status.setText("✗ Download failed — see console for details.")
+        # First line of traceback as friendly summary
+        last = err.strip().splitlines()[-1] if err.strip() else "Unknown error"
+        self.pull_status.setText(f"✗ {last}")
 
     def _save(self):
         self.cfg["ollama_url"] = self.ollama_url.text().strip()
         self.cfg["ollama_model"] = self.ollama_model.text().strip()
+        self.cfg["ollama_extra_scan_path"] = self.custom_scan_path.text().strip()
         self.cfg["openai_api_key"] = self.openai_key.text().strip()
         self.cfg["openai_model"] = self.openai_model.text().strip()
         self.cfg["openai_base_url"] = self.openai_base.text().strip()
@@ -732,6 +891,7 @@ class AboutPage(QWidget):
         eg = QVBoxLayout(engines)
         for line in (
             "• <b>Native</b> — offline, fast. PyMuPDF + pymupdf4llm.",
+            "• <b>pdfplumber</b> — offline, layout-aware. Best for table-heavy PDFs.",
             "• <b>Ollama</b> — local vision LLMs (llama3.2-vision, llava, …). Fully offline.",
             "• <b>OpenAI</b> — hosted vision models (gpt-4o-mini and friends).",
             "• <b>Anthropic Claude</b> — Claude Haiku / Sonnet / Opus with vision.",

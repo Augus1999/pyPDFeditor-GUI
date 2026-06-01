@@ -34,6 +34,7 @@ DEFAULTS: dict[str, Any] = {
     "engine": "native",
     "ollama_url": "http://localhost:11434",
     "ollama_model": "llama3.2-vision:11b",
+    "ollama_extra_scan_path": "",
     "openai_api_key": "",
     "openai_model": "gpt-4o-mini",
     "openai_base_url": "https://api.openai.com/v1",

@@ -113,6 +113,71 @@ def _extract_images(
 
 
 # ---------------------------------------------------------------------------
+# pdfplumber — offline, layout-aware extraction with table support
+# ---------------------------------------------------------------------------
+
+def _table_to_md(table: list[list[str | None]]) -> str:
+    rows = [[(c or "").strip().replace("|", "\\|").replace("\n", " ") for c in row] for row in table]
+    if not rows:
+        return ""
+    width = max(len(r) for r in rows)
+    rows = [r + [""] * (width - len(r)) for r in rows]
+    header = rows[0]
+    sep = ["---"] * width
+    body = rows[1:] if len(rows) > 1 else []
+    lines = [
+        "| " + " | ".join(header) + " |",
+        "| " + " | ".join(sep) + " |",
+    ]
+    for r in body:
+        lines.append("| " + " | ".join(r) + " |")
+    return "\n".join(lines)
+
+
+def convert_pdfplumber(
+    pdf_path: Path,
+    opts: ConvertOptions,
+    progress: ProgressCb | None = None,
+) -> str:
+    try:
+        import pdfplumber  # type: ignore
+    except ImportError as e:
+        raise RuntimeError(
+            "pdfplumber is not installed. Run: pip install pdfplumber"
+        ) from e
+
+    out: list[str] = []
+    with pdfplumber.open(str(pdf_path)) as doc:
+        total = len(doc.pages)
+        for i, page in enumerate(doc.pages):
+            if progress:
+                progress(i + 1, total, f"Page {i+1}/{total} (pdfplumber)")
+            text = page.extract_text() or ""
+            tables = page.extract_tables() or []
+            page_chunks: list[str] = []
+            if text.strip():
+                page_chunks.append(text.strip())
+            for t in tables:
+                md_table = _table_to_md(t)
+                if md_table:
+                    page_chunks.append("\n" + md_table + "\n")
+            if opts.include_images and opts.image_dir is not None:
+                # pdfplumber doesn't extract embedded images directly; fall back
+                # to PyMuPDF for the image side-pull so users still get them.
+                try:
+                    import pymupdf as _mu
+                    _d = _mu.open(str(pdf_path))
+                    _extract_images(_d, _d[i], opts.image_dir, opts.image_dir_name, page_chunks)
+                    _d.close()
+                except Exception:
+                    pass
+            out.append("\n\n".join(page_chunks))
+            if opts.page_separator and i < total - 1:
+                out.append("\n---\n")
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
 # Page rendering helper for vision-capable LLMs
 # ---------------------------------------------------------------------------
 

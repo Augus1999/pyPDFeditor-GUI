@@ -45,6 +45,7 @@ jobs:
           pyinstaller --noconfirm --onefile --windowed --name pdf2md `
             --collect-all pymupdf `
             --collect-all pymupdf4llm `
+            --collect-all pdfplumber `
             --icon icon.ico `
             pdf2md_launcher.py
 
