@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import base64
-import io
 import json
 import urllib.error
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Iterable
+from typing import Callable
 
 import pymupdf
 
@@ -21,22 +20,21 @@ ProgressCb = Callable[[int, int, str], None]  # (current_page, total_pages, mess
 class ConvertOptions:
     include_images: bool = True
     page_separator: bool = True
-    image_dir: Path | None = None  # if set, embedded images saved here
+    image_dir: Path | None = None
+    # folder name (not full path) used for relative markdown image refs
+    image_dir_name: str | None = None
 
 
 # ---------------------------------------------------------------------------
-# Native PyMuPDF — offline, no LLM. Uses MuPDF's built-in markdown extraction
-# (pymupdf4llm style heuristics, fallback to get_text("markdown") / blocks).
+# Native PyMuPDF
 # ---------------------------------------------------------------------------
 
 def _native_page_markdown(page: pymupdf.Page) -> str:
-    # PyMuPDF >= 1.24 supports "markdown" via pymupdf4llm; fall back if missing.
     try:
         import pymupdf4llm  # type: ignore
         return pymupdf4llm.to_markdown(page.parent, pages=[page.number])
     except Exception:
         pass
-    # Fallback: heuristic from blocks + font sizes.
     blocks = page.get_text("dict")["blocks"]
     parts: list[str] = []
     for b in blocks:
@@ -80,7 +78,7 @@ def convert_native(
         md = _native_page_markdown(page)
         out.append(md)
         if opts.include_images and opts.image_dir is not None:
-            _extract_images(doc, page, opts.image_dir, out)
+            _extract_images(doc, page, opts.image_dir, opts.image_dir_name, out)
         if opts.page_separator and i < total - 1:
             out.append("\n---\n")
     doc.close()
@@ -88,7 +86,11 @@ def convert_native(
 
 
 def _extract_images(
-    doc: pymupdf.Document, page: pymupdf.Page, image_dir: Path, out: list[str]
+    doc: pymupdf.Document,
+    page: pymupdf.Page,
+    image_dir: Path,
+    image_dir_name: str | None,
+    out: list[str],
 ) -> None:
     image_dir.mkdir(parents=True, exist_ok=True)
     for img_index, info in enumerate(page.get_images(full=True)):
@@ -100,7 +102,12 @@ def _extract_images(
             name = f"page{page.number+1}_img{img_index+1}.png"
             path = image_dir / name
             pix.save(str(path))
-            out.append(f"\n![image]({path.as_posix()})\n")
+            # use relative path so markdown previews work anywhere
+            if image_dir_name:
+                ref = f"./{image_dir_name}/{name}"
+            else:
+                ref = path.as_posix()
+            out.append(f"\n![image]({ref})\n")
         except Exception:
             continue
 
@@ -162,7 +169,7 @@ def convert_ollama(
 
 
 # ---------------------------------------------------------------------------
-# OpenAI / OpenAI-compatible (works for OpenAI, Groq, OpenRouter, LM Studio, etc.)
+# OpenAI / OpenAI-compatible
 # ---------------------------------------------------------------------------
 
 def convert_openai_compatible(
@@ -189,9 +196,7 @@ def convert_openai_compatible(
                         {"type": "text", "text": PROMPT},
                         {
                             "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/png;base64,{img_b64}"
-                            },
+                            "image_url": {"url": f"data:image/png;base64,{img_b64}"},
                         },
                     ],
                 }
@@ -266,8 +271,11 @@ def convert_anthropic(
         )
         with urllib.request.urlopen(req, timeout=600) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-        # Anthropic returns content as a list of blocks
-        text_parts = [b.get("text", "") for b in data.get("content", []) if b.get("type") == "text"]
+        text_parts = [
+            b.get("text", "")
+            for b in data.get("content", [])
+            if b.get("type") == "text"
+        ]
         out.append("".join(text_parts))
         if opts.page_separator and i < total - 1:
             out.append("\n---\n")
@@ -276,7 +284,7 @@ def convert_anthropic(
 
 
 # ---------------------------------------------------------------------------
-# Health / connectivity checks
+# Ollama helpers
 # ---------------------------------------------------------------------------
 
 def list_ollama_models(url: str) -> list[str]:
@@ -287,3 +295,35 @@ def list_ollama_models(url: str) -> list[str]:
         return [m["name"] for m in data.get("models", [])]
     except (urllib.error.URLError, OSError, json.JSONDecodeError):
         return []
+
+
+PullProgressCb = Callable[[str, int, int], None]  # (status, total, completed)
+
+
+def pull_ollama_model(
+    url: str,
+    model: str,
+    progress_cb: PullProgressCb,
+) -> None:
+    """Stream-pull an Ollama model. Calls progress_cb for each progress line."""
+    payload = {"name": model, "stream": True}
+    body = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        url.rstrip("/") + "/api/pull",
+        data=body,
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=7200) as resp:
+        for raw in resp:
+            raw = raw.strip()
+            if not raw:
+                continue
+            try:
+                d = json.loads(raw.decode("utf-8"))
+            except json.JSONDecodeError:
+                continue
+            progress_cb(
+                d.get("status", ""),
+                d.get("total", 0),
+                d.get("completed", 0),
+            )

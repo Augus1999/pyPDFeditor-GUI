@@ -1,17 +1,39 @@
 # -*- coding: utf-8 -*-
-"""Persistent settings for pdf2md."""
+"""Persistent settings and history for pdf2md."""
 import json
-import os
+import datetime
 from pathlib import Path
 from typing import Any
 
 APP_HOME = Path.home() / ".pdf2md"
 CONFIG_FILE = APP_HOME / "config.json"
+HISTORY_FILE = APP_HOME / "history.json"
+
+MAX_HISTORY = 500
+
+# Ollama preset models
+OLLAMA_PRESETS = {
+    "powerful": {
+        "label": "🚀 Powerful (90B)",
+        "model": "llama3.2-vision:90b",
+        "desc": "Best quality · needs 64GB+ VRAM",
+    },
+    "balanced": {
+        "label": "⚡ Balanced (11B)",
+        "model": "llama3.2-vision:11b",
+        "desc": "Great quality · needs 8GB+ VRAM",
+    },
+    "light": {
+        "label": "💨 Light (7B)",
+        "model": "moondream:latest",
+        "desc": "Fast · needs 4GB+ VRAM",
+    },
+}
 
 DEFAULTS: dict[str, Any] = {
-    "engine": "native",  # native | ollama | openai | anthropic | openai_compatible
+    "engine": "native",
     "ollama_url": "http://localhost:11434",
-    "ollama_model": "llama3.2-vision",
+    "ollama_model": "llama3.2-vision:11b",
     "openai_api_key": "",
     "openai_model": "gpt-4o-mini",
     "openai_base_url": "https://api.openai.com/v1",
@@ -46,3 +68,33 @@ def save(cfg: dict[str, Any]) -> None:
     APP_HOME.mkdir(parents=True, exist_ok=True)
     with open(CONFIG_FILE, "w", encoding="utf-8") as fh:
         json.dump(cfg, fh, indent=2, ensure_ascii=False)
+
+
+# ---------------------------------------------------------------------------
+# History
+# ---------------------------------------------------------------------------
+
+def load_history() -> list[dict]:
+    if not HISTORY_FILE.exists():
+        return []
+    try:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def append_history(entry: dict) -> None:
+    APP_HOME.mkdir(parents=True, exist_ok=True)
+    history = load_history()
+    entry.setdefault("ts", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    history.append(entry)
+    if len(history) > MAX_HISTORY:
+        history = history[-MAX_HISTORY:]
+    with open(HISTORY_FILE, "w", encoding="utf-8") as fh:
+        json.dump(history, fh, indent=2, ensure_ascii=False)
+
+
+def clear_history() -> None:
+    if HISTORY_FILE.exists():
+        HISTORY_FILE.write_text("[]", encoding="utf-8")
