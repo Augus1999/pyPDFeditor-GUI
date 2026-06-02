@@ -6,7 +6,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize, QUrl
 from PyQt6.QtGui import QIcon, QFont, QAction, QPixmap, QPainter, QColor
 from PyQt6.QtWidgets import (
     QApplication,
@@ -359,6 +359,10 @@ class ConvertPage(QWidget):
         self.engine_combo.addItem("OpenAI", "openai")
         self.engine_combo.addItem("Anthropic Claude", "anthropic")
         self.engine_combo.addItem("OpenAI-compatible — Groq · OpenRouter · LM Studio", "openai_compatible")
+        self.engine_combo.setToolTip(
+            "Choose the back-end that turns your PDF into Markdown.\n"
+            "Offline engines run locally and are free; hosted engines call an API."
+        )
         cur = self.cfg.get("engine", "native")
         for i in range(self.engine_combo.count()):
             if self.engine_combo.itemData(i) == cur:
@@ -366,12 +370,21 @@ class ConvertPage(QWidget):
                 break
         opts_layout.addRow("Engine:", self.engine_combo)
 
-        self.images_cb = QCheckBox("Extract embedded images (native engine)")
+        self.images_cb = QCheckBox("Extract embedded images")
         self.images_cb.setChecked(self.cfg.get("include_images", True))
+        self.images_cb.setToolTip(
+            "Save embedded images from the PDF into a sibling folder named "
+            "<stem>_images/ and reference them with relative paths in the "
+            "Markdown, so previews work in VS Code, Obsidian, Typora, etc."
+        )
         opts_layout.addRow("", self.images_cb)
 
         self.sep_cb = QCheckBox("Insert --- between pages")
         self.sep_cb.setChecked(self.cfg.get("page_separator", True))
+        self.sep_cb.setToolTip(
+            "Insert a Markdown horizontal-rule (---) between pages, making "
+            "page boundaries easy to spot in the output."
+        )
         opts_layout.addRow("", self.sep_cb)
 
         # Page range row
@@ -379,9 +392,16 @@ class ConvertPage(QWidget):
         self.range_from = QLineEdit(str(self.cfg.get("page_range_from", "")))
         self.range_from.setPlaceholderText("first")
         self.range_from.setFixedWidth(70)
+        self.range_from.setToolTip(
+            "First page to convert (1-based). Leave blank to start from page 1."
+        )
         self.range_to = QLineEdit(str(self.cfg.get("page_range_to", "")))
         self.range_to.setPlaceholderText("last")
         self.range_to.setFixedWidth(70)
+        self.range_to.setToolTip(
+            "Last page to convert (1-based, inclusive). Leave blank to go to the "
+            "end of the document."
+        )
         range_row.addWidget(QLabel("From"))
         range_row.addWidget(self.range_from)
         range_row.addWidget(QLabel("to"))
@@ -416,16 +436,26 @@ class ConvertPage(QWidget):
         self.estimate_btn = QPushButton("Estimate cost")
         self.estimate_btn.setObjectName("Ghost")
         self.estimate_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.estimate_btn.setToolTip(
+            "Estimate the rough USD cost for hosted LLM engines "
+            "(OpenAI, Anthropic, OpenAI-compatible) before converting. "
+            "Free for offline engines."
+        )
         self.estimate_btn.clicked.connect(self._estimate_cost)
         self.cancel_conv_btn = QPushButton("Cancel")
         self.cancel_conv_btn.setObjectName("Danger")
         self.cancel_conv_btn.setEnabled(False)
         self.cancel_conv_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.cancel_conv_btn.setToolTip(
+            "Stop the current batch. The page in progress finishes first, "
+            "remaining queued files are skipped."
+        )
         self.cancel_conv_btn.clicked.connect(self._cancel_conversion)
         self.convert_btn = QPushButton("Convert  →")
         self.convert_btn.setObjectName("Primary")
         self.convert_btn.setMinimumHeight(40)
         self.convert_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.convert_btn.setToolTip("Start converting every PDF in the queue.")
         self.convert_btn.clicked.connect(self.start_conversion)
         action_row.addWidget(self.estimate_btn)
         action_row.addStretch()
@@ -440,51 +470,154 @@ class ConvertPage(QWidget):
         box = QGroupBox("")
         form = QFormLayout(box)
 
-        # OCR
-        self.ocr_cb = QCheckBox("Enable OCR fallback for scanned pages (needs Tesseract)")
+        # ---- OCR ----
+        self.ocr_cb = QCheckBox("Enable OCR fallback for scanned pages")
         self.ocr_cb.setChecked(self.cfg.get("ocr_enabled", False))
-        form.addRow("OCR:", self.ocr_cb)
+        self.ocr_cb.setToolTip(
+            "When a page has no extractable text (a scanned image or a photo of a "
+            "document), run it through Tesseract OCR to recover the text.\n\n"
+            "Requires Tesseract installed on your system — use the\n"
+            "“Install Tesseract” button on the right for guidance."
+        )
+        ocr_row = QHBoxLayout()
+        ocr_row.addWidget(self.ocr_cb, 1)
+        self.tesseract_btn = QPushButton("Install Tesseract ↗")
+        self.tesseract_btn.setObjectName("Ghost")
+        self.tesseract_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.tesseract_btn.setToolTip(
+            "Open the Tesseract installation guide in your browser."
+        )
+        self.tesseract_btn.clicked.connect(self._show_tesseract_help)
+        ocr_row.addWidget(self.tesseract_btn)
+        form.addRow("OCR:", ocr_row)
+
         self.ocr_lang = QLineEdit(self.cfg.get("ocr_language", "eng"))
         self.ocr_lang.setPlaceholderText("eng, fas, eng+fas, …")
-        self.ocr_lang.setFixedWidth(140)
+        self.ocr_lang.setFixedWidth(180)
+        self.ocr_lang.setToolTip(
+            "Tesseract language code(s). Examples:\n"
+            "  eng        — English (default)\n"
+            "  fas        — Persian / Farsi\n"
+            "  eng+fas    — both, combined\n"
+            "  deu, jpn, chi_sim, ara, rus  — other languages\n\n"
+            "Each language needs its data pack installed alongside Tesseract."
+        )
         form.addRow("OCR language:", self.ocr_lang)
 
-        # Post-processing
+        # ---- Post-processing ----
         self.pp_hyphen_cb = QCheckBox("Merge hyphenated line breaks")
         self.pp_hyphen_cb.setChecked(self.cfg.get("pp_merge_hyphens", False))
+        self.pp_hyphen_cb.setToolTip(
+            "Re-join words split across line breaks with a hyphen.\n"
+            "Example:  “exam-\\nple” → “example”.\n"
+            "Useful for two-column papers and PDFs with tight line wrapping."
+        )
         form.addRow("Clean-up:", self.pp_hyphen_cb)
+
         self.pp_blanks_cb = QCheckBox("Collapse multiple blank lines")
         self.pp_blanks_cb.setChecked(self.cfg.get("pp_collapse_blanks", False))
+        self.pp_blanks_cb.setToolTip(
+            "Replace runs of 3+ consecutive blank lines with a single blank line, "
+            "for a tidier Markdown output."
+        )
         form.addRow("", self.pp_blanks_cb)
+
         self.pp_hf_cb = QCheckBox("Strip repeating headers / footers / page numbers")
         self.pp_hf_cb.setChecked(self.cfg.get("pp_strip_headers_footers", False))
+        self.pp_hf_cb.setToolTip(
+            "Detect the first/last line of each page; when the same text repeats "
+            "across most pages (a running header, footer, or page number), drop "
+            "it from the output. Needs at least 3 pages."
+        )
         form.addRow("", self.pp_hf_cb)
 
-        # pdfplumber table tuning
+        # ---- pdfplumber table tuning ----
         self.tables_cb = QCheckBox("Extract tables (pdfplumber engine)")
         self.tables_cb.setChecked(self.cfg.get("plumber_tables_enabled", True))
+        self.tables_cb.setToolTip(
+            "When using the pdfplumber engine, detect tables on each page and "
+            "convert them to GitHub-flavored Markdown tables.\n"
+            "Disable if pdfplumber is mistakenly turning paragraphs into tables."
+        )
         form.addRow("Tables:", self.tables_cb)
+
         self.vstrat = QComboBox()
         self.vstrat.addItems(["lines", "text", "lines_strict"])
         self.vstrat.setCurrentText(self.cfg.get("plumber_vertical_strategy", "lines"))
+        self.vstrat.setToolTip(
+            "How pdfplumber finds column boundaries inside a table:\n"
+            "  lines         — use ruled vertical lines (best for bordered tables)\n"
+            "  text          — infer from column-aligned text (best for borderless)\n"
+            "  lines_strict  — require explicit lines (avoids false positives)"
+        )
         form.addRow("Table vertical strategy:", self.vstrat)
+
         self.hstrat = QComboBox()
         self.hstrat.addItems(["lines", "text", "lines_strict"])
         self.hstrat.setCurrentText(self.cfg.get("plumber_horizontal_strategy", "lines"))
+        self.hstrat.setToolTip(
+            "How pdfplumber finds row boundaries inside a table. Same options as "
+            "the vertical strategy above. Default ‘lines’ works for most ruled "
+            "tables; switch to ‘text’ for tables with no visible row separators."
+        )
         form.addRow("Table horizontal strategy:", self.hstrat)
+
         self.snap = QSpinBox()
         self.snap.setRange(0, 50)
         self.snap.setValue(int(self.cfg.get("plumber_snap_tolerance", 3)))
+        self.snap.setToolTip(
+            "Pixel distance within which pdfplumber merges nearby table edges. "
+            "Lower (1–2) = stricter, more tables found but more false splits. "
+            "Higher (5–10) = lenient, joins wobbly cell borders. Default: 3."
+        )
         form.addRow("Table snap tolerance:", self.snap)
 
-        # LLM concurrency
+        # ---- LLM concurrency ----
         self.concurrency = QSpinBox()
         self.concurrency.setRange(1, 16)
         self.concurrency.setValue(int(self.cfg.get("llm_concurrency", 1)))
-        self.concurrency.setToolTip("Pages processed in parallel for hosted LLM engines (OpenAI/Anthropic/compatible).")
+        self.concurrency.setToolTip(
+            "How many pages to process in parallel for hosted LLM engines\n"
+            "(OpenAI, Anthropic, OpenAI-compatible).\n\n"
+            "  1   = sequential, safest\n"
+            "  4   = ~4× faster on most providers\n"
+            "  8+  = may hit provider rate limits — back off if requests fail"
+        )
         form.addRow("LLM parallel pages:", self.concurrency)
 
         return box
+
+    def _show_tesseract_help(self):
+        from PyQt6.QtGui import QDesktopServices
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Icon.Information)
+        box.setWindowTitle("Install Tesseract for OCR")
+        box.setTextFormat(Qt.TextFormat.RichText)
+        box.setText(
+            "<b>Tesseract</b> is the OCR engine that turns scanned/image-only PDF "
+            "pages into searchable text. Install it once on your system, then "
+            "enable OCR fallback here."
+        )
+        box.setInformativeText(
+            "<b>Windows</b><br>"
+            "Download the official installer:<br>"
+            "&nbsp;&nbsp;<a href='https://github.com/UB-Mannheim/tesseract/wiki'>"
+            "github.com/UB-Mannheim/tesseract/wiki</a><br>"
+            "During install, tick extra <b>language packs</b> you need "
+            "(e.g. Persian = <code>fas</code>).<br><br>"
+            "<b>macOS</b> &nbsp; <code>brew install tesseract tesseract-lang</code><br>"
+            "<b>Ubuntu / Debian</b> &nbsp; <code>sudo apt install tesseract-ocr tesseract-ocr-fas</code><br>"
+            "<b>Fedora</b> &nbsp; <code>sudo dnf install tesseract tesseract-langpack-fas</code><br><br>"
+            "<a href='https://tesseract-ocr.github.io/tessdoc/Installation.html'>"
+            "Full installation docs ↗</a>"
+        )
+        open_btn = box.addButton("Open Tesseract site", QMessageBox.ButtonRole.AcceptRole)
+        box.addButton("Close", QMessageBox.ButtonRole.RejectRole)
+        box.exec()
+        if box.clickedButton() is open_btn:
+            QDesktopServices.openUrl(
+                QUrl("https://tesseract-ocr.github.io/tessdoc/Installation.html")
+            )
 
     def _toggle_advanced(self, checked: bool):
         self.adv_box.setVisible(checked)
@@ -1264,14 +1397,25 @@ class PreviewPage(QWidget):
         self._render_pdf_page()
         self._build_tabs(data)
 
+    @staticmethod
+    def _render_md(browser: QTextBrowser, md: str, output_path: str | None) -> None:
+        """Render markdown with the right base URL so relative image paths
+        (e.g. ``./name_images/page1_img1.png``) resolve to real files."""
+        if output_path:
+            base = Path(output_path).parent
+            browser.setSearchPaths([str(base)])
+            browser.document().setBaseUrl(QUrl.fromLocalFile(str(base) + "/"))
+        browser.setOpenExternalLinks(True)
+        browser.setMarkdown(md)
+
     def _build_tabs(self, data: dict):
         self.tabs.clear()
         if data.get("compare"):
             nb = QTextBrowser()
-            nb.setMarkdown(data.get("md_native", ""))
+            self._render_md(nb, data.get("md_native", ""), data.get("output_native"))
             self.tabs.addTab(nb, "⚡ Native")
             pb = QTextBrowser()
-            pb.setMarkdown(data.get("md_pdfplumber", ""))
+            self._render_md(pb, data.get("md_pdfplumber", ""), data.get("output_pdfplumber"))
             self.tabs.addTab(pb, "📐 pdfplumber")
             diff = QTextBrowser()
             diff.setHtml(self._make_diff(
@@ -1280,7 +1424,7 @@ class PreviewPage(QWidget):
             self.tabs.addTab(diff, "≠ Diff")
         else:
             rendered = QTextBrowser()
-            rendered.setMarkdown(data.get("md", ""))
+            self._render_md(rendered, data.get("md", ""), data.get("output"))
             self.tabs.addTab(rendered, "Rendered")
             src = QPlainTextEdit()
             src.setPlainText(data.get("md", ""))
