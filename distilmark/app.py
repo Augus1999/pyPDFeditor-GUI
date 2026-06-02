@@ -38,8 +38,19 @@ from PyQt6.QtWidgets import (
     QTextBrowser,
 )
 
-from . import config, converters, styles, ollama_manager
+from . import config, converters, styles, ollama_manager, exporters
 from ._version import __version__
+
+
+# Inputs accepted by PyMuPDF (most natively) + DOCX (lightweight pre-convert path).
+SUPPORTED_INPUT_EXTS = {
+    ".pdf", ".xps", ".oxps", ".epub", ".fb2", ".cbz",
+    ".svg", ".txt", ".docx", ".png", ".jpg", ".jpeg",
+}
+
+# Per-item data roles for the queue list.
+_ROLE_ENGINE = Qt.ItemDataRole.UserRole + 1
+_ROLE_SCANNED = Qt.ItemDataRole.UserRole + 2
 
 
 # ---------------------------------------------------------------------------
@@ -59,7 +70,27 @@ def _parse_page_range(cfg: dict) -> tuple[int, int] | None:
     return (start, end)
 
 
-def _build_opts(cfg: dict, image_dir, image_dir_name, cancel_check) -> "converters.ConvertOptions":
+def _maybe_preconvert_to_pdf(src: Path) -> Path:
+    """For input formats PyMuPDF can't open natively (currently .docx), try to
+    pre-convert to PDF with Pandoc. Returns the PDF path if it succeeds, or the
+    original ``src`` so the caller still gets a useful error.
+    """
+    if src.suffix.lower() != ".docx":
+        return src
+    import shutil, subprocess, tempfile
+    pandoc = shutil.which("pandoc")
+    if not pandoc:
+        return src
+    out = Path(tempfile.gettempdir()) / f"{src.stem}.pdf"
+    try:
+        subprocess.run([pandoc, str(src), "-o", str(out)],
+                       check=True, capture_output=True)
+        return out
+    except Exception:
+        return src
+
+
+def _build_opts(cfg: dict, image_dir, image_dir_name, cancel_check, stream_cb=None) -> "converters.ConvertOptions":
     table_settings = {
         "vertical_strategy": cfg.get("plumber_vertical_strategy", "lines"),
         "horizontal_strategy": cfg.get("plumber_horizontal_strategy", "lines"),
@@ -80,11 +111,15 @@ def _build_opts(cfg: dict, image_dir, image_dir_name, cancel_check) -> "converte
         plumber_table_settings=table_settings,
         llm_concurrency=int(cfg.get("llm_concurrency", 1) or 1),
         cancel_check=cancel_check,
+        custom_prompt=cfg.get("custom_prompt", "") or None,
+        math_mode=cfg.get("math_mode", False),
+        stream_cb=stream_cb,
     )
 
 
 class ConvertWorker(QThread):
     progress = pyqtSignal(int, int, str)
+    stream = pyqtSignal(str, int, str)            # (pdf, page_idx, partial_text)
     finished_ok = pyqtSignal(str, str, int)       # (markdown, source_pdf, page_count)
     finished_compare = pyqtSignal(str, str, str, int)  # (md_native, md_pdfplumber, source_pdf, page_count)
     failed = pyqtSignal(str, str)                 # (source_pdf, error)
@@ -103,17 +138,26 @@ class ConvertWorker(QThread):
 
     def run(self) -> None:
         try:
+            # PyMuPDF handles many formats besides .pdf; for inputs it can't open
+            # (e.g. .docx) we transparently pre-convert to PDF using Pandoc.
+            src = self.pdf
+            self.pdf = _maybe_preconvert_to_pdf(self.pdf)
             import pymupdf as _mupdf
             _doc = _mupdf.open(self.pdf)
             page_count = _doc.page_count
             _doc.close()
 
+            stream_cb = None
+            engine_name = self.cfg.get("engine", "native")
+            if self.cfg.get("stream_output", False) and engine_name in {"ollama", "openai", "anthropic", "openai_compatible"}:
+                stream_cb = lambda idx, txt, _src=str(src): self.stream.emit(_src, idx, txt)
+
             opts = _build_opts(
                 self.cfg, self.image_dir, self.image_dir_name,
-                lambda: self._cancelled,
+                lambda: self._cancelled, stream_cb=stream_cb,
             )
             cb = lambda c, t, m: self.progress.emit(c, t, m)
-            engine = self.cfg.get("engine", "native")
+            engine = engine_name
 
             if engine == "native":
                 md = converters.convert_native(self.pdf, opts, cb)
@@ -283,7 +327,9 @@ def _icon_folder(color: str = "#f97316") -> QIcon:
 
 class ConvertPage(QWidget):
     conversion_done = pyqtSignal()  # notify History tab
-    preview_ready = pyqtSignal(dict)  # push last result to Preview tab
+    preview_ready = pyqtSignal(dict)   # push last result to Preview tab
+    stream_chunk = pyqtSignal(str, int, str)   # forward live LLM stream
+    stream_started = pyqtSignal(str)   # forward "starting LLM streaming for X"
 
     def __init__(self, cfg: dict, status: QStatusBar, parent=None):
         super().__init__(parent)
@@ -340,6 +386,16 @@ class ConvertPage(QWidget):
         self.list.setAcceptDrops(True)
         self.list.setMinimumHeight(150)
         self.list.setMaximumHeight(260)
+        from PyQt6.QtWidgets import QAbstractItemView
+        self.list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.list.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        self.list.setDefaultDropAction(Qt.DropAction.MoveAction)
+        self.list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.list.customContextMenuRequested.connect(self._queue_context_menu)
+        self.list.setToolTip(
+            "• Drag to reorder · double-click to open · Delete to remove\n"
+            "• Right-click for per-file engine override and other actions"
+        )
         self.setAcceptDrops(True)
         layout.addWidget(self.list)
 
@@ -463,8 +519,127 @@ class ConvertPage(QWidget):
         action_row.addWidget(self.convert_btn)
         layout.addLayout(action_row)
 
+        # ---- Quick actions (after a conversion) ----
+        self.quick_actions = self._build_quick_actions()
+        self.quick_actions.setVisible(False)
+        layout.addWidget(self.quick_actions)
+
         scroll.setWidget(inner)
         outer.addWidget(scroll)
+
+        # ---- Keyboard shortcuts ----
+        from PyQt6.QtGui import QShortcut, QKeySequence
+        QShortcut(QKeySequence("Ctrl+O"), self, activated=self.pick_files)
+        QShortcut(QKeySequence("Ctrl+Shift+O"), self, activated=self.pick_folder)
+        QShortcut(QKeySequence("Ctrl+Return"), self, activated=self.start_conversion)
+        QShortcut(QKeySequence("Ctrl+Enter"), self, activated=self.start_conversion)
+        QShortcut(QKeySequence("Escape"), self, activated=self._cancel_conversion)
+
+    def _build_quick_actions(self) -> QWidget:
+        box = QGroupBox("Last result")
+        row = QHBoxLayout(box)
+        self.open_folder_btn = QPushButton("📂 Open output folder")
+        self.open_folder_btn.setObjectName("Ghost")
+        self.open_folder_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.open_folder_btn.clicked.connect(
+            lambda: self._open_in_file_browser(self._out_dir)
+        )
+
+        self.copy_md_btn = QPushButton("Copy Markdown")
+        self.copy_md_btn.setObjectName("Ghost")
+        self.copy_md_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.copy_md_btn.clicked.connect(self._copy_last_markdown)
+
+        self.export_html_btn = QPushButton("Export HTML")
+        self.export_html_btn.setObjectName("Ghost")
+        self.export_html_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.export_html_btn.clicked.connect(lambda: self._export("html"))
+
+        self.export_docx_btn = QPushButton("Export DOCX")
+        self.export_docx_btn.setObjectName("Ghost")
+        self.export_docx_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.export_docx_btn.clicked.connect(lambda: self._export("docx"))
+
+        self.combine_btn = QPushButton("Combine all → one .md")
+        self.combine_btn.setObjectName("Ghost")
+        self.combine_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.combine_btn.clicked.connect(self._combine_outputs)
+
+        self.obsidian_btn = QPushButton("Open in Obsidian")
+        self.obsidian_btn.setObjectName("Ghost")
+        self.obsidian_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.obsidian_btn.clicked.connect(self._open_in_obsidian)
+
+        for b in (self.open_folder_btn, self.copy_md_btn,
+                  self.export_html_btn, self.export_docx_btn,
+                  self.combine_btn, self.obsidian_btn):
+            row.addWidget(b)
+        row.addStretch()
+        return box
+
+    def _show_quick_actions(self):
+        if self._outputs_for_quick_actions:
+            self.quick_actions.setVisible(True)
+            multi = len(self._outputs_for_quick_actions) > 1
+            self.combine_btn.setVisible(multi)
+
+    def _copy_last_markdown(self):
+        if not self._outputs_for_quick_actions:
+            return
+        from PyQt6.QtWidgets import QApplication
+        try:
+            text = self._outputs_for_quick_actions[-1].read_text(encoding="utf-8")
+        except OSError as e:
+            self.status.showMessage(f"Copy failed: {e}", 4000)
+            return
+        QApplication.clipboard().setText(text)
+        self.status.showMessage("✓ Markdown copied to clipboard", 3000)
+
+    def _export(self, fmt: str):
+        if not self._outputs_for_quick_actions:
+            return
+        src = self._outputs_for_quick_actions[-1]
+        try:
+            md = src.read_text(encoding="utf-8")
+        except OSError as e:
+            QMessageBox.critical(self, "Export", f"Could not read {src}\n\n{e}"); return
+        target = src.with_suffix("." + fmt)
+        try:
+            if fmt == "html":
+                exporters.to_html(md, target)
+            elif fmt == "docx":
+                exporters.to_docx(md, target, md_source=src)
+        except Exception as e:
+            QMessageBox.critical(self, "Export failed", f"{fmt.upper()} export failed:\n\n{e}")
+            return
+        self.status.showMessage(f"✓ Exported → {target.name}", 4000)
+        self._open_in_file_browser(target)
+
+    def _combine_outputs(self):
+        if len(self._outputs_for_quick_actions) < 2:
+            return
+        target = self._out_dir / "combined.md"
+        try:
+            exporters.combine_markdown(self._outputs_for_quick_actions, target)
+        except Exception as e:
+            QMessageBox.critical(self, "Combine failed", str(e)); return
+        self.status.showMessage(f"✓ Combined → {target.name}", 4000)
+        self._open_in_file_browser(target)
+
+    def _open_in_obsidian(self):
+        if not self._outputs_for_quick_actions:
+            return
+        from PyQt6.QtGui import QDesktopServices
+        last = self._outputs_for_quick_actions[-1]
+        # Obsidian URI: open vault file by absolute path
+        url = QUrl(f"obsidian://open?path={last}")
+        if not QDesktopServices.openUrl(url):
+            QMessageBox.information(
+                self, "Obsidian",
+                "Could not launch Obsidian via the obsidian:// URL.\n\n"
+                "Make sure Obsidian is installed and that the file is inside "
+                "a vault.\n\nFile path:\n" + str(last),
+            )
 
     def _build_advanced(self) -> QWidget:
         box = QGroupBox("")
@@ -572,6 +747,36 @@ class ConvertPage(QWidget):
         )
         form.addRow("Table snap tolerance:", self.snap)
 
+        # ---- Math mode (LLM engines) ----
+        self.math_cb = QCheckBox("Preserve math formulas (LaTeX)")
+        self.math_cb.setChecked(self.cfg.get("math_mode", False))
+        self.math_cb.setToolTip(
+            "When using an LLM engine, instruct the model to wrap inline math "
+            "with $…$ and display equations with $$…$$ — and to use proper "
+            "LaTeX notation. Useful for academic papers, lecture notes, and "
+            "anything with equations."
+        )
+        form.addRow("Math:", self.math_cb)
+
+        # ---- Streaming output ----
+        self.stream_cb_w = QCheckBox("Stream live tokens into Preview")
+        self.stream_cb_w.setChecked(self.cfg.get("stream_output", False))
+        self.stream_cb_w.setToolTip(
+            "For LLM engines, show Markdown appearing token-by-token in the "
+            "Preview tab as the model generates it, instead of waiting for "
+            "each page to complete. (Provider may not support streaming.)"
+        )
+        form.addRow("Streaming:", self.stream_cb_w)
+
+        # ---- Auto-open output folder ----
+        self.auto_open_cb = QCheckBox("Open the output folder when a batch finishes")
+        self.auto_open_cb.setChecked(self.cfg.get("auto_open_output", False))
+        self.auto_open_cb.setToolTip(
+            "Automatically open the output folder in your file browser the "
+            "moment a batch conversion completes."
+        )
+        form.addRow("After convert:", self.auto_open_cb)
+
         # ---- LLM concurrency ----
         self.concurrency = QSpinBox()
         self.concurrency.setRange(1, 16)
@@ -633,45 +838,152 @@ class ConvertPage(QWidget):
             p = Path(url.toLocalFile())
             if p.is_dir():
                 self._scan_folder(p)
-            elif p.suffix.lower() == ".pdf" and p.exists():
+            elif p.suffix.lower() in SUPPORTED_INPUT_EXTS and p.exists():
                 self._add(p)
 
     def _add(self, p: Path):
         if p in self.queue:
             return
         self.queue.append(p)
-        item = QListWidgetItem(f"  {p.name}    —    {p.parent}")
+        label = f"  {p.name}    —    {p.parent}"
+        # Scanned-PDF heuristic (only for .pdf, cheap)
+        scanned = False
+        try:
+            if p.suffix.lower() == ".pdf":
+                scanned = converters.is_likely_scanned(p)
+        except Exception:
+            scanned = False
+        if scanned:
+            label += "    [scanned?]"
+        item = QListWidgetItem(label)
         item.setData(Qt.ItemDataRole.UserRole, str(p))
+        item.setData(_ROLE_ENGINE, "")  # "" = use default engine
+        item.setData(_ROLE_SCANNED, scanned)
+        if scanned:
+            item.setForeground(QColor("#fbbf24"))
+            item.setToolTip(
+                "This PDF appears to contain little or no extractable text "
+                "— it's likely a scan. Enable OCR in Advanced options to "
+                "recover the text."
+            )
         self.list.addItem(item)
         self._update_queue_label()
 
     def _scan_folder(self, folder: Path) -> int:
-        found = sorted(
-            set(folder.rglob("*.pdf")) | set(folder.rglob("*.PDF"))
-        )
-        for p in found:
+        found: set[Path] = set()
+        for ext in SUPPORTED_INPUT_EXTS:
+            found.update(folder.rglob(f"*{ext}"))
+            found.update(folder.rglob(f"*{ext.upper()}"))
+        ordered = sorted(found)
+        for p in ordered:
             self._add(p)
         self._update_queue_label()
-        return len(found)
+        return len(ordered)
 
     def _update_queue_label(self):
         n = len(self.queue)
-        self.queue_label.setText(f"{n} file{'s' if n != 1 else ''} in queue")
+        scanned = sum(
+            1 for i in range(self.list.count())
+            if self.list.item(i).data(_ROLE_SCANNED)
+        )
+        msg = f"{n} file{'s' if n != 1 else ''} in queue"
+        if scanned:
+            msg += f"   ·   {scanned} look scanned — enable OCR"
+        self.queue_label.setText(msg)
+
+    @staticmethod
+    def _input_filter() -> str:
+        all_pat = " ".join(f"*{e}" for e in SUPPORTED_INPUT_EXTS)
+        return (
+            f"All supported ({all_pat});;"
+            "PDF (*.pdf);;Word (*.docx);;EPUB (*.epub);;"
+            "XPS (*.xps *.oxps);;FictionBook (*.fb2);;Comic (*.cbz);;"
+            "SVG (*.svg);;Text (*.txt);;Images (*.png *.jpg *.jpeg);;"
+            "All files (*)"
+        )
 
     def pick_files(self):
         files, _ = QFileDialog.getOpenFileNames(
-            self, "Pick PDFs", str(Path.home()), "PDF files (*.pdf)"
+            self, "Pick files to convert", str(Path.home()), self._input_filter()
         )
         for f in files:
             self._add(Path(f))
 
     def pick_folder(self):
         folder = QFileDialog.getExistingDirectory(
-            self, "Pick folder to scan for PDFs", str(Path.home())
+            self, "Pick folder to scan", str(Path.home())
         )
         if folder:
             n = self._scan_folder(Path(folder))
-            self.status.showMessage(f"Found {n} PDF(s) in folder.", 4000)
+            self.status.showMessage(f"Found {n} document(s) in folder.", 4000)
+
+    # ---- queue: context menu + delete key ----
+    def _queue_context_menu(self, pos):
+        from PyQt6.QtWidgets import QMenu
+        item = self.list.itemAt(pos)
+        if item is None:
+            return
+        menu = QMenu(self)
+        # Per-file engine override submenu
+        engine_menu = menu.addMenu("Use engine for this file")
+        cur_override = item.data(_ROLE_ENGINE) or ""
+        for i in range(self.engine_combo.count()):
+            data = self.engine_combo.itemData(i)
+            text = self.engine_combo.itemText(i)
+            a = engine_menu.addAction(("✓ " if data == cur_override else "  ") + text)
+            a.triggered.connect(lambda _=False, d=data, it=item: self._set_item_engine(it, d))
+        if cur_override:
+            reset = engine_menu.addAction("Clear override (use default)")
+            reset.triggered.connect(lambda: self._set_item_engine(item, ""))
+        menu.addSeparator()
+        open_loc = menu.addAction("Open file location")
+        open_loc.triggered.connect(lambda: self._open_in_file_browser(Path(item.data(Qt.ItemDataRole.UserRole))))
+        rm = menu.addAction("Remove from queue   (Del)")
+        rm.triggered.connect(lambda: self._remove_item(item))
+        menu.exec(self.list.mapToGlobal(pos))
+
+    def _set_item_engine(self, item, engine: str):
+        item.setData(_ROLE_ENGINE, engine or "")
+        path = item.data(Qt.ItemDataRole.UserRole)
+        base = f"  {Path(path).name}    —    {Path(path).parent}"
+        if item.data(_ROLE_SCANNED):
+            base += "    [scanned?]"
+        if engine:
+            base += f"    [{engine}]"
+        item.setText(base)
+
+    def _remove_item(self, item):
+        row = self.list.row(item)
+        if row < 0:
+            return
+        path_str = item.data(Qt.ItemDataRole.UserRole)
+        self.list.takeItem(row)
+        try:
+            self.queue.remove(Path(path_str))
+        except ValueError:
+            pass
+        self._update_queue_label()
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key.Key_Delete, Qt.Key.Key_Backspace) and self.list.hasFocus():
+            for item in self.list.selectedItems():
+                self._remove_item(item)
+            return
+        super().keyPressEvent(event)
+
+    @staticmethod
+    def _open_in_file_browser(path: Path):
+        import sys, subprocess
+        target = path.parent if path.is_file() else path
+        try:
+            if sys.platform.startswith("win"):
+                subprocess.Popen(["explorer", "/select,", str(path)] if path.is_file() else ["explorer", str(target)])
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", "-R", str(path)] if path.is_file() else ["open", str(target)])
+            else:
+                subprocess.Popen(["xdg-open", str(target)])
+        except Exception:
+            pass
 
     def clear_queue(self):
         self.queue.clear()
@@ -695,6 +1007,9 @@ class ConvertPage(QWidget):
         self.cfg["plumber_horizontal_strategy"] = self.hstrat.currentText()
         self.cfg["plumber_snap_tolerance"] = self.snap.value()
         self.cfg["llm_concurrency"] = self.concurrency.value()
+        self.cfg["math_mode"] = self.math_cb.isChecked()
+        self.cfg["stream_output"] = self.stream_cb_w.isChecked()
+        self.cfg["auto_open_output"] = self.auto_open_cb.isChecked()
         config.save(self.cfg)
 
     def _estimate_cost(self):
@@ -746,11 +1061,21 @@ class ConvertPage(QWidget):
         self.cfg["last_output_dir"] = out_dir
         config.save(self.cfg)
         self._out_dir = Path(out_dir)
-        self._remaining = list(self.queue)
+        # Read the queue from the list widget so user-reordering is honored,
+        # carrying per-item engine overrides alongside the path.
+        self._remaining = []
+        for i in range(self.list.count()):
+            it = self.list.item(i)
+            self._remaining.append((
+                Path(it.data(Qt.ItemDataRole.UserRole)),
+                it.data(_ROLE_ENGINE) or "",
+            ))
         self._total_files = len(self._remaining)
         self._done_files = 0
+        self._outputs_for_quick_actions: list[Path] = []
         self.convert_btn.setEnabled(False)
         self.cancel_conv_btn.setEnabled(True)
+        self.quick_actions.setVisible(False)
         self._convert_next()
 
     def _convert_next(self):
@@ -762,13 +1087,25 @@ class ConvertPage(QWidget):
             )
             self.progress.setValue(100)
             self.progress_label.setText("")
+            self._show_quick_actions()
+            if self.cfg.get("auto_open_output", False) and self._done_files:
+                self._open_in_file_browser(self._out_dir)
             self.conversion_done.emit()
             return
-        pdf = self._remaining.pop(0)
-        img_dir_name = f"{pdf.stem}_images" if self.cfg.get("include_images") else None
+        pdf, engine_override = self._remaining.pop(0)
+        # Build a per-file cfg copy so the worker picks up the override
+        run_cfg = dict(self.cfg)
+        if engine_override:
+            run_cfg["engine"] = engine_override
+        img_dir_name = f"{pdf.stem}_images" if run_cfg.get("include_images") else None
         img_dir = self._out_dir / img_dir_name if img_dir_name else None
-        self.worker = ConvertWorker(pdf, dict(self.cfg), img_dir, img_dir_name)
+        self.worker = ConvertWorker(pdf, run_cfg, img_dir, img_dir_name)
+        if run_cfg.get("stream_output", False) and run_cfg.get("engine") in {
+            "ollama", "openai", "anthropic", "openai_compatible"
+        }:
+            self.stream_started.emit(str(pdf))
         self.worker.progress.connect(self._on_progress)
+        self.worker.stream.connect(self._on_stream)
         self.worker.finished_ok.connect(self._on_done)
         self.worker.finished_compare.connect(self._on_done_compare)
         self.worker.failed.connect(self._on_failed)
@@ -787,6 +1124,7 @@ class ConvertPage(QWidget):
         src_path = Path(src)
         out = self._out_dir / f"{src_path.stem}.md"
         out.write_text(md, encoding="utf-8")
+        self._outputs_for_quick_actions.append(out)
         self._done_files += 1
         config.append_history({
             "source": src_path.name,
@@ -811,6 +1149,8 @@ class ConvertPage(QWidget):
         out_native = self._out_dir / f"{src_path.stem}_native.md"
         out_plumber = self._out_dir / f"{src_path.stem}_pdfplumber.md"
         out_native.write_text(md_native, encoding="utf-8")
+        self._outputs_for_quick_actions.append(out_native)
+        self._outputs_for_quick_actions.append(out_plumber)
         out_plumber.write_text(md_pdfplumber, encoding="utf-8")
         self._done_files += 1
         config.append_history({
@@ -844,6 +1184,9 @@ class ConvertPage(QWidget):
         })
         self._convert_next()
 
+    def _on_stream(self, src: str, page_idx: int, chunk: str):
+        self.stream_chunk.emit(src, page_idx, chunk)
+
     def _on_cancelled(self, src: str):
         self._remaining = []
         self.convert_btn.setEnabled(True)
@@ -873,6 +1216,8 @@ class ConvertPage(QWidget):
 # ---------------------------------------------------------------------------
 
 class SettingsPage(QWidget):
+    settings_saved = pyqtSignal()
+
     def __init__(self, cfg: dict, parent=None):
         super().__init__(parent)
         self.cfg = cfg
@@ -1023,6 +1368,73 @@ class SettingsPage(QWidget):
         cf.addRow("Base URL:", self.compat_base)
         cf.addRow("Model:", self.compat_model)
         layout.addWidget(cm)
+
+        # ---- LLM prompt (shared by all LLM engines) ----
+        pm = QGroupBox("LLM conversion prompt")
+        pf = QVBoxLayout(pm)
+        pf_hint = QLabel(
+            "Prompt sent to <b>Ollama / OpenAI / Anthropic</b> alongside each "
+            "rendered PDF page. Leave blank to use the built-in default."
+        )
+        pf_hint.setWordWrap(True); pf_hint.setObjectName("Hint")
+        pf.addWidget(pf_hint)
+        self.prompt_edit = QPlainTextEdit()
+        self.prompt_edit.setPlaceholderText(converters.PROMPT)
+        self.prompt_edit.setPlainText(self.cfg.get("custom_prompt", "") or "")
+        self.prompt_edit.setMinimumHeight(110)
+        self.prompt_edit.setToolTip(
+            "Override the system/user prompt for LLM engines. Useful for:\n"
+            "  • Preserving LaTeX math\n"
+            "  • Asking for specific Markdown dialects (CommonMark, GFM, …)\n"
+            "  • Domain hints (academic paper, recipe, invoice, code, …)"
+        )
+        pf.addWidget(self.prompt_edit)
+        preset_row = QHBoxLayout()
+        presets = [
+            ("Reset to default", ""),
+            ("Academic paper", converters.PROMPT + " This is an academic paper — preserve citations like [1], equations (LaTeX with $ delimiters), figure/table captions, and section numbering."),
+            ("Code-heavy", converters.PROMPT + " Wrap every code snippet in a fenced code block with the appropriate language tag. Preserve indentation exactly."),
+            ("Tables only", "Extract every table from this PDF page as GitHub-flavored Markdown tables. Ignore all other text. Output only the tables."),
+        ]
+        for label, text in presets:
+            b = QPushButton(label)
+            b.setObjectName("Ghost")
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            b.clicked.connect(lambda _=False, t=text: self.prompt_edit.setPlainText(t))
+            preset_row.addWidget(b)
+        preset_row.addStretch()
+        pf.addLayout(preset_row)
+        layout.addWidget(pm)
+
+        # ---- Watch folder ----
+        wf = QGroupBox("Watch folder  ·  auto-import new PDFs")
+        wff = QFormLayout(wf)
+        wf_hint = QLabel(
+            "Distilmark can watch a folder and automatically add every new "
+            "PDF that appears to the queue (great for scanner workflows). "
+            "Optionally start the conversion right away."
+        )
+        wf_hint.setWordWrap(True); wf_hint.setObjectName("Hint")
+        wff.addRow("", wf_hint)
+        watch_row = QHBoxLayout()
+        self.watch_path = QLineEdit(self.cfg.get("watch_folder", ""))
+        self.watch_path.setPlaceholderText("Pick a folder to watch …")
+        self.watch_path.setToolTip("Path of the folder Distilmark should watch for new PDFs.")
+        watch_browse = QPushButton("…"); watch_browse.setFixedWidth(32)
+        watch_browse.setCursor(Qt.CursorShape.PointingHandCursor)
+        watch_browse.clicked.connect(self._browse_watch_path)
+        watch_row.addWidget(self.watch_path, 1)
+        watch_row.addWidget(watch_browse)
+        wff.addRow("Folder:", watch_row)
+        self.watch_auto_cb = QCheckBox("Convert each new PDF immediately")
+        self.watch_auto_cb.setChecked(self.cfg.get("watch_auto_convert", False))
+        self.watch_auto_cb.setToolTip(
+            "When a new PDF appears in the watch folder, kick off the queue "
+            "automatically. If off, files are just added so you can review "
+            "and press Convert yourself."
+        )
+        wff.addRow("", self.watch_auto_cb)
+        layout.addWidget(wf)
 
         save_btn = QPushButton("Save settings")
         save_btn.setObjectName("Accent")
@@ -1232,8 +1644,20 @@ class SettingsPage(QWidget):
         self.cfg["compat_api_key"] = self.compat_key.text().strip()
         self.cfg["compat_base_url"] = self.compat_base.text().strip()
         self.cfg["compat_model"] = self.compat_model.text().strip()
+        self.cfg["custom_prompt"] = self.prompt_edit.toPlainText().strip()
+        self.cfg["watch_folder"] = self.watch_path.text().strip()
+        self.cfg["watch_auto_convert"] = self.watch_auto_cb.isChecked()
         config.save(self.cfg)
+        # Signal MainWindow to refresh the watcher
+        self.settings_saved.emit()
         QMessageBox.information(self, "Saved", "Settings saved.")
+
+    def _browse_watch_path(self):
+        folder = QFileDialog.getExistingDirectory(
+            self, "Pick a folder to watch", str(Path.home())
+        )
+        if folder:
+            self.watch_path.setText(folder)
 
 
 # ---------------------------------------------------------------------------
@@ -1410,13 +1834,18 @@ class PreviewPage(QWidget):
 
     def _build_tabs(self, data: dict):
         self.tabs.clear()
+        self._rendered_browsers = {}  # for streaming updates
+        self._editor_source: QPlainTextEdit | None = None
+        self._editor_output: str | None = None
         if data.get("compare"):
             nb = QTextBrowser()
             self._render_md(nb, data.get("md_native", ""), data.get("output_native"))
             self.tabs.addTab(nb, "⚡ Native")
+            self._rendered_browsers[0] = nb
             pb = QTextBrowser()
             self._render_md(pb, data.get("md_pdfplumber", ""), data.get("output_pdfplumber"))
             self.tabs.addTab(pb, "📐 pdfplumber")
+            self._rendered_browsers[1] = pb
             diff = QTextBrowser()
             diff.setHtml(self._make_diff(
                 data.get("md_native", ""), data.get("md_pdfplumber", "")
@@ -1426,10 +1855,80 @@ class PreviewPage(QWidget):
             rendered = QTextBrowser()
             self._render_md(rendered, data.get("md", ""), data.get("output"))
             self.tabs.addTab(rendered, "Rendered")
-            src = QPlainTextEdit()
-            src.setPlainText(data.get("md", ""))
-            src.setReadOnly(True)
-            self.tabs.addTab(src, "Source")
+            self._rendered_browsers[0] = rendered
+            # Editable Source tab
+            src_widget = QWidget()
+            sv = QVBoxLayout(src_widget); sv.setContentsMargins(0, 0, 0, 0); sv.setSpacing(8)
+            src = QPlainTextEdit(); src.setPlainText(data.get("md", "")); src.setReadOnly(False)
+            src.setToolTip("Edit the Markdown freely. Click 'Save edits' to write back to disk.")
+            self._editor_source = src
+            self._editor_output = data.get("output")
+            sv.addWidget(src, 1)
+            row = QHBoxLayout()
+            save_btn = QPushButton("💾 Save edits")
+            save_btn.setObjectName("Accent")
+            save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            save_btn.setToolTip("Save the edited Markdown back to the output file.")
+            save_btn.clicked.connect(self._save_edits)
+            revert_btn = QPushButton("Revert")
+            revert_btn.setObjectName("Ghost")
+            revert_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            revert_btn.clicked.connect(lambda: src.setPlainText(data.get("md", "")))
+            self._edit_status = QLabel(""); self._edit_status.setObjectName("Hint")
+            row.addWidget(revert_btn); row.addStretch()
+            row.addWidget(self._edit_status); row.addWidget(save_btn)
+            sv.addLayout(row)
+            self.tabs.addTab(src_widget, "Source / Edit")
+
+    def _save_edits(self):
+        if not (self._editor_source and self._editor_output):
+            return
+        try:
+            Path(self._editor_output).write_text(
+                self._editor_source.toPlainText(), encoding="utf-8"
+            )
+            self._edit_status.setText("✓ Saved")
+            # Re-render the Rendered tab in place
+            br = self._rendered_browsers.get(0)
+            if br is not None:
+                self._render_md(br, self._editor_source.toPlainText(), self._editor_output)
+        except OSError as e:
+            self._edit_status.setText(f"✗ {e}")
+
+    def start_stream(self, pdf_path: str):
+        """Initialise the Preview tab with an empty Rendered area ready to
+        receive live LLM stream chunks for the file ``pdf_path``."""
+        from PyQt6.QtCore import Qt as _Qt
+        self._pdf_path = pdf_path
+        try:
+            import pymupdf
+            doc = pymupdf.open(pdf_path); self._page_count = doc.page_count; doc.close()
+        except Exception:
+            self._page_count = 0
+        self._page_index = 0
+        self._render_pdf_page()
+        name = Path(pdf_path).name if pdf_path else ""
+        self.subtitle.setText(f"{name}  ·  streaming")
+        # Reset the right-side tabs to a single live "Rendered" tab.
+        self.tabs.clear()
+        self._rendered_browsers = {}
+        self._editor_source = None
+        live = QTextBrowser()
+        live.setOpenExternalLinks(True)
+        self._rendered_browsers[0] = live
+        self.tabs.addTab(live, "🟢 Live")
+
+    # Streaming hook: append a chunk of tokens to the most recent Rendered tab.
+    def append_stream(self, page_idx: int, chunk: str):
+        # We only display the live stream for the single-engine case; in compare
+        # mode the writes interleave both engines.
+        br = self._rendered_browsers.get(0)
+        if br is None:
+            return
+        cur = br.toPlainText()
+        if not cur.endswith("\n") and chunk and chunk[0] not in "\n ":
+            cur += ""
+        br.setPlainText(cur + chunk)
 
     @staticmethod
     def _make_diff(a: str, b: str) -> str:
@@ -1680,13 +2179,87 @@ class MainWindow(QMainWindow):
         self.convert_page.conversion_done.connect(self.history_page.refresh)
         # Feed the Preview tab with the latest conversion result
         self.convert_page.preview_ready.connect(self.preview_page.load)
+        # Stream live LLM chunks into the Preview tab
+        self.convert_page.stream_started.connect(self.preview_page.start_stream)
+        self.convert_page.stream_chunk.connect(
+            lambda src, idx, chunk: self.preview_page.append_stream(idx, chunk)
+        )
+        # Refresh the folder watcher when settings change
+        self.settings_page.settings_saved.connect(self._refresh_watcher)
 
         root.addWidget(self.stack, 1)
+
+        # ---- Global navigation shortcuts: Ctrl+1..5 ----
+        from PyQt6.QtGui import QShortcut, QKeySequence
+        for i in range(5):
+            QShortcut(QKeySequence(f"Ctrl+{i+1}"), self,
+                      activated=lambda _i=i: self._switch(_i))
+
+        # ---- Folder watcher (auto-import new PDFs) ----
+        from PyQt6.QtCore import QFileSystemWatcher, QTimer
+        self._fs_watcher = QFileSystemWatcher(self)
+        self._fs_watcher.directoryChanged.connect(self._on_watch_dir_changed)
+        # Debounce: many editors create files in bursts
+        self._watch_seen: set[str] = set()
+        QTimer.singleShot(400, self._refresh_watcher)
 
     def _switch(self, idx: int):
         self.stack.setCurrentIndex(idx)
         for i, b in enumerate(self.nav_buttons):
             b.setChecked(i == idx)
+
+    def _refresh_watcher(self):
+        # Re-arm QFileSystemWatcher to point at the configured folder (if any).
+        for d in list(self._fs_watcher.directories()):
+            self._fs_watcher.removePath(d)
+        folder = self.cfg.get("watch_folder", "").strip()
+        if not folder:
+            self._watch_seen.clear()
+            return
+        p = Path(folder)
+        if not p.is_dir():
+            return
+        self._fs_watcher.addPath(str(p))
+        # Seed the seen-set with the current contents so we only pick up *new* PDFs
+        self._watch_seen = {
+            str(f) for f in p.glob("*")
+            if f.suffix.lower() in SUPPORTED_INPUT_EXTS
+        }
+
+    def _on_watch_dir_changed(self, path: str):
+        from PyQt6.QtCore import QTimer
+        # Wait a beat so partially-written scans aren't read mid-stream
+        QTimer.singleShot(800, lambda: self._collect_new_from(path))
+
+    def _collect_new_from(self, path: str):
+        p = Path(path)
+        if not p.is_dir():
+            return
+        new_files = []
+        for f in p.glob("*"):
+            if f.suffix.lower() not in SUPPORTED_INPUT_EXTS:
+                continue
+            if str(f) in self._watch_seen:
+                continue
+            try:
+                # Skip files still being written (size 0 / growing)
+                if f.stat().st_size == 0:
+                    continue
+            except OSError:
+                continue
+            new_files.append(f)
+            self._watch_seen.add(str(f))
+        if not new_files:
+            return
+        # Add to the queue (switch to Convert tab so user sees them)
+        self._switch(0)
+        for f in new_files:
+            self.convert_page._add(f)
+        self.statusBar().showMessage(
+            f"Watch folder: added {len(new_files)} new file(s).", 4000
+        )
+        if self.cfg.get("watch_auto_convert", False):
+            self.convert_page.start_conversion()
 
     def _on_theme(self, name: str):
         self.cfg["theme"] = name

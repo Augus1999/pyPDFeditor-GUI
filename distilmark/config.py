@@ -75,6 +75,17 @@ DEFAULTS: dict[str, Any] = {
     "plumber_snap_tolerance": 3,
     # parallel page processing for hosted LLM engines
     "llm_concurrency": 1,
+    # LLM custom prompt — blank = built-in default
+    "custom_prompt": "",
+    # math-mode prompt augmentation
+    "math_mode": False,
+    # stream live tokens from LLM engines into Preview
+    "stream_output": False,
+    # auto-open output folder when a batch finishes
+    "auto_open_output": False,
+    # watch a folder for new PDFs and auto-add them
+    "watch_folder": "",
+    "watch_auto_convert": False,
 }
 
 

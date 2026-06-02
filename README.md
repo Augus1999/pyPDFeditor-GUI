@@ -11,11 +11,11 @@
   <img alt="qt" src="https://img.shields.io/badge/PyQt6-41CD52?logo=qt&logoColor=white" />
   <img alt="platform" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" />
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green" />
-  <img alt="version" src="https://img.shields.io/badge/version-v1.0.0-2563eb" />
+  <img alt="version" src="https://img.shields.io/badge/version-v1.1.0-2563eb" />
 </p>
 
 <p>
-  🌙 <b>Dark & Light themes</b> · 🚀 <b>Drag & Drop</b> · 🔌 <b>7 engines</b> · 👀 <b>Live preview</b> · 🦙 <b>Offline ready</b>
+  🌙 <b>Dark & Light themes</b> · 🚀 <b>Drag & Drop</b> · 🔌 <b>7 engines</b> · 👀 <b>Editable preview</b> · 📤 <b>HTML / DOCX export</b> · 🔭 <b>Watch folder</b> · 🦙 <b>Offline ready</b>
 </p>
 
 </div>
@@ -92,7 +92,18 @@ Pick whichever vibe matches you:
 ## ✨ Features
 
 - 🎯 **Multiple engines** — seven backends, one UI, switch in a single click
-- 👀 **Live preview** — source PDF page beside the rendered Markdown; in **Compare** mode get Native / pdfplumber / **Diff** tabs side-by-side
+- 👀 **Live preview, editable** — source PDF page beside the rendered Markdown, with a Source/Edit tab to tweak the output and Save back to disk. Compare mode adds Native / pdfplumber / **Diff** tabs side-by-side.
+- 📤 **Export anywhere** — one click for **HTML**, **DOCX** (Pandoc when available, python-docx fallback), or **combined `.md`** when batching a folder.
+- 🤖 **Custom LLM prompt** — edit the conversion prompt right from the Engines tab; presets for *Academic paper*, *Code-heavy*, *Tables-only*.
+- 🔬 **Math mode** — wraps formulas in `$…$` / `$$…$$` LaTeX for academic PDFs.
+- 🌀 **Streaming output** — watch the Markdown appear token-by-token from Ollama/OpenAI/Anthropic.
+- 🔭 **Watch folder** — point Distilmark at a folder; new PDFs are auto-queued (and optionally auto-converted) — perfect for scanner workflows.
+- 🧪 **Auto-detect scanned PDFs** — files with no extractable text get tagged in the queue so you know to enable OCR.
+- 🎚️ **Per-file engine override** — right-click a queued file to convert it with a different engine than the rest of the batch.
+- 🔀 **Drag-reorder + multi-select queue** — reorder, remove, or delete-key your queue items.
+- ⌨️ **Keyboard shortcuts** — `Ctrl+O` add files · `Ctrl+Shift+O` add folder · `Ctrl+Enter` convert · `Esc` cancel · `Ctrl+1..5` switch tabs.
+- ⚡ **Quick actions after a conversion** — Open output folder, Copy Markdown to clipboard, Open in Obsidian, Export HTML/DOCX, Combine.
+- 📂 **More input formats** — PDF, DOCX (via Pandoc), EPUB, XPS, FictionBook (FB2), comic archives (CBZ), SVG, TXT, and image inputs (PNG/JPG).
 - ⚖ **Dual-engine compare** — run native + pdfplumber together and get two files (`name_native.md` + `name_pdfplumber.md`) to judge for yourself
 - 🔍 **OCR fallback** — scanned/image-only pages are run through Tesseract automatically (when installed)
 - 🎯 **Page-range selection** — convert just pages 5–20 of a 500-page monster

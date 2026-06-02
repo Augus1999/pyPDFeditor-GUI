@@ -55,6 +55,12 @@ class ConvertOptions:
     llm_concurrency: int = 1
     # cooperative cancellation: a callable that returns True to abort
     cancel_check: Callable[[], bool] | None = None
+    # custom prompt for LLM engines (empty/None = default PROMPT)
+    custom_prompt: str | None = None
+    # math-mode prompt augmentation (LLM engines only)
+    math_mode: bool = False
+    # streaming callback: stream_cb(page_index_0based, partial_text)
+    stream_cb: Callable[[int, str], None] | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -336,12 +342,41 @@ PROMPT = (
     "Do not add commentary. Output only the markdown."
 )
 
+MATH_PROMPT_ADDITION = (
+    " Preserve mathematical formulas: wrap inline math with single dollar signs "
+    "($x = a + b$) and display equations with double dollar signs ($$...$$). "
+    "Use proper LaTeX notation."
+)
+
+
+def _resolve_prompt(opts: ConvertOptions) -> str:
+    p = (opts.custom_prompt or "").strip() or PROMPT
+    if opts.math_mode and MATH_PROMPT_ADDITION not in p:
+        p = p + MATH_PROMPT_ADDITION
+    return p
+
+
+def is_likely_scanned(pdf_path: Path, sample_pages: int = 3, threshold: int = 50) -> bool:
+    """Heuristic: very little extractable text per sampled page → probably scanned."""
+    try:
+        doc = pymupdf.open(pdf_path)
+        n = min(sample_pages, doc.page_count)
+        if n == 0:
+            return False
+        total = 0
+        for i in range(n):
+            total += len(doc[i].get_text().strip())
+        doc.close()
+        return total < threshold * n
+    except Exception:
+        return False
+
 
 # ---------------------------------------------------------------------------
 # Generic LLM page runner (sequential or concurrent)
 # ---------------------------------------------------------------------------
 
-PageFn = Callable[[str], str]  # (image_b64) -> markdown
+PageFn = Callable[[int, str], str]  # (page_idx_0based, image_b64) -> markdown
 
 
 def _run_llm(
@@ -371,12 +406,12 @@ def _run_llm(
             _check_cancel(opts)
             if progress:
                 progress(n + 1, n_total, f"Page {i+1}/{total} ({label})")
-            results[i] = page_fn(images[i])
+            results[i] = page_fn(i, images[i])
     else:
         from concurrent.futures import ThreadPoolExecutor, as_completed
         done = 0
         with ThreadPoolExecutor(max_workers=concurrency) as ex:
-            futs = {ex.submit(page_fn, images[i]): i for i in indices}
+            futs = {ex.submit(page_fn, i, images[i]): i for i in indices}
             try:
                 for fut in as_completed(futs):
                     _check_cancel(opts)
@@ -405,12 +440,13 @@ def convert_ollama(
     opts: ConvertOptions,
     progress: ProgressCb | None = None,
 ) -> str:
-    def page_fn(img_b64: str) -> str:
+    prompt = _resolve_prompt(opts)
+    streaming = opts.stream_cb is not None
+
+    def page_fn(idx: int, img_b64: str) -> str:
         payload = {
-            "model": model,
-            "prompt": PROMPT,
-            "images": [img_b64],
-            "stream": False,
+            "model": model, "prompt": prompt,
+            "images": [img_b64], "stream": streaming,
         }
         body = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
@@ -418,9 +454,28 @@ def convert_ollama(
             data=body,
             headers={"Content-Type": "application/json"},
         )
+        if not streaming:
+            with urllib.request.urlopen(req, timeout=600) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            return data.get("response", "")
+        # Streaming: Ollama sends NDJSON lines
+        out = []
         with urllib.request.urlopen(req, timeout=600) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        return data.get("response", "")
+            for raw in resp:
+                if not raw.strip():
+                    continue
+                try:
+                    d = json.loads(raw.decode("utf-8"))
+                except json.JSONDecodeError:
+                    continue
+                chunk = d.get("response", "")
+                if chunk:
+                    out.append(chunk)
+                    if opts.stream_cb:
+                        opts.stream_cb(idx, chunk)
+                if d.get("done"):
+                    break
+        return "".join(out)
 
     return _run_llm(pdf_path, opts, progress, f"ollama:{model}", page_fn)
 
@@ -437,34 +492,57 @@ def convert_openai_compatible(
     opts: ConvertOptions,
     progress: ProgressCb | None = None,
 ) -> str:
-    def page_fn(img_b64: str) -> str:
+    prompt = _resolve_prompt(opts)
+    streaming = opts.stream_cb is not None
+
+    def page_fn(idx: int, img_b64: str) -> str:
         payload = {
             "model": model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": PROMPT},
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": f"data:image/png;base64,{img_b64}"},
-                        },
-                    ],
-                }
-            ],
+            "messages": [{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {"type": "image_url",
+                     "image_url": {"url": f"data:image/png;base64,{img_b64}"}},
+                ],
+            }],
         }
+        if streaming:
+            payload["stream"] = True
         body = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
             base_url.rstrip("/") + "/chat/completions",
             data=body,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}",
-            },
+            headers={"Content-Type": "application/json",
+                     "Authorization": f"Bearer {api_key}"},
         )
+        if not streaming:
+            with urllib.request.urlopen(req, timeout=600) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            return data["choices"][0]["message"]["content"]
+        # Streaming: SSE — lines beginning with "data: " carry JSON deltas
+        out = []
         with urllib.request.urlopen(req, timeout=600) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        return data["choices"][0]["message"]["content"]
+            for raw in resp:
+                line = raw.decode("utf-8", "ignore").strip()
+                if not line.startswith("data:"):
+                    continue
+                payload_str = line[5:].strip()
+                if payload_str == "[DONE]":
+                    break
+                try:
+                    d = json.loads(payload_str)
+                except json.JSONDecodeError:
+                    continue
+                try:
+                    chunk = d["choices"][0]["delta"].get("content", "")
+                except (KeyError, IndexError):
+                    chunk = ""
+                if chunk:
+                    out.append(chunk)
+                    if opts.stream_cb:
+                        opts.stream_cb(idx, chunk)
+        return "".join(out)
 
     return _run_llm(pdf_path, opts, progress, model, page_fn)
 
@@ -480,45 +558,60 @@ def convert_anthropic(
     opts: ConvertOptions,
     progress: ProgressCb | None = None,
 ) -> str:
-    def page_fn(img_b64: str) -> str:
+    prompt = _resolve_prompt(opts)
+    streaming = opts.stream_cb is not None
+
+    def page_fn(idx: int, img_b64: str) -> str:
         payload = {
-            "model": model,
-            "max_tokens": 4096,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": "image/png",
-                                "data": img_b64,
-                            },
-                        },
-                        {"type": "text", "text": PROMPT},
-                    ],
-                }
-            ],
+            "model": model, "max_tokens": 4096,
+            "messages": [{
+                "role": "user",
+                "content": [
+                    {"type": "image",
+                     "source": {"type": "base64", "media_type": "image/png", "data": img_b64}},
+                    {"type": "text", "text": prompt},
+                ],
+            }],
         }
+        if streaming:
+            payload["stream"] = True
         body = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
             "https://api.anthropic.com/v1/messages",
             data=body,
-            headers={
-                "Content-Type": "application/json",
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-            },
+            headers={"Content-Type": "application/json",
+                     "x-api-key": api_key,
+                     "anthropic-version": "2023-06-01"},
         )
+        if not streaming:
+            with urllib.request.urlopen(req, timeout=600) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            text_parts = [b.get("text", "")
+                          for b in data.get("content", [])
+                          if b.get("type") == "text"]
+            return "".join(text_parts)
+        # Streaming via SSE: content_block_delta events carry text_delta
+        out = []
         with urllib.request.urlopen(req, timeout=600) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        text_parts = [
-            b.get("text", "")
-            for b in data.get("content", [])
-            if b.get("type") == "text"
-        ]
-        return "".join(text_parts)
+            for raw in resp:
+                line = raw.decode("utf-8", "ignore").strip()
+                if not line.startswith("data:"):
+                    continue
+                try:
+                    d = json.loads(line[5:].strip())
+                except json.JSONDecodeError:
+                    continue
+                if d.get("type") == "content_block_delta":
+                    delta = d.get("delta", {})
+                    if delta.get("type") == "text_delta":
+                        chunk = delta.get("text", "")
+                        if chunk:
+                            out.append(chunk)
+                            if opts.stream_cb:
+                                opts.stream_cb(idx, chunk)
+                if d.get("type") == "message_stop":
+                    break
+        return "".join(out)
 
     return _run_llm(pdf_path, opts, progress, model, page_fn)
 
