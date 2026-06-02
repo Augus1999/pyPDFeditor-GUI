@@ -55,12 +55,64 @@ jobs:
           name: distilmark-windows
           path: dist/Distilmark.exe
 
+      # Compose a rich, human-friendly release description. The auto-generated
+      # changelog (commits/PRs) is appended by `generate_release_notes: true`.
+      - name: Compose release notes
+        shell: bash
+        run: |
+          VER="${{ steps.version.outputs.version }}"
+          cat > RELEASE_BODY.md <<EOF
+          <div align="center">
+
+          # 🟦 Distilmark v${VER}
+
+          **Distil any PDF into clean Markdown — fully offline or with any LLM.**
+
+          </div>
+
+          ## ⬇️ Download & run (Windows)
+
+          1. Download **\`Distilmark.exe\`** from the **Assets** below — no Python, no install.
+          2. Double-click to run. If SmartScreen warns about an "unrecognized app", click **More info → Run anyway** (the binary is built in public GitHub Actions from this exact commit).
+
+          > 🍎 macOS / 🐧 Linux: run from source — see [INSTALL.md](https://github.com/Hesamsamani/distilmark/blob/main/INSTALL.md).
+
+          ## ✨ What's inside
+
+          **Conversion engines (7)**
+          \`Native (PyMuPDF)\` · \`pdfplumber\` · \`Compare\` · \`Ollama\` · \`OpenAI\` · \`Anthropic\` · \`OpenAI-compatible\`
+
+          **Highlights**
+          - 📚 **Courses** — organise PDFs into courses & chapters with a library view (exam-prep friendly)
+          - 👀 **Editable live preview** — source PDF beside rendered Markdown, edit & save, diff view in Compare mode
+          - 📤 **Export** — HTML, DOCX, and combined \`.md\`
+          - 🔍 **OCR** for scanned PDFs · 🔭 **Watch folder** · 🤖 **Custom prompts** · 🔬 **Math (LaTeX)** · 🌀 **Streaming**
+          - 🎯 Page ranges · 🛑 Cancel · 💲 Cost estimate · ⚡ Parallel pages · 🧹 Post-processing
+
+          ## 🛠 Install from source
+
+          \`\`\`bash
+          pip install git+https://github.com/Hesamsamani/distilmark.git
+          distilmark
+          \`\`\`
+
+          ## 🙏 Built on
+
+          PyMuPDF · pymupdf4llm · pdfplumber · PyQt6 · Ollama · Tesseract · markdown · python-docx
+
+          ---
+          ### 📝 Changelog
+          EOF
+          echo "Composed RELEASE_BODY.md:"
+          cat RELEASE_BODY.md
+
       # Tag-triggered runs: publish release at that tag.
       - name: Attach to release (tag push)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: dist/Distilmark.exe
+          body_path: RELEASE_BODY.md
           draft: false
           prerelease: false
           generate_release_notes: true
@@ -75,6 +127,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Distilmark ${{ steps.version.outputs.tag }}
           files: dist/Distilmark.exe
+          body_path: RELEASE_BODY.md
           draft: false
           prerelease: false
           generate_release_notes: true

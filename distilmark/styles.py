@@ -140,6 +140,28 @@ QListWidget::item:hover {{ background-color: #14171f; }}
 QListWidget::item:selected {{ background-color: #16233f; color: #60a5fa; }}
 QListWidget::item:alternate {{ background-color: #0d1016; }}
 
+/* ---- Tree (Courses library) ---- */
+QTreeWidget, QTreeView {{
+    background-color: #0a0c11;
+    alternate-background-color: #0e1118;
+    border: 1px solid #1a1e27;
+    border-radius: 13px;
+    padding: 4px;
+    outline: none;
+}}
+QTreeWidget::item, QTreeView::item {{ padding: 6px 4px; color: #c3c9d6; border-radius: 6px; }}
+QTreeWidget::item:hover, QTreeView::item:hover {{ background-color: #14171f; }}
+QTreeWidget::item:selected, QTreeView::item:selected {{ background-color: #16233f; color: #e7eaf0; }}
+QHeaderView::section {{
+    background-color: #11141b;
+    color: #8b93a5;
+    padding: 7px 10px;
+    border: none;
+    border-bottom: 1px solid #1a1e27;
+    font-weight: 700;
+}}
+QTreeWidget::branch {{ background: transparent; }}
+
 /* ---- Progress ---- */
 QProgressBar {{
     background-color: #161a22;
@@ -277,6 +299,19 @@ QListWidget::item {{ padding: 11px; border-radius: 9px; color: #3b4252; }}
 QListWidget::item:hover {{ background-color: #eef0f6; }}
 QListWidget::item:selected {{ background-color: #e3edfd; color: #1d4ed8; }}
 QListWidget::item:alternate {{ background-color: #f7f8fc; }}
+
+QTreeWidget, QTreeView {{
+    background-color: #ffffff;
+    alternate-background-color: #f4f6fb;
+    border: 1px solid #e6e8f0; border-radius: 13px; padding: 4px; outline: none;
+}}
+QTreeWidget::item, QTreeView::item {{ padding: 6px 4px; color: #3b4252; border-radius: 6px; }}
+QTreeWidget::item:hover, QTreeView::item:hover {{ background-color: #eef0f6; }}
+QTreeWidget::item:selected, QTreeView::item:selected {{ background-color: #e3edfd; color: #1d4ed8; }}
+QHeaderView::section {{
+    background-color: #f0f1f6; color: #6b7280; padding: 7px 10px; border: none;
+    border-bottom: 1px solid #e6e8f0; font-weight: 700;
+}}
 
 QProgressBar {{ background-color: #e6e8f0; border: none; border-radius: 6px; height: 10px; text-align: center; color: transparent; }}
 QProgressBar::chunk {{ background-color: #2563eb; border-radius: 6px; }}

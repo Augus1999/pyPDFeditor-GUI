@@ -36,9 +36,13 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QTabWidget,
     QTextBrowser,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QInputDialog,
+    QHeaderView,
 )
 
-from . import config, converters, styles, ollama_manager, exporters
+from . import config, converters, styles, ollama_manager, exporters, projects
 from ._version import __version__
 
 
@@ -1977,6 +1981,416 @@ class PreviewPage(QWidget):
 
 
 # ---------------------------------------------------------------------------
+# Courses page — organise PDFs into courses with chapters (library view)
+# ---------------------------------------------------------------------------
+
+_ROLE_KIND = Qt.ItemDataRole.UserRole + 10      # "chapter" | "document"
+_ROLE_CID = Qt.ItemDataRole.UserRole + 11       # chapter id
+_ROLE_SOURCE = Qt.ItemDataRole.UserRole + 12    # document source path
+
+
+class CoursesPage(QWidget):
+    conversion_done = pyqtSignal()
+    preview_ready = pyqtSignal(dict)
+
+    def __init__(self, cfg: dict, status: QStatusBar, parent=None):
+        super().__init__(parent)
+        self.cfg = cfg
+        self.status = status
+        self._pid: str | None = None
+        self._worker: ConvertWorker | None = None
+        self._convert_jobs: list[tuple[str, str, Path]] = []  # (cid, source, out_dir)
+        self._build()
+
+    def _build(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(32, 28, 32, 28)
+        layout.setSpacing(14)
+
+        title = QLabel("Courses")
+        title.setObjectName("H1")
+        layout.addWidget(title)
+        subtitle = QLabel(
+            "Group your PDFs into courses and chapters — perfect for exam prep. "
+            "See at a glance which files are added and which are converted."
+        )
+        subtitle.setObjectName("H2")
+        subtitle.setWordWrap(True)
+        layout.addWidget(subtitle)
+
+        # Course selector row
+        crow = QHBoxLayout()
+        self.course_combo = QComboBox()
+        self.course_combo.setToolTip("Select a course to view its chapters and documents.")
+        self.course_combo.currentIndexChanged.connect(self._on_course_changed)
+        new_btn = QPushButton("New course")
+        new_btn.setObjectName("Accent")
+        new_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        new_btn.clicked.connect(self._new_course)
+        ren_btn = QPushButton("Rename")
+        ren_btn.setObjectName("Ghost")
+        ren_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        ren_btn.clicked.connect(self._rename_course)
+        del_btn = QPushButton("Delete")
+        del_btn.setObjectName("Danger")
+        del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        del_btn.clicked.connect(self._delete_course)
+        crow.addWidget(QLabel("Course:"))
+        crow.addWidget(self.course_combo, 1)
+        crow.addWidget(new_btn)
+        crow.addWidget(ren_btn)
+        crow.addWidget(del_btn)
+        layout.addLayout(crow)
+
+        # Toolbar
+        trow = QHBoxLayout()
+        self.add_chapter_btn = QPushButton("＋ Chapter")
+        self.add_chapter_btn.setObjectName("Ghost")
+        self.add_pdfs_btn = QPushButton("＋ Add PDFs to chapter")
+        self.add_pdfs_btn.setObjectName("Ghost")
+        self.convert_btn = QPushButton("Convert pending  →")
+        self.convert_btn.setObjectName("Primary")
+        self.open_btn = QPushButton("Open output")
+        self.open_btn.setObjectName("Ghost")
+        self.remove_btn = QPushButton("Remove")
+        self.remove_btn.setObjectName("Danger")
+        for b, fn, tip in [
+            (self.add_chapter_btn, self._add_chapter, "Add a new chapter to this course."),
+            (self.add_pdfs_btn, self._add_pdfs, "Add PDF files to the selected chapter."),
+            (self.convert_btn, self._convert_pending, "Convert every not-yet-converted document in this course."),
+            (self.open_btn, self._open_selected_output, "Open the converted Markdown / its folder."),
+            (self.remove_btn, self._remove_selected, "Remove the selected chapter or document."),
+        ]:
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            b.setToolTip(tip)
+            b.clicked.connect(fn)
+        trow.addWidget(self.add_chapter_btn)
+        trow.addWidget(self.add_pdfs_btn)
+        trow.addStretch()
+        trow.addWidget(self.open_btn)
+        trow.addWidget(self.remove_btn)
+        trow.addWidget(self.convert_btn)
+        layout.addLayout(trow)
+
+        # Library tree
+        self.tree = QTreeWidget()
+        self.tree.setColumnCount(4)
+        self.tree.setHeaderLabels(["Name", "Status", "Engine", "Pages"])
+        self.tree.setAlternatingRowColors(True)
+        self.tree.setRootIsDecorated(True)
+        self.tree.setUniformRowHeights(True)
+        self.tree.itemDoubleClicked.connect(self._on_double_click)
+        hdr = self.tree.header()
+        hdr.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        for i in (1, 2, 3):
+            hdr.setSectionResizeMode(i, QHeaderView.ResizeMode.ResizeToContents)
+        layout.addWidget(self.tree, 1)
+
+        self.progress = QProgressBar()
+        self.progress.setRange(0, 100)
+        self.progress.setValue(0)
+        self.progress.setVisible(False)
+        layout.addWidget(self.progress)
+
+        self.summary = QLabel("")
+        self.summary.setObjectName("Hint")
+        layout.addWidget(self.summary)
+
+    # ---- lifecycle ----
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._reload_courses()
+
+    def _reload_courses(self):
+        data = projects.load()
+        self.course_combo.blockSignals(True)
+        self.course_combo.clear()
+        for p in data["projects"]:
+            self.course_combo.addItem(p["name"], p["id"])
+        # restore selection
+        if self._pid:
+            idx = self.course_combo.findData(self._pid)
+            if idx >= 0:
+                self.course_combo.setCurrentIndex(idx)
+        self.course_combo.blockSignals(False)
+        if self.course_combo.count() and self.course_combo.currentIndex() < 0:
+            self.course_combo.setCurrentIndex(0)
+        self._pid = self.course_combo.currentData()
+        self._refresh_tree()
+
+    def _current_project(self) -> dict | None:
+        if not self._pid:
+            return None
+        return next((p for p in projects.load()["projects"] if p["id"] == self._pid), None)
+
+    def _on_course_changed(self, _idx):
+        self._pid = self.course_combo.currentData()
+        self._refresh_tree()
+
+    # ---- course CRUD ----
+    def _new_course(self):
+        name, ok = QInputDialog.getText(self, "New course", "Course name:")
+        if ok and name.strip():
+            p = projects.add_project(name)
+            self._pid = p["id"]
+            self._reload_courses()
+
+    def _rename_course(self):
+        p = self._current_project()
+        if not p:
+            return
+        name, ok = QInputDialog.getText(self, "Rename course", "New name:", text=p["name"])
+        if ok and name.strip():
+            projects.rename_project(p["id"], name)
+            self._reload_courses()
+
+    def _delete_course(self):
+        p = self._current_project()
+        if not p:
+            return
+        if QMessageBox.question(
+            self, "Delete course",
+            f"Delete course “{p['name']}” and its chapter list?\n"
+            "(Your PDFs and converted files are not deleted.)",
+        ) == QMessageBox.StandardButton.Yes:
+            projects.delete_project(p["id"])
+            self._pid = None
+            self._reload_courses()
+
+    # ---- chapters / docs ----
+    def _add_chapter(self):
+        if not self._pid:
+            QMessageBox.information(self, "Courses", "Create a course first."); return
+        name, ok = QInputDialog.getText(self, "New chapter", "Chapter name:")
+        if ok and name.strip():
+            projects.add_chapter(self._pid, name)
+            self._refresh_tree()
+
+    def _selected_chapter_id(self) -> str | None:
+        item = self.tree.currentItem()
+        if item is None:
+            return None
+        if item.data(0, _ROLE_KIND) == "document":
+            item = item.parent()
+        if item is None:
+            return None
+        return item.data(0, _ROLE_CID)
+
+    def _add_pdfs(self):
+        if not self._pid:
+            QMessageBox.information(self, "Courses", "Create a course first."); return
+        cid = self._selected_chapter_id()
+        if not cid:
+            QMessageBox.information(self, "Courses", "Select a chapter to add PDFs to."); return
+        files, _ = QFileDialog.getOpenFileNames(
+            self, "Add PDFs to chapter", str(Path.home()), "PDF files (*.pdf)"
+        )
+        added = 0
+        for f in files:
+            if projects.add_document(self._pid, cid, f):
+                added += 1
+        if added:
+            self.status.showMessage(f"Added {added} document(s) to chapter.", 4000)
+        self._refresh_tree()
+
+    def _remove_selected(self):
+        item = self.tree.currentItem()
+        if item is None or not self._pid:
+            return
+        kind = item.data(0, _ROLE_KIND)
+        if kind == "chapter":
+            cid = item.data(0, _ROLE_CID)
+            if QMessageBox.question(self, "Remove chapter",
+                                    "Remove this chapter and its document list?") == QMessageBox.StandardButton.Yes:
+                projects.delete_chapter(self._pid, cid)
+        elif kind == "document":
+            cid = item.parent().data(0, _ROLE_CID)
+            src = item.data(0, _ROLE_SOURCE)
+            projects.remove_document(self._pid, cid, src)
+        self._refresh_tree()
+
+    # ---- tree rendering ----
+    def _refresh_tree(self):
+        self.tree.clear()
+        p = self._current_project()
+        if not p:
+            self.summary.setText("No course selected. Click “New course” to begin.")
+            return
+        for chapter in p.get("chapters", []):
+            docs = chapter.get("documents", [])
+            conv = sum(1 for d in docs if d.get("status") == projects.CONVERTED)
+            citem = QTreeWidgetItem([
+                chapter["name"], f"{conv}/{len(docs)} converted", "", ""
+            ])
+            citem.setData(0, _ROLE_KIND, "chapter")
+            citem.setData(0, _ROLE_CID, chapter["id"])
+            f = citem.font(0); f.setBold(True); citem.setFont(0, f)
+            self.tree.addTopLevelItem(citem)
+            for d in docs:
+                name = Path(d["source"]).name
+                status = d.get("status", projects.ADDED)
+                ditem = QTreeWidgetItem([
+                    name, _STATUS_LABEL.get(status, status),
+                    d.get("engine", ""), str(d.get("pages") or ""),
+                ])
+                ditem.setData(0, _ROLE_KIND, "document")
+                ditem.setData(0, _ROLE_SOURCE, d["source"])
+                ditem.setToolTip(0, d["source"])
+                color = {
+                    projects.CONVERTED: "#22c55e",
+                    projects.FAILED: "#f87171",
+                    projects.ADDED: "#fbbf24",
+                }.get(status)
+                if color:
+                    ditem.setForeground(1, QColor(color))
+                citem.addChild(ditem)
+            citem.setExpanded(True)
+        ch, docs, conv = projects.project_stats(p)
+        pending = docs - conv
+        self.summary.setText(
+            f"{ch} chapter(s)  ·  {docs} document(s)  ·  {conv} converted  ·  {pending} pending"
+        )
+
+    def _on_double_click(self, item, _col):
+        if item.data(0, _ROLE_KIND) != "document":
+            return
+        # Open converted markdown in Preview if available
+        cid = item.parent().data(0, _ROLE_CID)
+        p = self._current_project()
+        chapter = next((c for c in p.get("chapters", []) if c["id"] == cid), None)
+        if not chapter:
+            return
+        src = item.data(0, _ROLE_SOURCE)
+        doc = next((d for d in chapter["documents"] if d["source"] == src), None)
+        if doc and doc.get("status") == projects.CONVERTED and doc.get("output") and Path(doc["output"]).exists():
+            md = Path(doc["output"]).read_text(encoding="utf-8")
+            self.preview_ready.emit({"pdf": src, "compare": False, "md": md, "output": doc["output"]})
+            self.status.showMessage("Opened in Preview tab.", 3000)
+        else:
+            self.status.showMessage("Not converted yet — use “Convert pending”.", 4000)
+
+    def _open_selected_output(self):
+        item = self.tree.currentItem()
+        if item is None or item.data(0, _ROLE_KIND) != "document":
+            return
+        cid = item.parent().data(0, _ROLE_CID)
+        p = self._current_project()
+        chapter = next((c for c in p.get("chapters", []) if c["id"] == cid), None)
+        src = item.data(0, _ROLE_SOURCE)
+        doc = next((d for d in chapter["documents"] if d["source"] == src), None) if chapter else None
+        if doc and doc.get("output") and Path(doc["output"]).exists():
+            ConvertPage._open_in_file_browser(Path(doc["output"]))
+        else:
+            self.status.showMessage("No converted output for this document yet.", 4000)
+
+    # ---- conversion of pending docs ----
+    def _convert_pending(self):
+        p = self._current_project()
+        if not p:
+            return
+        if self._worker and self._worker.isRunning():
+            return
+        # gather pending docs
+        pending: list[tuple[str, str]] = []
+        for c in p.get("chapters", []):
+            for d in c.get("documents", []):
+                if d.get("status") != projects.CONVERTED:
+                    pending.append((c["id"], d["source"]))
+        if not pending:
+            QMessageBox.information(self, "Courses", "Nothing pending — all documents are converted.")
+            return
+        out_dir = QFileDialog.getExistingDirectory(
+            self, "Output folder for this course",
+            self.cfg.get("last_output_dir", str(Path.home())),
+        )
+        if not out_dir:
+            return
+        self.cfg["last_output_dir"] = out_dir
+        config.save(self.cfg)
+        out = Path(out_dir)
+        self._convert_jobs = [(cid, src, out) for cid, src in pending]
+        self._convert_total = len(self._convert_jobs)
+        self._convert_done = 0
+        self.convert_btn.setEnabled(False)
+        self.progress.setVisible(True)
+        self.progress.setValue(0)
+        self._convert_next()
+
+    def _convert_next(self):
+        if not self._convert_jobs:
+            self.convert_btn.setEnabled(True)
+            self.progress.setVisible(False)
+            self.status.showMessage(
+                f"Course conversion complete — {self._convert_done} file(s).", 8000
+            )
+            self.conversion_done.emit()
+            self._refresh_tree()
+            return
+        cid, src, out = self._convert_jobs.pop(0)
+        pdf = Path(src)
+        if not pdf.exists():
+            projects.update_document(self._pid, cid, src, status=projects.FAILED, output="")
+            self._convert_next()
+            return
+        img_name = f"{pdf.stem}_images" if self.cfg.get("include_images") else None
+        img_dir = out / img_name if img_name else None
+        self._cur_job = (cid, src, out)
+        self._worker = ConvertWorker(pdf, dict(self.cfg), img_dir, img_name)
+        self._worker.progress.connect(self._on_progress)
+        self._worker.finished_ok.connect(self._on_doc_done)
+        self._worker.finished_compare.connect(self._on_doc_done_compare)
+        self._worker.failed.connect(self._on_doc_failed)
+        self._worker.cancelled.connect(lambda *_: self._convert_next())
+        n = self._convert_total - len(self._convert_jobs)
+        self.status.showMessage(f"Converting {n}/{self._convert_total}: {pdf.name}")
+        self._worker.start()
+
+    def _on_progress(self, cur, total, msg):
+        self.progress.setValue(int(cur / max(total, 1) * 100))
+        self.status.showMessage(msg)
+
+    def _on_doc_done(self, md: str, src: str, pages: int):
+        cid, jsrc, out = self._cur_job
+        out_path = out / f"{Path(src).stem}.md"
+        out_path.write_text(md, encoding="utf-8")
+        projects.update_document(
+            self._pid, cid, jsrc,
+            status=projects.CONVERTED, output=str(out_path),
+            engine=self.cfg.get("engine", "native"), pages=pages,
+        )
+        self._convert_done += 1
+        self._refresh_tree()
+        self._convert_next()
+
+    def _on_doc_done_compare(self, md_native: str, md_plumber: str, src: str, pages: int):
+        cid, jsrc, out = self._cur_job
+        out_path = out / f"{Path(src).stem}_native.md"
+        out_path.write_text(md_native, encoding="utf-8")
+        (out / f"{Path(src).stem}_pdfplumber.md").write_text(md_plumber, encoding="utf-8")
+        projects.update_document(
+            self._pid, cid, jsrc,
+            status=projects.CONVERTED, output=str(out_path),
+            engine="compare", pages=pages,
+        )
+        self._convert_done += 1
+        self._refresh_tree()
+        self._convert_next()
+
+    def _on_doc_failed(self, src: str, err: str):
+        cid, jsrc, out = self._cur_job
+        projects.update_document(self._pid, cid, jsrc, status=projects.FAILED)
+        self._refresh_tree()
+        self._convert_next()
+
+
+_STATUS_LABEL = {
+    projects.ADDED: "● added",
+    projects.CONVERTED: "✓ converted",
+    projects.FAILED: "✗ failed",
+}
+
+
+# ---------------------------------------------------------------------------
 # About page
 # ---------------------------------------------------------------------------
 
@@ -2030,6 +2444,9 @@ class AboutPage(QWidget):
         features = QGroupBox("Features")
         fg = QVBoxLayout(features)
         for line in (
+            "• Courses & chapters — organise PDFs into courses with a library view of added vs converted files",
+            "• Editable live preview — edit the Markdown and save back; HTML / DOCX / combined-md export",
+            "• Custom LLM prompts, math (LaTeX) mode, streaming output, and a watch folder",
             "• Dual-engine compare mode — native + pdfplumber outputs two files for easy quality comparison",
             "• Live preview — source PDF page beside rendered Markdown, with a diff view in compare mode",
             "• OCR fallback for scanned PDFs (via Tesseract)",
@@ -2129,7 +2546,7 @@ class MainWindow(QMainWindow):
         sb.addWidget(section)
 
         self.nav_buttons: list[QPushButton] = []
-        for label, idx in [("Convert", 0), ("Preview", 1), ("Engines", 2), ("History", 3), ("About", 4)]:
+        for label, idx in [("Convert", 0), ("Courses", 1), ("Preview", 2), ("Engines", 3), ("History", 4), ("About", 5)]:
             b = QPushButton(f"  {label}")
             b.setObjectName("NavItem")
             b.setCheckable(True)
@@ -2164,12 +2581,14 @@ class MainWindow(QMainWindow):
         self.setStatusBar(status)
 
         self.convert_page = ConvertPage(self.cfg, status)
+        self.courses_page = CoursesPage(self.cfg, status)
         self.preview_page = PreviewPage()
         self.settings_page = SettingsPage(self.cfg)
         self.history_page = HistoryPage()
         self.about_page = AboutPage()
 
         self.stack.addWidget(self.convert_page)
+        self.stack.addWidget(self.courses_page)
         self.stack.addWidget(self.preview_page)
         self.stack.addWidget(self.settings_page)
         self.stack.addWidget(self.history_page)
@@ -2177,8 +2596,10 @@ class MainWindow(QMainWindow):
 
         # Refresh history tab when a conversion completes
         self.convert_page.conversion_done.connect(self.history_page.refresh)
+        self.courses_page.conversion_done.connect(self.history_page.refresh)
         # Feed the Preview tab with the latest conversion result
         self.convert_page.preview_ready.connect(self.preview_page.load)
+        self.courses_page.preview_ready.connect(self._preview_from_course)
         # Stream live LLM chunks into the Preview tab
         self.convert_page.stream_started.connect(self.preview_page.start_stream)
         self.convert_page.stream_chunk.connect(
@@ -2189,9 +2610,9 @@ class MainWindow(QMainWindow):
 
         root.addWidget(self.stack, 1)
 
-        # ---- Global navigation shortcuts: Ctrl+1..5 ----
+        # ---- Global navigation shortcuts: Ctrl+1..6 ----
         from PyQt6.QtGui import QShortcut, QKeySequence
-        for i in range(5):
+        for i in range(6):
             QShortcut(QKeySequence(f"Ctrl+{i+1}"), self,
                       activated=lambda _i=i: self._switch(_i))
 
@@ -2207,6 +2628,11 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentIndex(idx)
         for i, b in enumerate(self.nav_buttons):
             b.setChecked(i == idx)
+
+    def _preview_from_course(self, data: dict):
+        # Courses page asked to show a converted doc — load it and jump to Preview.
+        self.preview_page.load(data)
+        self._switch(2)  # Preview is index 2 now
 
     def _refresh_watcher(self):
         # Re-arm QFileSystemWatcher to point at the configured folder (if any).

@@ -11,11 +11,11 @@
   <img alt="qt" src="https://img.shields.io/badge/PyQt6-41CD52?logo=qt&logoColor=white" />
   <img alt="platform" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" />
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green" />
-  <img alt="version" src="https://img.shields.io/badge/version-v1.1.0-2563eb" />
+  <img alt="version" src="https://img.shields.io/badge/version-v1.2.0-2563eb" />
 </p>
 
 <p>
-  🌙 <b>Dark & Light themes</b> · 🚀 <b>Drag & Drop</b> · 🔌 <b>7 engines</b> · 👀 <b>Editable preview</b> · 📤 <b>HTML / DOCX export</b> · 🔭 <b>Watch folder</b> · 🦙 <b>Offline ready</b>
+  🌙 <b>Dark & Light themes</b> · 🔌 <b>7 engines</b> · 📚 <b>Courses</b> · 👀 <b>Editable preview</b> · 📤 <b>HTML / DOCX export</b> · 🔭 <b>Watch folder</b> · 🦙 <b>Offline ready</b>
 </p>
 
 </div>
@@ -92,6 +92,7 @@ Pick whichever vibe matches you:
 ## ✨ Features
 
 - 🎯 **Multiple engines** — seven backends, one UI, switch in a single click
+- 📚 **Courses & chapters** — organise PDFs into courses with chapters and a library view showing which files are *added* vs *converted*. Built for exam prep when you've got dozens of per-chapter PDFs; convert all pending docs in one click and double-click any converted file to open it in Preview.
 - 👀 **Live preview, editable** — source PDF page beside the rendered Markdown, with a Source/Edit tab to tweak the output and Save back to disk. Compare mode adds Native / pdfplumber / **Diff** tabs side-by-side.
 - 📤 **Export anywhere** — one click for **HTML**, **DOCX** (Pandoc when available, python-docx fallback), or **combined `.md`** when batching a folder.
 - 🤖 **Custom LLM prompt** — edit the conversion prompt right from the Engines tab; presets for *Academic paper*, *Code-heavy*, *Tables-only*.
@@ -134,6 +135,12 @@ Pick whichever vibe matches you:
 
 <p align="center">
   <img src="./screenshots/convert-dark.png" width="820" alt="Distilmark — Convert page (dark theme)" />
+</p>
+
+**Courses** — organise your PDFs into courses & chapters and track what's converted:
+
+<p align="center">
+  <img src="./screenshots/courses-dark.png" width="820" alt="Distilmark — Courses page with chapters and a library view" />
 </p>
 
 **Preview** — the source PDF beside the rendered Markdown (Diff view in Compare mode):
