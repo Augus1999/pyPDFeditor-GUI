@@ -3,6 +3,7 @@
 """
 set up the application
 """
+
 import os
 import re
 from pathlib import Path
@@ -44,7 +45,7 @@ setup(
     },
     license="MIT",
     python_requires=">=3.10",
-    install_requires=["PyMuPDF>=1.26.5,<1.28.0", "PyQt6>=6.7.0"],
+    install_requires=["PyMuPDF>=1.28.0,<1.29.0", "PyQt6>=6.7.0"],
     url="https://github.com/Augus1999/pyPDFeditor-GUI/",
     project_urls={"Source": "https://github.com/Augus1999/pyPDFeditor-GUI"},
     include_package_data=True,

@@ -3,6 +3,7 @@
 """
 win32api functions and classes
 """
+
 from ctypes import POINTER, c_int, WinDLL, Structure, byref, cast
 from ctypes.wintypes import RECT, UINT, HWND, MSG
 from PyQt6.QtCore import QRect

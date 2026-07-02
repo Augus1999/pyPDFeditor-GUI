@@ -3,6 +3,7 @@
 """
 application window forms
 """
+
 import re
 from typing import Tuple, Union, Optional
 from PyQt6.sip import voidptr
@@ -609,16 +610,14 @@ class MainR(QTabWidget):
         text.setStyleSheet("border-radius:15px;font-size:20pt")
         text.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         text.setReadOnly(True)
-        text.setHtml(
-            """
+        text.setHtml("""
             <h1 style='color:#02554e;font-family:Verdana'>Welcome 🎃🎉</h1>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [1]: Welcome to pyPDFeditor-GUI.</p>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [2]: ...</p>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [3]: STAND WITH UKRAINE 🇺🇦</p>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [4]: There's no place for United States now.</p>
             <p style='color:#333;font-family:Verdana;font-size:12pt'>Out [5]: ...</p>
-            """
-        )
+            """)
         shadow(text, QColor(0, 0, 0, 90), 10)
         label_w = QLabel(self.tab0)
         label_w.setStyleSheet(LABEL_STYLE)

@@ -3,6 +3,7 @@
 """
 all style sheets
 """
+
 from .icons import icon_path
 
 icon_path_ = str(icon_path).replace("\\", "/")

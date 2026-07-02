@@ -3,6 +3,7 @@
 """
 wrap the whole application to one function
 """
+
 import os
 import sys
 import json
@@ -46,7 +47,6 @@ from .functions import (
     read_from_font_cache,
     store_font_path,
 )
-
 
 user_home = os.path.expanduser("~")
 app_home = os.path.join(user_home, ".pyPDFeditor-GUI")
@@ -386,6 +386,7 @@ class Main(MainR):
         f_name, _ = add(
             self,
             "PDF files (*.pdf);;"
+            "Markdown files (*.md);;"
             "images (*.png *.jpg *.jpeg *.bmp *.tiff *.svg);;"
             "ebooks (*.epub *.xps *.fb2 *.cbz)",
         )
@@ -405,7 +406,7 @@ class Main(MainR):
         tab2 add function
         """
         if len(self.tab2.book_list) == 0:
-            f_name, _ = add(self, "(*.pdf);;ebooks (*.epub *.xps *.fb2 *.cbz)")
+            f_name, _ = add(self, "(*.pdf *.md);;ebooks (*.epub *.xps *.fb2 *.cbz)")
             if _:
                 doc, state = open_pdf(f_name, self)
                 if state:

@@ -19,7 +19,7 @@
 
 ## What's in
 
-* Merge files no matter they are PDF files (`.pdf`), image files (`.jpg` `.png` `.jpeg` `.bmp` `.tiff` `.svg`), or
+* Merge files no matter they are PDF files (`.pdf`), Markdown files (`.md`), image files (`.jpg` `.png` `.jpeg` `.bmp` `.tiff` `.svg`), or
   e-book files (`.epub` `.xps` `.fb2` `.cbz`) into one PDF file📚
 * (...right-click the page then) Delete pages or rearrange pages
 * (...right-click the page then) Extract images from a page
@@ -41,7 +41,7 @@ Python>=3.10
 
 ```text
 PyQt6>=6.7.0
-PyMuPDF>=1.26.5,<1.28.0
+PyMuPDF>=1.28.0,<1.29.0
 ```
 
 ## Install & Run

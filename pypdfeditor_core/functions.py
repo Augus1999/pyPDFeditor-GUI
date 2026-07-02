@@ -3,6 +3,7 @@
 """
 all function needed
 """
+
 import os
 import gc
 import sys
@@ -27,7 +28,7 @@ from .language import MENU_L, MESSAGE
 
 # list .svg at the end!
 SUPPORT_IMG_FORMAT = (".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".svg")
-SUPPORT_FORMAT = (".pdf", ".epub", ".xps", ".fb2", ".cbz") + SUPPORT_IMG_FORMAT
+SUPPORT_FORMAT = (".pdf", ".epub", ".xps", ".fb2", ".cbz", ".md") + SUPPORT_IMG_FORMAT
 SUPPORT_OUT_FORMAT = (".pdf",)
 
 

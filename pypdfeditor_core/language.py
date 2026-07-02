@@ -3,6 +3,7 @@
 """
 language related functions
 """
+
 from PyQt6 import QtWidgets
 
 TAB_L = {
