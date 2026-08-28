@@ -3,6 +3,7 @@
 """
 core of pyPDFeditor-GUI
 """
+
 import os
 import sys
 import platform
@@ -15,7 +16,7 @@ if not os.path.exists(app_home):
 
 __system__ = platform.system()
 __author__ = "Nianze A. TAO (Omozawa SUENO)"
-__version__ = "3.1.6"
+__version__ = "3.1.7"
 __all__ = ["main", "reset", "remove"]
 
 
@@ -32,6 +33,8 @@ def main(
     """
     if system == "Windows":
         os.environ["QT_FONT_DPI"] = "96"
+    elif system == "Darwin":
+        os.environ["QT_SCALE_FACTOR"] = "0.8"
     pymupdf.TOOLS.mupdf_display_errors(debug)
     app = QApplication(sys.argv)
     main_app = Main(system, version)

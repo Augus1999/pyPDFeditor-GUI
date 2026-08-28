@@ -199,7 +199,11 @@ def add_watermark(
             fill_opacity=opacity,
             align=1,
             fontfile=None if font_file == "" else font_file,
-            fontname="helv" if font_file == "" else os.path.basename(font_file),
+            fontname=(
+                "helv"
+                if font_file == ""
+                else os.path.basename(font_file).replace(" ", "_")
+            ),
             morph=(pos0, Matrix(rotate)),
         )
         shape.commit(overlay=False)
