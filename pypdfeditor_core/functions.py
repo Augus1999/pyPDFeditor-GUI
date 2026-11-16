@@ -372,8 +372,9 @@ def save(main: QWidget, _format: str) -> Tuple[str, str]:
     :param _format: file format filter, e.g., '.pdf'
     :return: [f_name, state]
     """
+    dname = "new" if main.__system__ == "Darwin" else "new.pdf"
     f_name, state = QFileDialog.getSaveFileName(
-        main, "save", os.path.join(main.o_dir, "new.pdf"), _format
+        main, "save", os.path.join(main.o_dir, dname), _format
     )
     if state and not f_name.endswith(SUPPORT_OUT_FORMAT):
         return "", ""
