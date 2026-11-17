@@ -2,6 +2,9 @@ name: Publish Python distribution to PyPI
 on: 
   release:
     types: [released]
+permissions:
+  contents: read
+  issues: none
 
 jobs:
   build:
